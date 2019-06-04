@@ -64,6 +64,7 @@
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   DfciPkg/DfciPkg.dec
+  MsGraphicsPkg/MsGraphicsPkg.dec
   ZeroTouchPkg/ZeroTouchPkg.dec
 
 [LibraryClasses]
@@ -113,6 +114,7 @@
   gEfiSimpleFileSystemProtocolGuid
   gEfiTlsConfigurationProtocolGuid
   gEfiUsbIoProtocolGuid
+  gMsOSKProtocolGuid
 
 [FeaturePcd]
 
