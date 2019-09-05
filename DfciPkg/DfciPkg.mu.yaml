@@ -8,6 +8,7 @@
             "MdeModulePkg/MdeModulePkg.dec",
             "MsUnitTestPkg/MsUnitTestPkg.dec",
             "CryptoPkg/CryptoPkg.dec",
+            "DfciPkg/DfciPkg.dec",
             "DfciPkg/DfciPkg.dec"
         ],
         "IgnoreInf": []
