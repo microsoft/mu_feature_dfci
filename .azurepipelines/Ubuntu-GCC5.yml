@@ -1,0 +1,32 @@
+## @file
+# Azure Pipeline build file for a build using Ubuntu and GCC.
+#
+# Copyright (c) Microsoft Corporation.
+# Copyright (c) 2020, Hewlett Packard Enterprise Development LP. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+resources:
+  repositories:
+    - repository: mu_devops
+      type: github
+      endpoint: microsoft
+      name: microsoft/mu_devops
+      ref: main
+
+variables:
+- group: architectures-arm-64-x86-64
+- group: tool-chain-ubuntu-gcc
+
+jobs:
+- template: Matrix-Build-Job.yml
+  parameters:
+    arch_list: $(arch_list)
+    extra_build_args: CODE_COVERAGE=TRUE CC_HTML=TRUE
+    extra_install_step:
+    - script: |
+              sudo apt-get install -y mingw-w64 lcov
+              pip install lcov_cobertura pycobertura
+      displayName: Install Windows Resource Compiler for Linux & Code Coverage Tools
+    tool_chain_tag: $(tool_chain_tag)
+    vm_image: $(vm_image)
