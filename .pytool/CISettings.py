@@ -50,7 +50,6 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
 
         return (
             "DfciPkg",
-            "XmlSupportPkg",
             "ZeroTouchPkg"
         )
 
@@ -180,6 +179,11 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
             {
                 "Path": "MU_BASECORE",
                 "Url": "https://github.com/microsoft/mu_basecore.git",
+                "Branch": "release/202208"
+            },
+            {
+                "Path": "Common/MU",
+                "Url": "https://github.com/microsoft/mu_plus.git",
                 "Branch": "release/202208"
             },
         ]
