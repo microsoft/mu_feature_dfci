@@ -2,12 +2,12 @@
 Project Mu Feature Dfci Repository
 ==================================
 
-============================= ================= =============== ===================
- Host Type & Toolchain        Build Status      Test Status     Code Coverage
-============================= ================= =============== ===================
-Windows_VS2022_               |WindowsCiBuild|  |WindowsCiTest| |WindowsCiCoverage|
-Ubuntu_GCC5_                  |UbuntuCiBuild|   |UbuntuCiTest|  |UbuntuCiCoverage|
-============================= ================= =============== ===================
+============================= ================= ===================
+ Host Type & Toolchain        Build Status      Code Coverage
+============================= ================= ===================
+Windows_VS2022_               |WindowsCiBuild|  |WindowsCiCoverage|
+Ubuntu_GCC5_                  |UbuntuCiBuild|   |UbuntuCiCoverage|
+============================= ================= ===================
 
 This repository is part of Project Mu.  Please see Project Mu for details https://microsoft.github.io/mu
 
@@ -75,12 +75,16 @@ Copyright & License
 .. ===================================================================
 
 .. CoreCI
-
-.. _Windows_VS2022: https://dev.azure.com/projectmu/mu/_apis/build/status/CI/Feature%20DFCI/Mu%20Feature%20DFCI%20-%20CI%20-%20WIndows%20VS?repoName=microsoft%2Fmu_feature_dfci&branchName=main
+                           
 .. |WindowsCiBuild| image:: https://dev.azure.com/projectmu/mu/_apis/build/status/CI/Feature%20DFCI/Mu%20Feature%20DFCI%20-%20CI%20-%20WIndows%20VS?repoName=microsoft%2Fmu_feature_dfci&branchName=main
+   :target: https://dev.azure.com/projectmu/mu/_build?definitionId=142&_a=summary                          
+
+.. _Windows_VS2022: https://dev.azure.com/projectmu/mu/_build/latest?definitionId=142&repoName=microsoft%2Fmu_feature_dfci&branchName=main
+
 .. |WindowsCiCoverage| image:: https://img.shields.io/badge/coverage-coming_soon-blue
-
-
 .. _Ubuntu_GCC5: https://dev.azure.com/projectmu/mu/_build/latest?definitionId=139&repoName=microsoft%2Fmu_feature_dfci&branchName=main
+
 .. |UbuntuCiBuild| image:: https://dev.azure.com/projectmu/mu/_apis/build/status/CI/Feature%20DFCI/Mu%20Feature%20DFCI%20-%20CI%20-%20GCC5?repoName=microsoft%2Fmu_feature_dfci&branchName=main
+  :target: https://dev.azure.com/projectmu/mu/_build?definitionId=141&_a=summary 
+
 .. |UbuntuCiCoverage| image:: https://img.shields.io/badge/coverage-coming_soon-blue
