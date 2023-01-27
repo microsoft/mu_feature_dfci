@@ -9,17 +9,23 @@
 #
 # DFCI_SupportLib
 #
-import os, sys
+import os
 import xml.etree.ElementTree as ET
 import binascii
 import traceback
 import xml.dom.minidom
 import subprocess
+import configparser
+import json
+import struct
 
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO, BytesIO
+
+# try:
+# from StringIO import StringIO
+# except ImportError:
+from io import StringIO, BytesIO
+# from cryptography.hazmat.primitives.asymmetric import rsa
+# from cryptography.hazmat.primitives.serialization import load_der_public_key
 
 from builtins import int
 
@@ -30,13 +36,51 @@ from Data.CertProvisioningVariable import CertProvisioningApplyVariable
 from Data.CertProvisioningVariable import CertProvisioningResultVariable
 from Data.PermissionPacketVariable import PermissionApplyVariable
 from Data.PermissionPacketVariable import PermissionResultVariable
-from Data.SecureSettingVariable    import SecureSettingsApplyVariable
-from Data.SecureSettingVariable    import SecureSettingsResultVariable
+from Data.SecureSettingVariable import SecureSettingsApplyVariable
+from Data.SecureSettingVariable import SecureSettingsResultVariable
 
 SignToolPath = None
 CertMgrPath = None
+DfciTest_Template = 'DfciTests.Template'
+DfciTest_Config = 'DfciTests.ini'
 
 class DFCI_SupportLib(object):
+
+    def get_test_config(self):
+        if not os.path.exists(DfciTest_Template):
+            raise Exception("Unable to locate test configuration template.")
+
+        config = configparser.ConfigParser()
+        config.read(DfciTest_Template)
+        template_ver = int(config["DfciConfig"]["version"])
+        update_config = True
+        if os.path.exists(DfciTest_Config):
+            config.read(DfciTest_Config)
+            current_ver = int(config["DfciConfig"]["version"])
+            if current_ver < template_ver:
+                config["DfciConfig"]["version"] = str(template_ver)
+            else:
+                update_config = False
+        if update_config:
+            with open(DfciTest_Config, 'w') as config_file:
+                config.write(config_file)
+                config_file.close()
+
+        return config
+
+    def compare_json_files(self, request_name, expected_name):
+
+        with open(request_name, "r") as request_file:
+            requested_data = json.load(request_file)
+
+        with open(expected_name, "r") as expected_file:
+            expected_data = json.load(expected_file)
+
+        is_equal = all((requested_data.get(k) == v for k, v in expected_data.items()))
+        if is_equal:
+            is_equal = all((expected_data.get(k) == v for k, v in requested_data.items()))
+        return is_equal
+
 
     def _ReturnSessionIdValue(self, InputString):
         #Session Id:       0xF08A4
@@ -653,7 +697,7 @@ class DFCI_SupportLib(object):
     # Determine if the DUT is online by pinging it
     #
     def is_device_online(self, ipaddress):
-        output = subprocess.Popen(["ping.exe", "-n", "1", ipaddress],stdout = subprocess.PIPE).communicate()[0]
+        output = subprocess.Popen(["ping.exe", "-n", "1", ipaddress], stdout=subprocess.PIPE).communicate()[0]
 
         if (b'TTL' in output):
             return True
@@ -662,8 +706,8 @@ class DFCI_SupportLib(object):
 
     def get_signtool_path(self):
         global SignToolPath
-        if SignToolPath == None:
-            SignToolPath = FindToolInWinSdk ("signtool.exe")
+        if SignToolPath is None:
+            SignToolPath = FindToolInWinSdk("signtool.exe")
 
             # check if exists
             if SignToolPath is None or not os.path.exists(SignToolPath):
@@ -674,8 +718,8 @@ class DFCI_SupportLib(object):
 
     def get_certmgr_path(self):
         global CertMgrPath
-        if CertMgrPath == None:
-            CertMgrPath = FindToolInWinSdk ("certmgr.exe")
+        if CertMgrPath is None:
+            CertMgrPath = FindToolInWinSdk("certmgr.exe")
 
             # check if exists
             if CertMgrPath is None or not os.path.exists(CertMgrPath):
@@ -683,3 +727,85 @@ class DFCI_SupportLib(object):
                                 "https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit")
 
         return CertMgrPath
+
+
+    mOidValue = [0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x02];
+
+    def _wrap_pkcs7_data(self,data):
+
+        if not PyBytesObject(data):
+            raise Exception('data is not a bytes object')
+        data_size = sizeof(data)
+        if data_size < (len(mOidVlaue) + 4):
+            raise Exception('data is too small')
+
+        flag = False
+        if ((data[4] == 0x06) and
+            (data[5] == 0x09) and
+            (data[15] == 0xa0) and
+            (data[16] == 0x82)):
+
+            flag = True
+            for i in range(0, len(mOidValue) - 1):
+                if data[i + 4] == mOidValue[i]:
+                    continue
+                flag = False
+                break
+
+        if flag:
+            return data
+
+        wrapped_size = data_size + 19
+
+        wrapped_data = []
+        wrapped_data.append(0x30)
+        wrapped_data.append(0x82)
+        wrapped_data.append((wrapped_size - 4) >> 8)
+        wrapped_data.append((wrapped_size - 4) & 0xff)
+        wrapped_data.append(0x06)
+        wrapped_data.append(0x09)
+        wrapped_data = wrapped_data + mOidValue
+        wrapped_data.append(0xa0)
+        wrapped_data.append(0x82)
+        wrapped_data.append(data_size >> 8)
+        wrapped_data.append(data_size & 0xff)
+        wrapped_data = wrapped_data + list(data)
+
+        return wrapped_data
+
+    def verify_identity_packet(self, cert_file, identity_file):
+        f = open(identity_file, 'rb')
+        rslt = CertProvisioningApplyVariable(f)
+
+        TrustedCertSize = rslt.TrustedCertSize
+        TrustedCert = rslt.TrustedCert
+
+        f.seek(18) # Hdr.PayloadSize
+        data_blob_size = struct.unpack("=H", f.read(2))[0]
+        data_blob_offset = struct.unpack("=H", f.read(2))[0]
+        f.seek(data_blob_offset)
+        data_blob = bytearray(f.read(data_blob_size))
+
+        Signature = rslt.Signature
+        SignatureSize = Signature.Hdr_dwLength
+
+        print(f'data_blob_size={data_blob_size}')
+        print(f'TrustedCertSize = {TrustedCertSize}')
+        print(f'SignatureSize = {SignatureSize}')
+        f.close()
+
+        f = open('content', 'wb')
+
+        # Zero the packet ID
+        data_blob[8] = 0
+        data_blob[9] = 0
+        data_blob[10] = 0
+        data_blob[11] = 0
+        f.write(data_blob)
+        f.close()
+
+        buffer = rslt.TestSignature.CertData
+        f = open('test_signature', 'wb')
+        f.write(buffer)
+        f.close()
+        return True
