@@ -18,6 +18,7 @@ import subprocess
 import configparser
 import json
 import struct
+import pathlib
 
 
 # try:
@@ -47,22 +48,32 @@ DfciTest_Config = 'DfciTests.ini'
 class DFCI_SupportLib(object):
 
     def get_test_config(self):
-        if not os.path.exists(DfciTest_Template):
-            raise Exception("Unable to locate test configuration template.")
 
+        #
+        # The config files are located two directories above where DFCI_SupportLib.py is located.
+        #
+        modpath = pathlib.Path(__file__).parent.parent.parent
+        config_path = os.path.realpath(modpath)
+
+        template_path = os.path.join(config_path, DfciTest_Template)
+        ini_path = os.path.join(config_path, DfciTest_Config)
         config = configparser.ConfigParser()
-        config.read(DfciTest_Template)
+
+        if not os.path.exists(template_path):
+            raise Exception(f'Unable to locate test configuration template({template_path}).')
+
+        config.read(template_path)
         template_ver = int(config["DfciConfig"]["version"])
         update_config = True
-        if os.path.exists(DfciTest_Config):
-            config.read(DfciTest_Config)
+        if os.path.exists(ini_path):
+            config.read(ini_path)
             current_ver = int(config["DfciConfig"]["version"])
             if current_ver < template_ver:
                 config["DfciConfig"]["version"] = str(template_ver)
             else:
                 update_config = False
         if update_config:
-            with open(DfciTest_Config, 'w') as config_file:
+            with open(ini_path, 'w') as config_file:
                 config.write(config_file)
                 config_file.close()
 
