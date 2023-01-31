@@ -29,8 +29,8 @@ CHAR8 strings.
 The DfciGroupLib is how groups are managed. This library separates the grouping configuration
 from the setting providers to allow better flexibility and better maintainability.
 
-**DfciGroupLib** is defined in the **DfciPkg** located in **mu_plus** repository
-<https://github.com/microsoft/mu_plus/>
+**DfciGroupLib** is defined in the **DfciPkg** located in **mu_feature_dfci** repository
+<https://github.com/microsoft/mu_feature_dfci/>
 
 ## Library Interfaces
 
