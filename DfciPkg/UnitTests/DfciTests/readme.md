@@ -54,22 +54,67 @@ This will download and install Python, robotframework, robotremoteserver, and py
 In addition, the SetupDUT command will update the firewall for the robot framework testing, and a make a couple of
 configuration changes to Windows for a better test experience.
 
-## Setting up the HOST system
+## Setting up the RefreshFromNetwork server
+A Refresh Server is required to run the Refresh From Network portion of the DFCI E2E tests.
+In addition, Refresh From Network may be run from the DUT firmware menu in lieu of running the DFCI_InTuneUnEnroll
+testcase.
+
+Instructions given here are to setup a Docker container running Ubuntu on Windows using Windows Subsystem for Linux 2 (WSL2).
+You will need the IP address of the system that will run the RefreshFromNetwork container in order to generate
+the SSL certificate used to access the RefreshFromNetwork server.
+
+
+
+## Setting up the HOST system, with the Refresh From Network server running as a container
+A Refresh Server is required to run the Refresh From Network portion of the DFCI E2E tests.
+In addition, Refresh From Network may be run from the DUT firmware menu in lieu of running the DFCI_InTuneUnEnroll
+testcase.
+
+Instructions given here are to setup a Docker container on the HOST system.
+This container will run the Ubuntu version of Linux on Windows using Windows Subsystem for Linux 2 (WSL2).
 
 The HOST system requires the following software (NOTE - There are dependencies on x86-64 versions of Windows):
 
-1. A current version of Windows x86-64.
-2. The current Windows SDK, available here [Windows SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk).
-3. Python x86-64 (the version tested), available here [Python 3.11.1](https://www.python.org/ftp/python/3.11.1/python-3.11.1-amd64.exe).
-4. Copy the DfciTests directory, including all of the contents of the subdirectories, onto the HOST system. See the file DfciPkg\UnitTests\DfciTests\CloneUnitTests.bat for a way to get the files you need from GitHub.
-5. Install the required python packages by running using the pip-requirements.txt file in the DfciTests directory:
+1. No other web server using ports 80 or 443 may run on the system chosen for the RefreshServer.
+2. A current version of Windows x86-64.
+3. The current Windows SDK, available here [Windows SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk).
+4. Python x86-64 (the version tested), available here [Python 3.11.0](https://www.python.org/ftp/python/3.11.0/python-3.11.0-amd64.exe).
+5. The testcase tree needs to be on the test host.  This can be your build repository, or you can clone just the files
+needed by using this bat file to clone just the DfciTest tree: DfciPkg\UnitTests\DfciTests\CloneUnitTests.bat.
+6. Install the required python packages by running using the pip-requirements.txt file in the DfciTests directory:
 
 ```text
    python -m pip install --upgrade -r pip-requirements.txt
 ```
-6. Git for Windows, available here  [Git for Windows](https://gitforwindows.org/).
-7. Windows Syubsystem for Linux, install instructions here [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install).
-8. Docker Desktop, available here [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/).
+
+7. Install Git for Windows, available here  [Git for Windows](https://gitforwindows.org/).
+This is probably already installed, but the certificate generation in the next session will need to use the openssl.exe command.
+Git for Windows distributes an acceptable version of openssl.exe that will be used in the preparation of the DFCI_HTTPS certificates.
+8. Install Windows Subsystem for Linux. Install instructions here [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install).
+9. Install Docker Desktop, available here [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/).
+
+### Configure DfciTests.ini, and initialize the Refresh Server Container
+
+Dfci testing now uses a test configuration file, DfciTest.ini.
+DfciTests.Template is the master .ini file.
+If new settings are added in the future, they will be added to the DfciTests.Template file.
+Every time that the DfciTests.ini file is read, the version is compared with DfciTest.Template.
+When a new version is detected, the new fields are added to DfciTests.ini.
+
+1. Copy DfciTests.Template DfciTests.ini
+2. Edit DfciTests.ini and set the value of server_host_name to either a host name or an IP address of your HOST device.
+The server_host_name field will be used to populate the Subject Alternative Names list in the DFCI_HTTPS SSL certificates.
+3. In the directory DfciPkg\UnitTests\DfciTests\Certs, run MakeHTTPSCerts.  This will generate two SSL certificates.
+One is for the RefreshServer, and the other is used by the RefreshServer testcase.
+4. In the directory DfciPkg\UnitTests\DfciTests\RefreshServer, run CreateDockerContainer.  After the container is created,
+the script will prompt you about starting the container.  I suggest using option 2 for this first test.
+5. In another command window, cd to DfciPkg\UnitTests\DfciTests and run these two unit tests:
+
+```text
+   RunDfciTest.bat TestCases\DFCI_RefreshServer
+   RunDfciTest.bat TestCases\DFCI_CertChainingTest
+```
+
 
 ## Test Cases Collections
 
@@ -131,32 +176,31 @@ You should expect to see similar output with all four tests passing.
 <!-- spellchecker: disable -->
 <!-- This omits the below code block from cspell checking -->
 ```txt
-DfciTests>RunDfciTest.bat TestCases\DFCI_InitialState 11.11.11.211
-
-DfciTests>python.exe -m robot.run -L TRACE -x DFCI_InitialState.xml -A Platforms\SimpleFTDI\Args.txt -v IP_OF_DUT:11.11.11.211 -v TEST_OUTPUT_BASE:C:\TestLogs\robot\DFCI_InitialState\logs_20191113_121224 -d C:\TestLogs\robot\DFCI_InitialState\logs_20191113_121224 TestCases\DFCI_InitialState\run.robot
+DfciTests>python.exe -m robot.run -L TRACE -x DFCI_InitialState.xml -A Platforms\SimpleFTDI\Args.txt -v IP_OF_DUT:192.168.1.177 -v TEST_OUTPUT_BASE:C:\TestLogs\robot\DFCI_InitialState\logs_20230131_090759 -d C:\TestLogs\robot\DFCI_InitialState\logs_20230131_090759 TestCases\DFCI_InitialState\run.robot
 ==============================================================================
 Run :: DFCI Initial State test - Verifies that there are no enrolled identi...
 ==============================================================================
 Ensure Mailboxes Are Clean                                            ..
-.L:\Common\MU\DfciPkg\UnitTests\DfciTests\TestCases\DFCI_InitialState\run.robot
+DfciTests\TestCases\DFCI_InitialState\run.robot
 Ensure Mailboxes Are Clean                                            | PASS |
 ------------------------------------------------------------------------------
-Get the starting DFCI Settings                                        | PASS |
+Verify System Unter Test is Opted In                                  | PASS |
+------------------------------------------------------------------------------
+Check that the starting DFCI Ownership is Unenrolled                  | PASS |
 ------------------------------------------------------------------------------
 Obtain Target Parameters From Target                                  | PASS |
 ------------------------------------------------------------------------------
-Process Complete Testcase List                                        ..Initializing testcases
+Verify Initial Permissions                                            ..Initializing testcases
 ..Running test
-Process Complete Testcase List                                        | PASS |
+Verify Initial Permissions                                            | PASS |
 ------------------------------------------------------------------------------
 Run :: DFCI Initial State test - Verifies that there are no enroll... | PASS |
-4 critical tests, 4 passed, 0 failed
-4 tests total, 4 passed, 0 failed
+5 tests, 5 passed, 0 failed
 ==============================================================================
-Output:  C:\TestLogs\robot\DFCI_InitialState\logs_20191113_121224\output.xml
-XUnit:   C:\TestLogs\robot\DFCI_InitialState\logs_20191113_121224\DFCI_InitialState.xml
-Log:     C:\TestLogs\robot\DFCI_InitialState\logs_20191113_121224\log.html
-Report:  C:\TestLogs\robot\DFCI_InitialState\logs_20191113_121224\report.html
+Output:  C:\TestLogs\robot\DFCI_InitialState\logs_20230131_090759\output.xml
+XUnit:   C:\TestLogs\robot\DFCI_InitialState\logs_20230131_090759\DFCI_InitialState.xml
+Log:     C:\TestLogs\robot\DFCI_InitialState\logs_20230131_090759\log.html
+Report:  C:\TestLogs\robot\DFCI_InitialState\logs_20230131_090759\report.html
 ```
 <!-- spellchecker: enable -->
 
