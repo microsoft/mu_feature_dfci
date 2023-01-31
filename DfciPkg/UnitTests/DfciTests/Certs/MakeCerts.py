@@ -14,6 +14,7 @@ import subprocess
 import sys
 import time
 import traceback
+import pathlib
 
 from ctypes import windll, c_int, c_void_p, c_wchar_p
 from threading import Thread
@@ -221,6 +222,17 @@ def main():
 
     parser.add_argument("--DeleteCerts", action="store_true", dest="delete", help="Delete DFCI test certs and certificate store", default=False)
     options = parser.parse_args()
+
+    modpath = pathlib.Path(__file__)
+    basename = os.path.basename(modpath)
+    modpath = modpath.parent
+    modpath = os.path.realpath(modpath)
+
+    cwdpath = os.getcwd()
+    cwdpath = os.path.realpath(cwdpath)
+
+    if cwdpath != modpath:
+        raise Exception("You must run " + basename + " from the DfciTest\\Certs directory\n")
 
     ztd_files_exist = check_for_files('ZTD*')
     dds_files_exist = check_for_files('DDS*')

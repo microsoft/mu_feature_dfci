@@ -1,6 +1,8 @@
 @echo off
 setlocal
 if not exist ..\DfciTests.ini goto error2
+if not exist ..\Certs\DFCI_HTTPS.key goto error3
+if not exist ..\Certs\DFCI_HTTPS.pem goto error3
 
 docker ps -a -f name=dfci_server | findstr dfci_server
 if %ERRORLEVEL% NEQ 0 goto :no_container
@@ -95,5 +97,9 @@ goto Done
 
 :error2
 echo You must create DfciTests.ini before creating your container
+goto Done
+
+:error3
+echo You must create your DFCI_HTTPS certs before creating your container
 :Done
 endlocal
