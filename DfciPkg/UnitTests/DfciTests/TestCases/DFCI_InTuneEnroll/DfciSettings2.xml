@@ -23,29 +23,5 @@
             <Id>MDM.TenantName.String</Id>
             <Value>The DFCI Test Lab Tenant</Value>
         </Setting>
-        <Setting>
-            <Id>Dfci.OnboardCameras.Enable</Id>
-            <Value>Disabled</Value>
-        </Setting>
-        <Setting>
-            <Id>Dfci.OnboardRadios.Enable</Id>
-            <Value>Disabled</Value>
-        </Setting>
-        <Setting>
-            <Id>Dfci.BootExternalMedia.Enable</Id>
-            <Value>Disabled</Value>
-        </Setting>
-        <Setting>
-            <Id>Dfci3.OnboardWpbt.Enable</Id>
-            <Value>Disabled</Value>
-        </Setting>
-        <Setting>
-            <Id>Dfci3.ProcessorSMT.Enable</Id>
-            <Value>Disabled</Value>
-        </Setting>
-        <Setting>
-            <Id>Dfci3.AssetTag.String</Id>
-            <Value>DFCI.LAB.001234</Value>
-        </Setting>
     </Settings>
 </SettingsPacket>
