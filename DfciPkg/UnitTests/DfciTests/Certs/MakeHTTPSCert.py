@@ -14,8 +14,6 @@ import subprocess
 import sys
 import traceback
 import pathlib
-sys.path.append(r'..\Support\Python')
-from DFCI_SupportLib import DFCI_SupportLib
 
 
 def check_for_files(filemask):
@@ -23,14 +21,14 @@ def check_for_files(filemask):
     return len(file_list) != 0
 
 
-def delete_cert_files(filemask):
+def delete_files(filemask):
     file_list = glob.glob(filemask)
     # Iterate over the list of file paths & remove each file.
     for file_path in file_list:
         os.remove(file_path)
 
 
-def generate_httpreq_cnf():
+def generate_httpreq_cnf(config):
     base_cnf = [
         '# @file',
         '#',
@@ -67,7 +65,6 @@ def generate_httpreq_cnf():
         '[alt_names]',
         ]
 
-    config = DFCI_SupportLib().get_test_config()
     hostname = config['DfciTest']['server_host_name']
     with open('httpreq.cnf', 'w') as config_file:
         for line in base_cnf:
@@ -155,6 +152,9 @@ def main(console):
     parser.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='Print verbose messages', default=False)
     options = parser.parse_args()
 
+    if options.verbose:
+        console.setLevel(logging.INFO)
+
     modpath = pathlib.Path(__file__)
     basename = os.path.basename(modpath)
     modpath = modpath.parent
@@ -166,17 +166,18 @@ def main(console):
     if cwdpath != modpath:
         raise Exception("You must run " + basename + " from the DfciTest\\Certs directory\n")
 
-    if options.verbose:
-        console.setLevel(logging.INFO)
+    sys.path.append(r'..\Support\Python')
+    from DFCI_SupportLib import DFCI_SupportLib
+    config = DFCI_SupportLib().get_test_config()
 
     https_files_exist = check_for_files('DFCI_HTTPS.*')
 
     if https_files_exist:
-        delete_cert_files('DFCI_HTTPS.*')
+        delete_files('DFCI_HTTPS.*')
 
     rc = 0
 
-    generate_httpreq_cnf()
+    generate_httpreq_cnf(config)
 
     try:
         run_makecert('DFCI_HTTPS')
@@ -188,6 +189,7 @@ def main(console):
     except Exception:
         traceback.print_exc()
 
+    delete_files('httpreq.cnf')
     return rc
 
 

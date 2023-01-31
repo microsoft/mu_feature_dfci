@@ -19,25 +19,5 @@
             <Id>Dfci.OnboardCameras.Enable</Id>
             <Value>Enabled</Value>
         </Setting>
-        <Setting>
-            <Id>Dfci.OnboardRadios.Enable</Id>
-            <Value>Enabled</Value>
-        </Setting>
-        <Setting>
-            <Id>Dfci.BootExternalMedia.Enable</Id>
-            <Value>Enabled</Value>
-        </Setting>
-        <Setting>
-            <Id>Dfci3.OnboardWpbt.Enable</Id>
-            <Value>Enabled</Value>
-        </Setting>
-        <Setting>
-            <Id>Dfci3.ProcessorSMT.Enable</Id>
-            <Value>Enabled</Value>
-        </Setting>
-        <Setting>
-            <Id>Dfci3.AssetTag.String</Id>
-            <Value></Value>
-        </Setting>
     </Settings>
 </SettingsPacket>

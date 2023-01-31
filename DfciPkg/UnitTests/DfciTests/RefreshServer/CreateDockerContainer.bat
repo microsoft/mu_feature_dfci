@@ -67,7 +67,7 @@ echo .
 echo To start this container in the background, issue:
 echo     docker start dfci_server
 echo .
-echo or, to start this container to see error messages:
+echo or, to start this container in a command window to see error messages:
 echo     docker start -i dfci_server
 echo .
 echo .
@@ -75,13 +75,13 @@ echo Choose an option to start the dfci_server:
 echo 1. Start in background
 echo 2. Start in command window
 echo 3. Do not start dfci_server
-:Prompt
-set /P ChooseStartOption=Select 1, 2, or 3
+:Prompt2
+set /P "AreYouSure= Select 1, 2, or 3 "
 if /I "%AreYouSure%" EQU "1" goto start_background
 if /I "%AreYouSure%" EQU "2" goto start_foreground
 if /I "%AreYouSure%" EQU "3" goto Done
 echo Invalid response %AreYouSure%
-goto Prompt
+goto Prompt2
 
 :start_background
 docker start dfci_server

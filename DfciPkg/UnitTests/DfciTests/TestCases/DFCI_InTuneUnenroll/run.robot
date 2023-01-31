@@ -180,17 +180,8 @@ Verify Settings Returned To Defaults
     @{RTD_CHECK03}=   Create List   Dfci.RecoveryUrl.String            ${EMPTY}
     @{RTD_CHECK04}=   Create List   Dfci.RegistrationId.String         ${EMPTY}
     @{RTD_CHECK05}=   Create List   Dfci.TenantId.String               ${EMPTY}
-    @{RTD_CHECK06}=   Create List   Dfci3.AssetTag.String              ${EMPTY}
-    @{RTD_CHECK07}=   Create List   Dfci3.OnboardWpbt.Enable           Enabled
-    @{RTD_CHECK08}=   Create List   MDM.FriendlyName.String            ${EMPTY}
-    @{RTD_CHECK09}=   Create List   MDM.TenantName.String              ${EMPTY}
-
-#Documentation  Verify the settings that require explicit reset reset to default
-    @{RTD_CHECK10}=   Create List   Dfci.OnboardCameras.Enable         Enabled
-    @{RTD_CHECK11}=   Create List   Dfci.OnboardRadios.Enable          Enabled
-    @{RTD_CHECK12}=   Create List   Dfci.BootExternalMedia.Enable      Enabled
-    @{RTD_CHECK13}=   Create List   Dfci3.ProcessorSMT.Enable          Enabled
-    @{RTD_CHECK14}=   Create List   Dfci3.AssetTag.String              ${EMPTY}
+    @{RTD_CHECK06}=   Create List   MDM.FriendlyName.String            ${EMPTY}
+    @{RTD_CHECK07}=   Create List   MDM.TenantName.String              ${EMPTY}
 
     @{RTD_CHECKS}=    Create List   ${RTD_CHECK01}
 ...                                 ${RTD_CHECK02}
@@ -199,13 +190,6 @@ Verify Settings Returned To Defaults
 ...                                 ${RTD_CHECK05}
 ...                                 ${RTD_CHECK06}
 ...                                 ${RTD_CHECK07}
-...                                 ${RTD_CHECK08}
-...                                 ${RTD_CHECK09}
-...                                 ${RTD_CHECK10}
-...                                 ${RTD_CHECK11}
-...                                 ${RTD_CHECK12}
-...                                 ${RTD_CHECK13}
-...                                 ${RTD_CHECK14}
 
     Get and Print Current Settings     ${currentSettingXmlFile}
 

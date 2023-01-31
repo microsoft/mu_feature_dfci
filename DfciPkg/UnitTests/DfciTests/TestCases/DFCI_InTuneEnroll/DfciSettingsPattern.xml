@@ -60,14 +60,5 @@
                 98765432-1234-5678-1234-012345674321
             </Value>
         </Setting>
-        <Setting>
-            <Id>Device.SecureBootKeys.Enum</Id>
-            <!-- MsOnly, MsPlus3rdParty, None -->
-            <Value>None</Value>
-        </Setting>
-        <Setting>
-            <Id>Device.BootOrderLock.Enable</Id>
-            <Value>Disabled</Value>
-        </Setting>
     </Settings>
 </SettingsPacket>
