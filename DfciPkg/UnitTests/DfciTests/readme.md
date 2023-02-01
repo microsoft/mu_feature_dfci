@@ -55,6 +55,7 @@ In addition, the SetupDUT command will update the firewall for the robot framewo
 configuration changes to Windows for a better test experience.
 
 ## Setting up the RefreshFromNetwork server
+
 A Refresh Server is required to run the Refresh From Network portion of the DFCI E2E tests.
 In addition, Refresh From Network may be run from the DUT firmware menu in lieu of running the DFCI_InTuneUnEnroll
 testcase.
@@ -63,9 +64,8 @@ Instructions given here are to setup a Docker container running Ubuntu on Window
 You will need the IP address of the system that will run the RefreshFromNetwork container in order to generate
 the SSL certificate used to access the RefreshFromNetwork server.
 
-
-
 ## Setting up the HOST system, with the Refresh From Network server running as a container
+
 A Refresh Server is required to run the Refresh From Network portion of the DFCI E2E tests.
 In addition, Refresh From Network may be run from the DUT firmware menu in lieu of running the DFCI_InTuneUnEnroll
 testcase.
@@ -83,9 +83,9 @@ The HOST system requires the following software (NOTE - There are dependencies o
 needed by using this bat file to clone just the DfciTest tree: DfciPkg\UnitTests\DfciTests\CloneUnitTests.bat.
 6. Install the required python packages by running using the pip-requirements.txt file in the DfciTests directory:
 
-```text
-   python -m pip install --upgrade -r pip-requirements.txt
-```
+      ```text
+         python -m pip install --upgrade -r pip-requirements.txt
+       ```
 
 7. Install Git for Windows, available here  [Git for Windows](https://gitforwindows.org/).
 This is probably already installed, but the certificate generation in the next session will need to use the openssl.exe command.
@@ -110,24 +110,23 @@ One is for the RefreshServer, and the other is used by the RefreshServer testcas
 the script will prompt you about starting the container.  I suggest using option 2 for this first test.
 5. In another command window, cd to DfciPkg\UnitTests\DfciTests and run these two unit tests:
 
-```text
-   RunDfciTest.bat TestCases\DFCI_RefreshServer
-   RunDfciTest.bat TestCases\DFCI_CertChainingTest
-```
-
+      ```text
+         RunDfciTest.bat TestCases\DFCI_RefreshServer
+         RunDfciTest.bat TestCases\DFCI_CertChainingTest
+      ```
 
 ## Test Cases Collections
 
 Table of DFCI Test case collections:
 
-1. Pre tests to validate the certs and the refresh server setup:
+* Pre tests to validate the certs and the refresh server setup:
 
 | Test Case Collection | Description of Test Case |
 | ----- | ----- |
 | DFCI_CertChainingTest | Verifies that a ZeroTouch enroll actually prompts for authorization to Enroll when the enroll package is not signed by the proper key.|
 | DFCI_RefreshServer | Verifies the Refresh Server is operational before attempting the Refresh from Network EFI menu option in place of DFCI_InTuneUnenroll. |
 
-2. Testcases to validate the System Under Test:
+* Testcases to validate the System Under Test:
 
 | Test Case Collection | Description of Test Case |
 | ----- | ----- |
@@ -161,8 +160,7 @@ FILE FREEFORM = PCD(gZeroTouchPkgTokenSpaceGuid.PcdZeroTouchCertificateFile) {
 }
 ```
 
-## One time setup for the tests.
-
+## One time setup for the tests
 
 ### WARNING: Do not ship with the ZTD_Leaf.cer certificate in your firmware
 
@@ -222,7 +220,7 @@ Steps 3 through 6 can and should be repeated in any order.
 
 This tests also start with a DUT that is not enrolled in DFCI, and will leave the system not enrolled if it completes successfully.
 
-- DFCI_CertChainingTest
+* DFCI_CertChainingTest
 
 ## Recovering from errors
 

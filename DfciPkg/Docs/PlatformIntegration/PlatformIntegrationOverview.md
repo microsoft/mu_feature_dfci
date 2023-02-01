@@ -65,12 +65,11 @@ Setting providers is how a platform provides a setting to DFCI
 * DFCI Recovery service uses HTTPS certificates with Subject Alternative Names.  This requires a recent version of NetworkPkg.
 To verify you have the correct version, verify that your version of NetworkPkg has one of the following changes:
 
- * [mu_basecore - removal of EFI_TLS_VERIFY_FLAG_NO_WILDCARDS from TlsConfigureSession()](https://github.com/microsoft/mu_basecore/commit/931ff1a45ce13a6a8c3e296f89c6de21f23a17ed#diff-620e10fa41a63814688b931d19fefa89R628).
+* [mu_basecore - removal of EFI_TLS_VERIFY_FLAG_NO_WILDCARDS from TlsConfigureSession()](https://github.com/microsoft/mu_basecore/commit/931ff1a45ce13a6a8c3e296f89c6de21f23a17ed#diff-620e10fa41a63814688b931d19fefa89R628).
 
- * [edk2 - removal of EFI_TLS_VERIFY_FLAG_NO_WILDCARDS from TlsConfigureSession()](https://github.com/tianocore/edk2/commit/6f9e83f757ed7c5c78d071f475b2e72d899c2aef).
+* [edk2 - removal of EFI_TLS_VERIFY_FLAG_NO_WILDCARDS from TlsConfigureSession()](https://github.com/tianocore/edk2/commit/6f9e83f757ed7c5c78d071f475b2e72d899c2aef).
 
 In addition, OpenSSL has to be configured for modern TLS ciphers.
-
 
 * [*mu_tiano_plus* Configure OpenSSL to support modern TLS ciphers](https://github.com/microsoft/mu_tiano_plus/commit/1f3b135ddc821718a78c352316197889c5d3e0c2)
 

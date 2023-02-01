@@ -26,8 +26,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // *---------------------------------------------------------------------------------------*
 // * Application Global Variables                                                          *
 // *---------------------------------------------------------------------------------------*
-DFCI_NETWORK_REQUEST  mDfciNetworkRequest = {0};
-STATIC CHAR8                 mCheck429Url[] = "http://mikeytbds3.eastus.cloudapp.azure.com/return_429";
+DFCI_NETWORK_REQUEST  mDfciNetworkRequest = { 0 };
+STATIC CHAR8          mCheck429Url[]      = "http://mikeytbds3.eastus.cloudapp.azure.com/return_429";
 
 /**
 *  This function is the main entry of the DfciCheck429 application.
@@ -45,9 +45,9 @@ DfciCheck429Entry (
 {
   EFI_STATUS  Status;
 
-  ZeroMem (&mDfciNetworkRequest, sizeof(mDfciNetworkRequest));
+  ZeroMem (&mDfciNetworkRequest, sizeof (mDfciNetworkRequest));
 
-  mDfciNetworkRequest.HttpRequest.Url = AllocateCopyPool (sizeof(mCheck429Url), &mCheck429Url);
+  mDfciNetworkRequest.HttpRequest.Url = AllocateCopyPool (sizeof (mCheck429Url), &mCheck429Url);
   mDfciNetworkRequest.MainLogic       = Check429Logic;
 
   // Try every NIC in the system until one fills the first part of the request.
@@ -63,7 +63,7 @@ DfciCheck429Entry (
     if (mDfciNetworkRequest.HttpStatus.HttpStatus == HTTP_STATUS_UNSUPPORTED_STATUS) {
       AsciiPrint ("TEST FAILED.  Http status could not be retrieved.\n");
     } else {
-      AsciiPrint ("TEST FAILED.  Unexpected status = %a\n",  GetHttpErrorMsg (mDfciNetworkRequest.HttpStatus.HttpStatus));
+      AsciiPrint ("TEST FAILED.  Unexpected status = %a\n", GetHttpErrorMsg (mDfciNetworkRequest.HttpStatus.HttpStatus));
     }
   }
 

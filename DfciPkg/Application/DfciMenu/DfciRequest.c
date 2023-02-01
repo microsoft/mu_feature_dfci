@@ -80,15 +80,16 @@ DumpHeaders (
     UINTN   Index;
 
     for (Index = 0; Index < Count; Index++) {
-      DEBUG ((
-        DEBUG_INFO,
-        "  %d - %a: %a\n",
-        Index + 1,
-        Headers[Index].FieldName,
-        Headers[Index].FieldValue
-        ));
-    }
-  );
+    DEBUG ((
+      DEBUG_INFO,
+      "  %d - %a: %a\n",
+      Index + 1,
+      Headers[Index].FieldName,
+      Headers[Index].FieldValue
+      ));
+  }
+
+    );
 }
 
 /**
@@ -97,7 +98,6 @@ DumpHeaders (
   @param[in]      StatusCode      The status code value in HTTP message.
 
 **/
-STATIC
 CHAR8 *
 GetHttpErrorMsg (
   EFI_HTTP_STATUS_CODE  StatusCode
@@ -1156,7 +1156,12 @@ ProcessHttpRequest (
   }
 
   // Send request without the terminating NULL.
-  RequestMessage.BodyLength   = NetworkRequest->HttpRequest.BodySize - sizeof (CHAR8);
+  if (NetworkRequest->HttpRequest.BodySize == 0) {
+    RequestMessage.BodyLength = 0;
+  } else {
+    RequestMessage.BodyLength = NetworkRequest->HttpRequest.BodySize - sizeof (CHAR8);
+  }
+
   RequestMessage.Body         = NetworkRequest->HttpRequest.Body;
   RequestMessage.Data.Request = &RequestData;
 
@@ -1523,6 +1528,51 @@ SimpleMainLogic (
 }
 
 /**
+ * Check network stack for capability to receive HTTP error 429.
+ *
+ * @param[in]  NetworkRequest
+ * @param[out] Done Processing    - Inform caller processing is complete
+ *
+ * This is a really simple request to a test server that will return 429.
+ **/
+EFI_STATUS
+EFIAPI
+Check429Logic (
+  IN  DFCI_NETWORK_REQUEST  *NetworkRequest,
+  OUT BOOLEAN               *DoneProcessing
+  )
+{
+  EFI_STATUS  Status;
+
+  *DoneProcessing            = FALSE;
+  NetworkRequest->LogicState = DFCI_CHECK_429;
+
+  //
+  // Step 1. Ping server with Bootstrap URL provided in DFCI settings
+  //
+
+  Status = ProcessHttpRequestWithRetries (
+             NetworkRequest,
+             HttpMethodGet,
+             NetworkRequest->HttpRequest.Url,
+             FALSE
+             );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Process Http Get failed.  Status = %r\n", Status));
+    goto CHK_429_CLEANUP;
+  }
+
+  NetworkRequest->LogicState = DFCI_CHECK_429_COMPLETE;
+  *DoneProcessing            = TRUE;
+
+  // Let the caller verify the HTTP status
+
+CHK_429_CLEANUP:
+
+  return Status;
+}
+
+/**
  * MainLogic for processing the recovery contract with recovery provider
  *
  * @param[in]  NetworkRequest
@@ -1571,14 +1621,6 @@ DfciMainLogic (
 
   *DoneProcessing            = FALSE;
   NetworkRequest->LogicState = DFCI_PRE_BOOTSTRAP;
-
-  //
-  // Step 1. Ping server with Bootstrap URL provided in DFCI settings
-  //
-  Status = BuildJsonBootstrapRequest (NetworkRequest);
-  if (EFI_ERROR (Status)) {
-    goto MAIN_CLEANUP;
-  }
 
   Status = ProcessAsyncRequest (
              NetworkRequest,
@@ -1694,7 +1736,6 @@ MAIN_CLEANUP:
  * Returns      EFI_STATUS
  *
  **/
-STATIC
 EFI_STATUS
 TryEachNICThenProcessRequest (
   DFCI_NETWORK_REQUEST  *NetworkRequest

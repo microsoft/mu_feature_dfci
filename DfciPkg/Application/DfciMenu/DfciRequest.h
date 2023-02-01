@@ -44,4 +44,43 @@ ProcessSimpleNetworkRequest (
   OUT CHAR16                **Message
   );
 
+/**
+ * TryEachNICThenProcessRequest
+ *
+ * @param[in]   NetworkRequest
+ *
+ * Returns      EFI_STATUS
+ *
+ **/
+EFI_STATUS
+TryEachNICThenProcessRequest (
+  DFCI_NETWORK_REQUEST  *NetworkRequest
+  );
+
+/**
+ * Check network stack for capability to receive HTTP error 429.
+ *
+ * @param[in]  NetworkRequest
+ * @param[out] Done Processing    - Inform caller processing is complete
+ *
+ * This is a really simple request to a test server that will return 429.
+ **/
+EFI_STATUS
+EFIAPI
+Check429Logic (
+  IN  DFCI_NETWORK_REQUEST  *NetworkRequest,
+  OUT BOOLEAN               *DoneProcessing
+  );
+
+/**
+  This function is to display the HTTP error status.
+
+  @param[in]      StatusCode      The status code value in HTTP message.
+
+**/
+CHAR8 *
+GetHttpErrorMsg (
+  EFI_HTTP_STATUS_CODE  StatusCode
+  );
+
 #endif // __DFCI_REQUEST_H__
