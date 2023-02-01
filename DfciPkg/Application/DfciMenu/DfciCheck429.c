@@ -54,7 +54,7 @@ DfciCheck429Entry (
   Status = TryEachNICThenProcessRequest (&mDfciNetworkRequest);
 
   DEBUG ((DEBUG_INFO, "Url   %a\n", mDfciNetworkRequest.HttpRequest.Url));
-  DEBUG ((DEBUG_INFO, "HttpStatus = %d\n", mDfciNetworkRequest.HttpStatus.HttpStatus));
+  DEBUG ((DEBUG_INFO, "HttpStatus = %d, Status-%r\n", mDfciNetworkRequest.HttpStatus.HttpStatus, Status));
   DEBUG ((DEBUG_INFO, "HttpStatus = %a\n", GetHttpErrorMsg (mDfciNetworkRequest.HttpStatus.HttpStatus)));
 
   if (mDfciNetworkRequest.HttpStatus.HttpStatus == HTTP_STATUS_429_TOO_MANY_REQUESTS) {
