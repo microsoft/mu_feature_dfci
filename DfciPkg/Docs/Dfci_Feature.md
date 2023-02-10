@@ -79,8 +79,8 @@ included in the UEFI BIOS image.
 The DFCI source code and public certificate are available on GitHub under a permissive open
 source license (SPDX-License-Identifier: BSD-2-Clause-Patent).
 
-* <https://github.com/microsoft/mu_plus/tree/dev/201908/DfciPkg>
-* <https://github.com/microsoft/mu_plus/tree/dev/201908/ZeroTouchPkg>
+* [DfciPkg source](<https://github.com/microsoft/mu_feature_dfci/tree/main/DfciPkg>
+* [ZeroTouchPkg source]<https://github.com/microsoft/mu_feature_dfci/tree/main/ZeroTouchPkg>
 
 There is also an example UEFI BIOS menu that demonstrates how to integrate DFCI:
 
@@ -93,7 +93,7 @@ DFCI allows a platform to supply either an allow list, or a disallow list, of a 
 that may be deployed using unsigned packets.
 Unsigned settings may only be deployed when no DFCI Owner has been enrolled in the system
 unless that DFCI owner has specifically allowed certain settings to be set by unsigned packets.
-See the [section on platform integRation](PlatformIntegration/PlatformIntegrationOverview.md) for more information.
+See the section on [Platform Integration](PlatformIntegration/PlatformIntegrationOverview.md) for more information.
 
 ## UEFI Implementation Details
 
@@ -105,5 +105,5 @@ See the [section on platform integRation](PlatformIntegration/PlatformIntegratio
 
 ## Copyright
 
-Copyright (C) Microsoft Corporation. All rights reserved.
+Copyright (C) Microsoft Corporation. All rights reserved.  
 SPDX-License-Identifier: BSD-2-Clause-Patent

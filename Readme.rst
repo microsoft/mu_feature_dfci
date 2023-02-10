@@ -75,9 +75,9 @@ Copyright & License
 .. ===================================================================
 
 .. CoreCI
-                           
+
 .. |WindowsCiBuild| image:: https://dev.azure.com/projectmu/mu/_apis/build/status/CI/Feature%20DFCI/Mu%20Feature%20DFCI%20-%20CI%20-%20WIndows%20VS?repoName=microsoft%2Fmu_feature_dfci&branchName=main
-   :target: https://dev.azure.com/projectmu/mu/_build?definitionId=142&_a=summary                          
+   :target: https://dev.azure.com/projectmu/mu/_build?definitionId=142&_a=summary
 
 .. _Windows_VS2022: https://dev.azure.com/projectmu/mu/_build/latest?definitionId=142&repoName=microsoft%2Fmu_feature_dfci&branchName=main
 
@@ -85,6 +85,6 @@ Copyright & License
 .. _Ubuntu_GCC5: https://dev.azure.com/projectmu/mu/_build/latest?definitionId=139&repoName=microsoft%2Fmu_feature_dfci&branchName=main
 
 .. |UbuntuCiBuild| image:: https://dev.azure.com/projectmu/mu/_apis/build/status/CI/Feature%20DFCI/Mu%20Feature%20DFCI%20-%20CI%20-%20GCC5?repoName=microsoft%2Fmu_feature_dfci&branchName=main
-  :target: https://dev.azure.com/projectmu/mu/_build?definitionId=141&_a=summary 
+  :target: https://dev.azure.com/projectmu/mu/_build?definitionId=141&_a=summary
 
 .. |UbuntuCiCoverage| image:: https://img.shields.io/badge/coverage-coming_soon-blue
