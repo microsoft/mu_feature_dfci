@@ -20,7 +20,7 @@ typedef struct {
   UINT32            AttributesCantHave;
 } VARIABLE_POLICY_ELEMENT;
 
-//  Varialbes that are al locked at ready to boot.
+//  Variables that are locked at ready to boot.
 STATIC VARIABLE_POLICY_ELEMENT  gReadyToBootPolicies[] =
 {
   // Identity and Auth variables

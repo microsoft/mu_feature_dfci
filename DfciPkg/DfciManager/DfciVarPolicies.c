@@ -139,7 +139,6 @@ InitializeAndSetPolicyForAllDfciVariables (
     DEBUG ((DEBUG_ERROR, "%a %a: Error deleting Dfci Lock variable(%s). Code=%r\n", _DBGMSGID_, __FUNCTION__, DFCI_LOCK_VAR_NAME, Status));
   }
 
-
   for (i = 0; i < ARRAY_SIZE (gDfciLockPolicy); i++) {
     Status = RegisterBasicVariablePolicy (
                mVariablePolicy,

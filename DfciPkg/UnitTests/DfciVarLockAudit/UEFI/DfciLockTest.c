@@ -66,7 +66,7 @@ GetVariablePolicy (
   }
 
   for (i = 0; i < ARRAY_SIZE (gDfciLockPolicy); i++) {
-     if (CompareGuid (varGuid, gDfciLockPolicy[i].Namespace)) {
+    if (CompareGuid (varGuid, gDfciLockPolicy[i].Namespace)) {
       if (gDfciLockPolicy[i].Name == NULL) {
         return &gDfciLockPolicy[i];
       }
@@ -193,6 +193,10 @@ CreateListOfDfciVars (
     if (!SPP_Present) {
       AddDfciErrorToNode (gDfciStatusNode, "FAIL Required Permissions Library private variable not found");
       gDfciPolicyFailedCount++;
+    }
+
+    if (!DLCK_Present) {
+      DEBUG ((DEBUG_ERROR, "This variable will be required in a future release of this test"));
     }
   }
 
