@@ -65,6 +65,18 @@ GetVariablePolicy (
     }
   }
 
+  for (i = 0; i < ARRAY_SIZE (gDfciLockPolicy); i++) {
+     if (CompareGuid (varGuid, gDfciLockPolicy[i].Namespace)) {
+      if (gDfciLockPolicy[i].Name == NULL) {
+        return &gDfciLockPolicy[i];
+      }
+
+      if (0 == StrCmp (varName, gDfciLockPolicy[i].Name)) {
+        return &gDfciLockPolicy[i];
+      }
+    }
+  }
+
   if (ShouldBeLocked != NULL) {
     *ShouldBeLocked = FALSE;
   }
@@ -94,6 +106,7 @@ CreateListOfDfciVars (
   XmlNode                  *VarNode;
   BOOLEAN                  IPCVN_Present;
   BOOLEAN                  SPP_Present;
+  BOOLEAN                  DLCK_Present;
 
   IPCVN_Present = FALSE;
   SPP_Present   = FALSE;
@@ -139,6 +152,17 @@ CreateListOfDfciVars (
               SPP_Present = TRUE;
             } else if (0 != StrCmp (varName, L"_SMID")) {
               AddDfciErrorToNode (VarNode, "ERROR, Unexpected variable in Internal Variable namespace\n");
+              gDfciPolicyFailedCount++;
+            }
+          }
+
+          // This variable is on present when Dfci variables are using Lock on Variable State.  If present
+          // its policies must be correct, and should be locked.
+          if (CompareGuid (&varGuid, &gDfciLockVariableGuid)) {
+            if (0 == StrCmp (varName, DFCI_LOCK_VAR_NAME)) {
+              DLCK_Present = TRUE;
+            } else {
+              AddDfciErrorToNode (VarNode, "ERROR, Unexpected variable in Lock Variable namespace\n");
               gDfciPolicyFailedCount++;
             }
           }
