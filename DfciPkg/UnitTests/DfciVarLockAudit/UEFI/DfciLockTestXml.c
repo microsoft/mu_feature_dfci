@@ -453,6 +453,19 @@ AddDfciErrorToNode (
 {
   EFI_STATUS  Status;
 
-  Status = AddNode (StatusNode, VAR_DFCI_CHECK_ELEMENT_NAME, DfciStatusString, NULL);
+  Status = AddNode (StatusNode, VAR_DFCI_ERROR_ELEMENT_NAME, DfciStatusString, NULL);
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
+AddDfciPassToNode (
+  IN XmlNode  *StatusNode,
+  IN CHAR8    *DfciStatusString
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = AddNode (StatusNode, VAR_DFCI_PASS_ELEMENT_NAME, DfciStatusString, NULL);
   return Status;
 }
