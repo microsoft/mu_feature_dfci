@@ -1,9 +1,9 @@
-# Project Mu Common Plus
+# Project Mu, Mu Feature Dfci
 
 ??? info "Git Details"
     Repository Url: {{mu_feature_dfci.url}}  
     Branch:         {{mu_feature_dfci.branch}}  
-    Commit:         [{{mu_feature_dfci.commit}}]({{mu_feature_dfci.commitlink}})  
+    Commit:         [{{mu_feature_dfci.commit}}]({{mu_feature_dfci}})  
     Commit Date:    {{mu_plus.date}}
 
 This repo contains Project Mu Feature DFCI common code that should only take Basecore as a
@@ -11,8 +11,10 @@ dependency and be applicable to almost any FW project. For full documentation, s
 
 ## More Info
 
-Please see the Project Mu docs (<https://github.com/Microsoft/mu>) for more
-information.  
+Please see specific [DfciPkg documentation](DfciPkg/Docs/Dfci_Feature.md)
+
+Please see the [Project Mu docs](<https://github.com/Microsoft/mu>) for more
+information.
 
 This project has adopted the [Microsoft Open Source Code of
 Conduct](https://opensource.microsoft.com/codeofconduct/).
