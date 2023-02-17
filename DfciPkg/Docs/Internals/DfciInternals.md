@@ -12,7 +12,7 @@ DFCI processes the mailbox variables during a system restart.
 ## Identity Manager
 
 In the source code, the Identity manager is implemented in **IdentityAndAuthManager** is defined
-in the **DfciPkg** located in the **mu_plus** repository <https://github.com/microsoft/mu_plus/>.
+in the **DfciPkg** located in the **mu_feature_dfci** repository <https://github.com/microsoft/mu_feature_dfci/>.
 Identity and Auth Manager is responsible for managing the Identities.
 The initial state of the system has the Local User with full authentication to make changes to
 any of the available settings.
@@ -302,8 +302,8 @@ certain settings.
 
 ### Settings provider for enabled features without platform control
 
-Please refer to the DfciVirtualizationSettings provider in [Project mu_plus](
-https://github.com/microsoft/mu_plus/tree/release/202002/DfciPkg/Library/DfciVirtualizationSettings)
+Please refer to the DfciVirtualizationSettings provider in [Project mu_feature_dfci](
+https://github.com/microsoft/mu_feature_dfci/tree/main/DfciPkg/Library/DfciVirtualizationSettings)
 for this section.
 A platform may conform to a Enabled setting, but have no method to control this setting.
 The CPU and I/O virtualization setting is one of those.
