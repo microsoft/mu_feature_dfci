@@ -20,8 +20,8 @@ typedef struct {
   UINT32            AttributesCantHave;
 } VARIABLE_POLICY_ELEMENT;
 
+//  Variables that are locked at ready to boot.
 STATIC VARIABLE_POLICY_ELEMENT  gReadyToBootPolicies[] =
-
 {
   // Identity and Auth variables
   {
@@ -100,7 +100,7 @@ STATIC VARIABLE_POLICY_ELEMENT  gReadyToBootPolicies[] =
   },
 };
 
-// Set the policy for all of the public mail boxes.
+// Set the policy for all of the public mail boxes.  These policies are all NO_LOCK.
 VARIABLE_POLICY_ELEMENT  gMailBoxPolicies[] =
 {
   {
@@ -134,6 +134,16 @@ VARIABLE_POLICY_ELEMENT  gMailBoxPolicies[] =
     .Namespace          = &gDfciSettingsManagerVarNamespace, .Name = DFCI_SETTINGS2_APPLY_INPUT_VAR_NAME,
     .MinSize            = VARIABLE_POLICY_NO_MIN_SIZE, .MaxSize = MAX_ALLOWABLE_DFCI_APPLY_VAR_SIZE,
     .AttributesMustHave = DFCI_SECURED_SETTINGS_VAR_ATTRIBUTES, .AttributesCantHave = (UINT32) ~DFCI_SECURED_SETTINGS_VAR_ATTRIBUTES,
+  },
+};
+
+// Set the policy for the Dfci Lock variable.  All variables listed here will be Lock On Create variables.
+VARIABLE_POLICY_ELEMENT  gDfciLockPolicy[] =
+{
+  {
+    .Namespace          = &gDfciLockVariableGuid, .Name = DFCI_LOCK_VAR_NAME,
+    .MinSize            = DFCI_LOCK_VAR_SIZE, .MaxSize = DFCI_LOCK_VAR_SIZE,
+    .AttributesMustHave = DFCI_LOCK_VAR_ATTRIBUTES, .AttributesCantHave = (UINT32) ~DFCI_LOCK_VAR_ATTRIBUTES,
   },
 };
 

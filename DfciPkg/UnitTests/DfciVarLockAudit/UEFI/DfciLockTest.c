@@ -65,6 +65,18 @@ GetVariablePolicy (
     }
   }
 
+  for (i = 0; i < ARRAY_SIZE (gDfciLockPolicy); i++) {
+    if (CompareGuid (varGuid, gDfciLockPolicy[i].Namespace)) {
+      if (gDfciLockPolicy[i].Name == NULL) {
+        return &gDfciLockPolicy[i];
+      }
+
+      if (0 == StrCmp (varName, gDfciLockPolicy[i].Name)) {
+        return &gDfciLockPolicy[i];
+      }
+    }
+  }
+
   if (ShouldBeLocked != NULL) {
     *ShouldBeLocked = FALSE;
   }
@@ -94,9 +106,11 @@ CreateListOfDfciVars (
   XmlNode                  *VarNode;
   BOOLEAN                  IPCVN_Present;
   BOOLEAN                  SPP_Present;
+  BOOLEAN                  DLCK_Present;
 
   IPCVN_Present = FALSE;
   SPP_Present   = FALSE;
+  DLCK_Present  = FALSE;
 
   List = New_VariablesNodeList ();
   if (List == NULL) {
@@ -142,6 +156,17 @@ CreateListOfDfciVars (
               gDfciPolicyFailedCount++;
             }
           }
+
+          // This variable is on present when Dfci variables are using Lock on Variable State.  If present
+          // its policies must be correct, and should be locked.
+          if (CompareGuid (&varGuid, &gDfciLockVariableGuid)) {
+            if (0 == StrCmp (varName, DFCI_LOCK_VAR_NAME)) {
+              DLCK_Present = TRUE;
+            } else {
+              AddDfciErrorToNode (VarNode, "ERROR, Unexpected variable in Lock Variable namespace\n");
+              gDfciPolicyFailedCount++;
+            }
+          }
         }
       }
     }
@@ -169,6 +194,10 @@ CreateListOfDfciVars (
     if (!SPP_Present) {
       AddDfciErrorToNode (gDfciStatusNode, "FAIL Required Permissions Library private variable not found");
       gDfciPolicyFailedCount++;
+    }
+
+    if (!DLCK_Present) {
+      DEBUG ((DEBUG_ERROR, "This variable will be required in a future release of this test"));
     }
   }
 
