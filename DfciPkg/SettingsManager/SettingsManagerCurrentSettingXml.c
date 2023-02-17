@@ -101,6 +101,11 @@ CreateXmlStringFromCurrentSettings (
     DFCI_SETTING_PROVIDER_LIST_ENTRY  *Prov  = PROV_LIST_ENTRY_FROM_LINK (Link);
     Value = ProviderValueAsAscii (&(Prov->Provider), TRUE);
 
+    if (Value == NULL) {
+      DEBUG ((DEBUG_INFO, "%a - Value is NULL for %a\n", __FUNCTION__, Prov->Provider.Id));
+      continue;
+    }
+
     if (V1Compatible) {
       DFCI_SETTING_ID_STRING  NumberString;
       NumberString = DfciV1NumberFromId (Prov->Provider.Id);
@@ -305,8 +310,12 @@ PopulateCurrentSettingsIfNeeded (
     ASSERT (OldVar[OldVarSize - 1] == 0);            // Ensure null terminator is present
     OldVarCompare1 = AsciiStrStr (OldVar, "<Date>"); // Find the start of the date
     OldVarCompare2 = AsciiStrStr (OldVar, "/Date>"); // Find the end of the date
-    ASSERT (OldVarCompare1 != NULL);                 // Ensure end of date found
-    ASSERT (OldVarCompare2 != NULL);                 // Ensure end of date found
+    if ((OldVarCompare1 == NULL) || (OldVarCompare2 == NULL)) {
+      ASSERT (OldVarCompare1 != NULL);               // Ensure end of date found
+      ASSERT (OldVarCompare2 != NULL);               // Ensure end of date found
+      Status = EFI_INVALID_PARAMETER;
+      goto EXIT;
+    }
   }
 
   // Create string of Xml
@@ -320,8 +329,12 @@ PopulateCurrentSettingsIfNeeded (
     ASSERT (Var[VarSize - 1] == 0);                    // Ensure null terminator is present
     VarCompare1 = AsciiStrStr (Var, "<Date>");         // Find the start of the date
     VarCompare2 = AsciiStrStr (Var, "/Date>");         // Find the end of the date
-    ASSERT (VarCompare1 != NULL);                      // Ensure end of date found
-    ASSERT (VarCompare2 != NULL);                      // Ensure end of date found
+    if ((VarCompare1 == NULL) || (VarCompare2 == NULL)) {
+      ASSERT (VarCompare1 != NULL);                    // Ensure end of date found
+      ASSERT (VarCompare2 != NULL);                    // Ensure end of date found
+      Status = EFI_INVALID_PARAMETER;
+      goto EXIT;
+    }
 
     Len    = VarCompare1 - Var;
     OldLen = OldVarCompare1 - OldVar;
