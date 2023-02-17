@@ -110,6 +110,7 @@ CreateListOfDfciVars (
 
   IPCVN_Present = FALSE;
   SPP_Present   = FALSE;
+  DLCK_Present  = FALSE;
 
   List = New_VariablesNodeList ();
   if (List == NULL) {
