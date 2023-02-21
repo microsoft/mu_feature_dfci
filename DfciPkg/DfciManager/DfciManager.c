@@ -79,11 +79,17 @@ RunProcessMailBoxes (
   EFI_TPL  OldTpl;
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  //
+  // The process of applying Enroll packets may call the UI code, which must run
+  // at TPL_APPLICATION.
+  //
   gBS->RestoreTPL (TPL_APPLICATION);
 
   ProcessMailBoxes ();
 
-  gBS->RaiseTPL (OldTpl);
+  gBS->RaiseTPL (TPL_NOTIFY);
+  gBS->RestoreTPL (OldTpl);
   return;
 }
 
