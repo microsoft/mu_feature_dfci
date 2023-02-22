@@ -63,6 +63,7 @@ static DFCI_MANAGER_DATA           mManagerData[MGR_MAX] = {
  */
 EFI_STATUS
 ProcessMailBoxes (
+  VOID
   );
 
 /**
@@ -74,6 +75,7 @@ ProcessMailBoxes (
  */
 VOID
 RunProcessMailBoxes (
+  VOID
   )
 {
   EFI_TPL  OldTpl;
@@ -382,6 +384,7 @@ DecodeIdentityPacket (
  */
 EFI_STATUS
 QueueMailboxAtEndOfDxe (
+  VOID
   )
 {
   EFI_STATUS  Status;
@@ -409,6 +412,7 @@ QueueMailboxAtEndOfDxe (
  */
 EFI_STATUS
 QueueMailboxAtSettingAccess (
+  VOID
   )
 {
   EFI_STATUS  Status;
@@ -851,6 +855,7 @@ CompletePacket (
  */
 EFI_STATUS
 ProcessMailBoxes (
+  VOID
   )
 {
   EFI_STATUS         LkgStatus;
