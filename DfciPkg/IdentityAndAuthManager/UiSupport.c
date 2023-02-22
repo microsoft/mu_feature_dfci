@@ -364,8 +364,14 @@ UiEnrollRequest (
   CHAR16   ThumbprintCode[3];
 
   CertText = QueryCertificateDetails (TrustedCert, TrustedCertSize);
+
   if (CertText == NULL) {
-    CertText    = AllocatePool (sizeof (L'\0'));
+    CertText = AllocatePool (sizeof (L'\0'));
+    if (CertText == NULL) {
+      DEBUG ((DEBUG_ERROR, "%a: Failed to allocate memory for CertText", __FUNCTION__));
+      return FALSE;
+    }
+
     CertText[0] = L'\0';
   }
 
