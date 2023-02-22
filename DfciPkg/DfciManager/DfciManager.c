@@ -63,6 +63,7 @@ static DFCI_MANAGER_DATA           mManagerData[MGR_MAX] = {
  */
 EFI_STATUS
 ProcessMailBoxes (
+  VOID
   );
 
 /**
@@ -74,16 +75,23 @@ ProcessMailBoxes (
  */
 VOID
 RunProcessMailBoxes (
+  VOID
   )
 {
   EFI_TPL  OldTpl;
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  //
+  // The process of applying Enroll packets may call the UI code, which must run
+  // at TPL_APPLICATION.
+  //
   gBS->RestoreTPL (TPL_APPLICATION);
 
   ProcessMailBoxes ();
 
-  gBS->RaiseTPL (OldTpl);
+  gBS->RaiseTPL (TPL_NOTIFY);
+  gBS->RestoreTPL (OldTpl);
   return;
 }
 
@@ -376,6 +384,7 @@ DecodeIdentityPacket (
  */
 EFI_STATUS
 QueueMailboxAtEndOfDxe (
+  VOID
   )
 {
   EFI_STATUS  Status;
@@ -403,6 +412,7 @@ QueueMailboxAtEndOfDxe (
  */
 EFI_STATUS
 QueueMailboxAtSettingAccess (
+  VOID
   )
 {
   EFI_STATUS  Status;
@@ -845,6 +855,7 @@ CompletePacket (
  */
 EFI_STATUS
 ProcessMailBoxes (
+  VOID
   )
 {
   EFI_STATUS         LkgStatus;

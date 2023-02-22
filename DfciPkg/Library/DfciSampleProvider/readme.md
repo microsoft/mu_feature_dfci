@@ -5,7 +5,7 @@ for DFCI.
 
 This is **not to be used in production** but is provided as a sample for reference when creating your own provider.
 
-For more information, please refer to the DFCI documentation [here]( https://microsoft.github.io/mu/dyn/mu_plus/DfciPkg/Docs/PlatformIntegration/DfciSettingProviders/)
+For more information, please refer to the DFCI documentation [here]( https://github.com/microsoft/mu_feature_dfci/tree/main/DfciPkg/Docs/PlatformIntegration/DfciSettingProviders/)
 
 ## Copyright
 
