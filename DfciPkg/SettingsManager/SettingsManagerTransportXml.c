@@ -436,7 +436,7 @@ ValidateSettingsPacket (
   IN       DFCI_INTERNAL_PACKET  *Data
   )
 {
-  UINT8  *EndData;
+  UINT8  *EndData = NULL;
 
   if (Data->PacketSize > MAX_ALLOWABLE_DFCI_APPLY_VAR_SIZE) {
     DEBUG ((DEBUG_ERROR, "%a - MAX_ALLOWABLE_DFCI_APPLY_VAR_SIZE.\n", __FUNCTION__));

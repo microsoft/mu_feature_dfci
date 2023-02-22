@@ -302,6 +302,11 @@ SetProviderValueFromAscii (
 
       ByteArray = (UINT8 *)AllocatePool (ValueSize);
 
+      if (NULL == ByteArray) {
+        DEBUG ((DEBUG_ERROR, "Cannot allocate memory for binary blob\n"));
+        return EFI_OUT_OF_RESOURCES;
+      }
+
       Status = Base64Decode (Value, b64Size, ByteArray, &ValueSize);
       if (EFI_ERROR (Status)) {
         FreePool (ByteArray);
@@ -508,6 +513,11 @@ ProviderValueAsAscii (
 
       Value = AllocatePool (ValueSize);
 
+      if (Value == NULL) {
+        DEBUG ((DEBUG_ERROR, "Allocation failed. \n"));
+        break;
+      }
+
       if (Current) {
         Status = Provider->GetSettingValue (Provider, &ValueSize, Value);
       } else {
@@ -668,6 +678,11 @@ ProviderValueAsAscii (
       }
 
       Value = (CHAR8 *)AllocatePool (AsciiSize);
+
+      if (Value == NULL) {
+        DEBUG ((DEBUG_ERROR, "%a - Failed to allocate pool.\n", __FUNCTION__));
+        return NULL;
+      }
 
       Status = Base64Encode (Buffer, ValueSize, Value, &AsciiSize);
       if (EFI_ERROR (Status)) {

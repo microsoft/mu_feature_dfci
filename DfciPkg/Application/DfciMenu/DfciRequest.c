@@ -1978,7 +1978,7 @@ ProcessDfciNetworkRequest (
   OUT CHAR16                **Message
   )
 {
-  CHAR16       *Msg;
+  CHAR16       *Msg = NULL;
   EFI_STATUS   Status;
   UINTN        MsgLen;
   UINTN        MsgSize;
@@ -2068,8 +2068,10 @@ operation."
     }
   }
 
-  DEBUG ((DEBUG_INFO, "Error message of %d characters generated\n", MsgLen));
-  DEBUG ((DEBUG_INFO, "%s\n", Msg));
+  if (NULL != Msg) {
+    DEBUG ((DEBUG_INFO, "Error message of %d characters generated\n", MsgLen));
+    DEBUG ((DEBUG_INFO, "%s\n", Msg));
+  }
 
 EXIT_NETWORK_REQUEST:
   RestoreCertificates ();
