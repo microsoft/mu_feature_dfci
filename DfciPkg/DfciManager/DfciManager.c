@@ -55,8 +55,7 @@ static DFCI_MANAGER_DATA           mManagerData[MGR_MAX] = {
 /**
  * Process Mailboxes
  *
- * Called in mainline, or at one of the callbacks (EndOfDxe, or SettingAccess), or
- * after raising TPL to TPL_CALLBACK.
+ * Called in mainline, or at one of the callbacks (EndOfDxe, or SettingAccess).
  *
  * @param
  *
@@ -64,8 +63,29 @@ static DFCI_MANAGER_DATA           mManagerData[MGR_MAX] = {
  */
 EFI_STATUS
 ProcessMailBoxes (
-  VOID
   );
+
+/**
+ * RunProcessMailBoxes - Set the TPL to TPL_APPLICATION and run ProcessMailboxes
+ *
+ * @param
+ *
+ * @return VOID
+ */
+VOID
+RunProcessMailBoxes (
+  )
+{
+  EFI_TPL  OldTpl;
+
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+  gBS->RestoreTPL (TPL_APPLICATION);
+
+  ProcessMailBoxes ();
+
+  gBS->RaiseTPL (OldTpl);
+  return;
+}
 
 /**
  * Event callback for End Of Dxe.
@@ -101,7 +121,7 @@ EndOfDxeCallback (
   // Try again to process provisioning input.
   //
   mProcessingAtEndOfDxe = TRUE;
-  ProcessMailBoxes ();
+  RunProcessMailBoxes ();
 
   gBS->CloseEvent (Event);
   mEndOfDxeEvent = NULL;
@@ -131,7 +151,7 @@ SettingAccessCallback (
   //
   // Try again to process provisioning input.
   //
-  ProcessMailBoxes ();
+  RunProcessMailBoxes ();
 
   gBS->CloseEvent (Event);
 
@@ -356,7 +376,6 @@ DecodeIdentityPacket (
  */
 EFI_STATUS
 QueueMailboxAtEndOfDxe (
-  VOID
   )
 {
   EFI_STATUS  Status;
@@ -384,12 +403,10 @@ QueueMailboxAtEndOfDxe (
  */
 EFI_STATUS
 QueueMailboxAtSettingAccess (
-  VOID
   )
 {
   EFI_STATUS  Status;
   EFI_EVENT   Event;
-  EFI_TPL     OldTpl;
   VOID        *NotUsed;
 
   Status = gBS->LocateProtocol (
@@ -422,9 +439,7 @@ QueueMailboxAtSettingAccess (
     }
   } else {
     DEBUG ((DEBUG_INFO, "%a %a: Processing packets immediately.\r\n", _DBGMSGID_, __FUNCTION__));
-    OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
     Status = ProcessMailBoxes ();
-    gBS->RestoreTPL (OldTpl);
   }
 
   return Status;
@@ -830,7 +845,6 @@ CompletePacket (
  */
 EFI_STATUS
 ProcessMailBoxes (
-  VOID
   )
 {
   EFI_STATUS         LkgStatus;
