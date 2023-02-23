@@ -10,7 +10,7 @@ rmdir /s /q .git
 goto Done
 
 :Error
-echo Don't run this command in a direcotry at the root of a repository. (ie with a .git folder)
+echo Don't run this command in a directory at the root of a repository. (ie with a .git folder)
 
 :Done
 endlocal
