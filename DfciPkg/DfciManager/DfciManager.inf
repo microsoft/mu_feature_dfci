@@ -53,6 +53,7 @@
   gDfciAuthProvisionVarNamespace
   gDfciDeviceIdVarNamespace
   gDfciInternalVariableGuid
+  gDfciLockVariableGuid
   gDfciPermissionManagerVarNamespace
   gDfciSettingsGuid
   gDfciSettingsManagerVarNamespace

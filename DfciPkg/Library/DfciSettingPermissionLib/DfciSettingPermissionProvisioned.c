@@ -108,7 +108,13 @@ ConvertFromV1 (
   }
 
   for (UINT16 i = 0; i < Var1->NumberOfEntries; i++) {
-    Id     = DfciV1TranslateEnum (Var1->PermTable[i].Id);
+    Id = DfciV1TranslateEnum (Var1->PermTable[i].Id);
+    if (Id == NULL) {
+      DEBUG ((DEBUG_ERROR, "%a - Failed to translate V1 ID %d\n", __FUNCTION__, Var1->PermTable[i].Id));
+      ASSERT (Id != NULL);
+      return EFI_COMPROMISED_DATA;
+    }
+
     Status = AddPermissionEntry (*Store, Id, Var1->PermTable[i].Permissions, DFCI_IDENTITY_SIGNER_OWNER);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "%a - Failed to add a permission entry. %r\n", __FUNCTION__, Status));

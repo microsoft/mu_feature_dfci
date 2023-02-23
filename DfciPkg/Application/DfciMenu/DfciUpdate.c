@@ -522,6 +522,11 @@ ProcessFunction (
           return EFI_OUT_OF_RESOURCES;
         }
 
+        if (NULL == StringValue) {
+          DEBUG ((DEBUG_ERROR, "Failed to allocate pool\n"));
+          return EFI_OUT_OF_RESOURCES;
+        }
+
         Status = Base64Decode (Rqst->Value, Rqst->ValueLen, (UINT8 *)StringValue, &ValueSize);
         if (EFI_ERROR (Status)) {
           FreePool (StringValue);
