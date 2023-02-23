@@ -1,7 +1,8 @@
 ## @file
-# DfciSARecovery.inf
+# DfciCheck429.inf
 #
-# Stand alone application/example for DFCI recovery
+# Stand alone shell application to verify that HTTP error code 429 is returned
+# from the refresh server.
 #
 # Copyright (C) Microsoft Corporation. All rights reserved.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -67,3 +68,4 @@
   gEfiBootManagerPolicyProtocolGuid
   gEfiHttpServiceBindingProtocolGuid
   gEfiHttpProtocolGuid
+  gEfiShellParametersProtocolGuid

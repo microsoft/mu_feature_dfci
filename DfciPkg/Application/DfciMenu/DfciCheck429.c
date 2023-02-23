@@ -11,6 +11,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Uefi.h>
 
+#include <Protocol/ShellParameters.h>
+
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -18,6 +20,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
+#include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
 #include "DfciPrivate.h"
@@ -27,7 +30,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // * Application Global Variables                                                          *
 // *---------------------------------------------------------------------------------------*
 DFCI_NETWORK_REQUEST  mDfciNetworkRequest = { 0 };
-STATIC CHAR8          mCheck429Url[]      = "http://mikeytbds3.eastus.cloudapp.azure.com/return_429";
+STATIC CHAR8         *mCheck429Url        = NULL;
+
+#define host_name_prefix "http://"
+#define host_name_suffix "/return_429"
 
 /**
 *  This function is the main entry of the DfciCheck429 application.
@@ -43,11 +49,82 @@ DfciCheck429Entry (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS  Status;
+  UINTN                         host_name_len;
+  CHAR8                         *host_name_url;
+  UINTN                         offset;
+  EFI_SHELL_PARAMETERS_PROTOCOL *Parameters;
+  EFI_STATUS                    Status;
 
   ZeroMem (&mDfciNetworkRequest, sizeof (mDfciNetworkRequest));
+  Parameters = NULL;
 
-  mDfciNetworkRequest.HttpRequest.Url = AllocateCopyPool (sizeof (mCheck429Url), &mCheck429Url);
+  Status = gBS->HandleProtocol (
+                  ImageHandle,
+                  &gEfiShellParametersProtocolGuid,
+                  (VOID **)&Parameters
+                  );
+
+  if (EFI_ERROR (Status) || (Parameters == NULL)) {
+    // This UEFI_DRIVER application must run under the UEFI Shell
+    DEBUG ((DEBUG_ERROR, "%a - Shell Parameters protocol not available. %r\n", __FUNCTION__, Status));
+    return 8;
+  }
+
+  if (Parameters->Argc != 2) {
+    AsciiPrint ("Incorrect parameters:\n");
+    AsciiPrint ("\n");
+    AsciiPrint ("  DfciCheck429  host-name-or-ip-address\n");
+    AsciiPrint ("\n");
+    AsciiPrint ("  Examples:\n");
+    AsciiPrint ("    DfciCheck host.docker.internal.com\n");
+    AsciiPrint ("    DfciCheck 192.168.1.115\n");
+    return 8;
+  }
+
+  host_name_len = 1;
+  host_name_len = StrLen (Parameters->Argv[1]);
+  if (host_name_len < 1) {
+    AsciiPrint ("Invalid or missing host-name-or-ip-address\n");
+    return 8;
+  }
+
+  AsciiPrint ("This test takes at least 40 seconds, and may take over a minute with network retires.\n");
+
+  //
+  // Build the CHAR8 URL from the CHAR16 parameter + the CHA8 host_name_suffix, host_name_prefix, and a '\0'.
+  // Note that sizeof returns the size including the NULL, so we only need one of those NULL's.
+  //
+  //    'http://' + host-name-or-ip-address + '/return_429'
+  //
+  host_name_len += sizeof (host_name_prefix) + sizeof(host_name_suffix) - sizeof (CHAR8);
+  host_name_url = AllocatePool (host_name_len);
+  if (host_name_url == NULL) {
+    AsciiPrint ("TEST FAILED. Out of memory\n");
+    return 8;
+  }
+
+  Status = AsciiStrCpyS (host_name_url, host_name_len, host_name_prefix);
+  if EFI_ERROR (Status) {
+    AsciiPrint ("TEST FAILED. AsciiStrCpyS failed\n");
+    return 8;
+  }
+
+  offset = AsciiStrLen (host_name_prefix);
+  Status = UnicodeStrToAsciiStrS (Parameters->Argv[1], &host_name_url[offset], host_name_len - offset);
+  if EFI_ERROR (Status) {
+    AsciiPrint ("TEST FAILED. UnicodeStrToAsciiStrS failed\n");
+    return 8;
+  }
+
+  Status = AsciiStrCatS (host_name_url, host_name_len, host_name_suffix);
+  if EFI_ERROR (Status) {
+    AsciiPrint ("TEST FAILED. AsciiStrCatS failed\n");
+    return 8;
+  }
+
+  AsciiPrint ("Processing url=%a\n", host_name_url);
+
+  mDfciNetworkRequest.HttpRequest.Url = host_name_url;
   mDfciNetworkRequest.MainLogic       = Check429Logic;
 
   // Try every NIC in the system until one fills the first part of the request.
@@ -68,5 +145,5 @@ DfciCheck429Entry (
   }
 
   // Right now, this is a driver due to the libraries used.  So, never load.
-  return EFI_NOT_FOUND;
+  return EFI_SUCCESS;
 }
