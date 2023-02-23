@@ -821,6 +821,16 @@ DfciBuildRequestHeaders (
   AsciiSPrint (ContentLengthString, sizeof (ContentLengthString), "%ld", BodyLength);
   RequestHeaders[3].FieldValue = AllocateCopyPool (AsciiStrSize (ContentLengthString), ContentLengthString);
 
+  if ((RequestHeaders[0].FieldName == NULL) ||
+      (RequestHeaders[1].FieldName == NULL) ||
+      (RequestHeaders[1].FieldValue == NULL) ||
+      (RequestHeaders[2].FieldName == NULL) ||
+      (RequestHeaders[2].FieldValue == NULL) ||
+      (RequestHeaders[3].FieldName == NULL) ||
+      (RequestHeaders[3].FieldValue == NULL)) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
   Status = HttpUrlGetHostName (Url, UrlParser, &RequestHeaders[0].FieldValue);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to get Host Name from URL\n"));
@@ -829,6 +839,10 @@ DfciBuildRequestHeaders (
   if (0 != BodyLength) {
     RequestHeaders[4].FieldName  = AllocateCopyPool (AsciiStrSize (HTTP_HEADER_CONTENT_TYPE), HTTP_HEADER_CONTENT_TYPE);
     RequestHeaders[4].FieldValue = AllocateCopyPool (AsciiStrSize (ContentType), ContentType);
+    if ((RequestHeaders[0].FieldName == NULL) ||
+        (RequestHeaders[1].FieldName == NULL)) {
+      return EFI_OUT_OF_RESOURCES;
+    }
   }
 
   *Headers = RequestHeaders;
