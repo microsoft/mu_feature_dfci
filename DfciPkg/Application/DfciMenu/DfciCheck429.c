@@ -130,20 +130,23 @@ DfciCheck429Entry (
   // Try every NIC in the system until one fills the first part of the request.
   Status = TryEachNICThenProcessRequest (&mDfciNetworkRequest);
 
-  DEBUG ((DEBUG_INFO, "Url   %a\n", mDfciNetworkRequest.HttpRequest.Url));
-  DEBUG ((DEBUG_INFO, "HttpStatus = %d, Status-%r\n", mDfciNetworkRequest.HttpStatus.HttpStatus, Status));
-  DEBUG ((DEBUG_INFO, "HttpStatus = %a\n", GetHttpErrorMsg (mDfciNetworkRequest.HttpStatus.HttpStatus)));
-
-  if (mDfciNetworkRequest.HttpStatus.HttpStatus == HTTP_STATUS_429_TOO_MANY_REQUESTS) {
-    AsciiPrint ("TEST PASSED. Network stack returned 429 as expected.\n");
+  if (EFI_ERROR (Status)) {
+    AsciiPrint ("TEST FAILED.  No NIC satisfied the request.\n");
   } else {
-    if (mDfciNetworkRequest.HttpStatus.HttpStatus == HTTP_STATUS_UNSUPPORTED_STATUS) {
-      AsciiPrint ("TEST FAILED.  Http status could not be retrieved.\n");
+    DEBUG ((DEBUG_INFO, "Url   %a\n", mDfciNetworkRequest.HttpRequest.Url));
+    DEBUG ((DEBUG_INFO, "HttpStatus = %d, Status-%r\n", mDfciNetworkRequest.HttpStatus.HttpStatus, Status));
+    DEBUG ((DEBUG_INFO, "HttpStatus = %a\n", GetHttpErrorMsg (mDfciNetworkRequest.HttpStatus.HttpStatus)));
+
+    if (mDfciNetworkRequest.HttpStatus.HttpStatus == HTTP_STATUS_429_TOO_MANY_REQUESTS) {
+      AsciiPrint ("TEST PASSED. Network stack returned 429 as expected.\n");
     } else {
-      AsciiPrint ("TEST FAILED.  Unexpected status = %a\n", GetHttpErrorMsg (mDfciNetworkRequest.HttpStatus.HttpStatus));
+      if (mDfciNetworkRequest.HttpStatus.HttpStatus == HTTP_STATUS_UNSUPPORTED_STATUS) {
+        AsciiPrint ("TEST FAILED.  Http status could not be retrieved.\n");
+      } else {
+        AsciiPrint ("TEST FAILED.  Unexpected status = %a\n", GetHttpErrorMsg (mDfciNetworkRequest.HttpStatus.HttpStatus));
+      }
     }
   }
 
-  // Right now, this is a driver due to the libraries used.  So, never load.
   return EFI_SUCCESS;
 }
