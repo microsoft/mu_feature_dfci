@@ -31,8 +31,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // *---------------------------------------------------------------------------------------*
 DFCI_NETWORK_REQUEST  mDfciNetworkRequest = { 0 };
 
-#define host_name_prefix "http://"
-#define host_name_suffix "/return_429"
+#define host_name_prefix  "http://"
+#define host_name_suffix  "/return_429"
 
 /**
 *  This function is the main entry of the DfciCheck429 application.
@@ -48,11 +48,11 @@ DfciCheck429Entry (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  UINTN                         host_name_len;
-  CHAR8                         *host_name_url;
-  UINTN                         offset;
-  EFI_SHELL_PARAMETERS_PROTOCOL *Parameters;
-  EFI_STATUS                    Status;
+  UINTN                          host_name_len;
+  CHAR8                          *host_name_url;
+  UINTN                          offset;
+  EFI_SHELL_PARAMETERS_PROTOCOL  *Parameters;
+  EFI_STATUS                     Status;
 
   ZeroMem (&mDfciNetworkRequest, sizeof (mDfciNetworkRequest));
   Parameters = NULL;
@@ -91,32 +91,32 @@ DfciCheck429Entry (
 
   //
   // Build the CHAR8 URL from the CHAR16 parameter + the CHA8 host_name_suffix, host_name_prefix, and a '\0'.
-  // Note that sizeof returns the size including the NULL, so we only need one of those NULL's.
+  // Note that sizeof returns the size including the NULL, so we only need one of those NULL characters.
   //
   //    'http://' + host-name-or-ip-address + '/return_429'
   //
-  host_name_len += sizeof (host_name_prefix) + sizeof(host_name_suffix) - sizeof (CHAR8);
-  host_name_url = AllocatePool (host_name_len);
+  host_name_len += sizeof (host_name_prefix) + sizeof (host_name_suffix) - sizeof (CHAR8);
+  host_name_url  = AllocatePool (host_name_len);
   if (host_name_url == NULL) {
     AsciiPrint ("TEST FAILED. Out of memory\n");
     return 8;
   }
 
   Status = AsciiStrCpyS (host_name_url, host_name_len, host_name_prefix);
-  if EFI_ERROR (Status) {
+  if (EFI_ERROR (Status)) {
     AsciiPrint ("TEST FAILED. AsciiStrCpyS failed\n");
     return 8;
   }
 
   offset = AsciiStrLen (host_name_prefix);
   Status = UnicodeStrToAsciiStrS (Parameters->Argv[1], &host_name_url[offset], host_name_len - offset);
-  if EFI_ERROR (Status) {
+  if (EFI_ERROR (Status)) {
     AsciiPrint ("TEST FAILED. UnicodeStrToAsciiStrS failed\n");
     return 8;
   }
 
   Status = AsciiStrCatS (host_name_url, host_name_len, host_name_suffix);
-  if EFI_ERROR (Status) {
+  if (EFI_ERROR (Status)) {
     AsciiPrint ("TEST FAILED. AsciiStrCatS failed\n");
     return 8;
   }

@@ -827,7 +827,8 @@ DfciBuildRequestHeaders (
       (RequestHeaders[2].FieldName == NULL) ||
       (RequestHeaders[2].FieldValue == NULL) ||
       (RequestHeaders[3].FieldName == NULL) ||
-      (RequestHeaders[3].FieldValue == NULL)) {
+      (RequestHeaders[3].FieldValue == NULL))
+  {
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -840,7 +841,8 @@ DfciBuildRequestHeaders (
     RequestHeaders[4].FieldName  = AllocateCopyPool (AsciiStrSize (HTTP_HEADER_CONTENT_TYPE), HTTP_HEADER_CONTENT_TYPE);
     RequestHeaders[4].FieldValue = AllocateCopyPool (AsciiStrSize (ContentType), ContentType);
     if ((RequestHeaders[0].FieldName == NULL) ||
-        (RequestHeaders[1].FieldName == NULL)) {
+        (RequestHeaders[1].FieldName == NULL))
+    {
       return EFI_OUT_OF_RESOURCES;
     }
   }
