@@ -21,12 +21,7 @@ import struct
 import pathlib
 
 
-# try:
-# from StringIO import StringIO
-# except ImportError:
 from io import StringIO, BytesIO
-# from cryptography.hazmat.primitives.asymmetric import rsa
-# from cryptography.hazmat.primitives.serialization import load_der_public_key
 
 from builtins import int
 
@@ -738,85 +733,3 @@ class DFCI_SupportLib(object):
                                 "https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit")
 
         return CertMgrPath
-
-
-    mOidValue = [0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x02];
-
-    def _wrap_pkcs7_data(self,data):
-
-        if not PyBytesObject(data):
-            raise Exception('data is not a bytes object')
-        data_size = sizeof(data)
-        if data_size < (len(mOidVlaue) + 4):
-            raise Exception('data is too small')
-
-        flag = False
-        if ((data[4] == 0x06) and
-            (data[5] == 0x09) and
-            (data[15] == 0xa0) and
-            (data[16] == 0x82)):
-
-            flag = True
-            for i in range(0, len(mOidValue) - 1):
-                if data[i + 4] == mOidValue[i]:
-                    continue
-                flag = False
-                break
-
-        if flag:
-            return data
-
-        wrapped_size = data_size + 19
-
-        wrapped_data = []
-        wrapped_data.append(0x30)
-        wrapped_data.append(0x82)
-        wrapped_data.append((wrapped_size - 4) >> 8)
-        wrapped_data.append((wrapped_size - 4) & 0xff)
-        wrapped_data.append(0x06)
-        wrapped_data.append(0x09)
-        wrapped_data = wrapped_data + mOidValue
-        wrapped_data.append(0xa0)
-        wrapped_data.append(0x82)
-        wrapped_data.append(data_size >> 8)
-        wrapped_data.append(data_size & 0xff)
-        wrapped_data = wrapped_data + list(data)
-
-        return wrapped_data
-
-    def verify_identity_packet(self, cert_file, identity_file):
-        f = open(identity_file, 'rb')
-        rslt = CertProvisioningApplyVariable(f)
-
-        TrustedCertSize = rslt.TrustedCertSize
-        TrustedCert = rslt.TrustedCert
-
-        f.seek(18) # Hdr.PayloadSize
-        data_blob_size = struct.unpack("=H", f.read(2))[0]
-        data_blob_offset = struct.unpack("=H", f.read(2))[0]
-        f.seek(data_blob_offset)
-        data_blob = bytearray(f.read(data_blob_size))
-
-        Signature = rslt.Signature
-        SignatureSize = Signature.Hdr_dwLength
-
-        print(f'data_blob_size={data_blob_size}')
-        print(f'TrustedCertSize = {TrustedCertSize}')
-        print(f'SignatureSize = {SignatureSize}')
-        f.close()
-
-        f = open('content', 'wb')
-
-        # Zero the packet ID
-        data_blob[8] = 0
-        data_blob[9] = 0
-        data_blob[10] = 0
-        data_blob[11] = 0
-        f.write(data_blob)
-        f.close()
-
-        buffer = rslt.TestSignature.CertData
-        f = open('test_signature', 'wb')
-        f.write(buffer)
-        f.close()
-        return True
