@@ -30,7 +30,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 // * Application Global Variables                                                          *
 // *---------------------------------------------------------------------------------------*
 DFCI_NETWORK_REQUEST  mDfciNetworkRequest = { 0 };
-STATIC CHAR8         *mCheck429Url        = NULL;
 
 #define host_name_prefix "http://"
 #define host_name_suffix "/return_429"
