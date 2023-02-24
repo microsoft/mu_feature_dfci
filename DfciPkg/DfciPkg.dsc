@@ -190,6 +190,8 @@
       DebugLib|MdePkg/Library/UefiDebugLibConOut/UefiDebugLibConOut.inf
   }
 
+  DfciPkg/Application/DfciMenu/DfciCheck429.inf
+
 [BuildOptions]
 #force deprecated interfaces off
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES

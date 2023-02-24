@@ -113,7 +113,8 @@
             "overlongs",
             "SDCARD",
             "SECUREBOOTKEYENUM",
-            "USBPORTENUM"
+            "USBPORTENUM",
+            "cherrypy"
         ]
     }
 }

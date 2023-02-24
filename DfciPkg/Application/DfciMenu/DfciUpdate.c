@@ -517,8 +517,8 @@ ProcessFunction (
         }
 
         StringValue = (CHAR8 *)AllocatePool (ValueSize + sizeof (CHAR8));       // Allow for extra NULL
-        if (NULL == Rqst->Value) {
-          DEBUG ((DEBUG_ERROR, "Cannot allocate Rqst->Value\n"));
+        if (NULL == StringValue) {
+          DEBUG ((DEBUG_ERROR, "Cannot allocate StringValue\n"));
           return EFI_OUT_OF_RESOURCES;
         }
 
@@ -618,7 +618,7 @@ ProcessFunction (
     }
   } else {
     Status = EFI_INVALID_PARAMETER;
-    DEBUG ((DEBUG_ERROR, "Rqst not found int ResponseTable. Rqst=%a\n", Rqst->FieldName));
+    DEBUG ((DEBUG_ERROR, "Rqst not found in ResponseTable. Rqst=%a\n", Rqst->FieldName));
   }
 
   return Status;

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CurrentSettingsPacket>
+  <Date>2022-10-18T08:05:58</Date>
+  <Settings>
+    <SettingCurrent>
+      <Id>Device.SecureBootKeys.Enum</Id>
+      <Value>None</Value>
+      <Type>SECURE BOOT KEY ENUM TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.DockingUsbPort.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.DgpuPci.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.OnboardAudio.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.OnboardMic.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.WiFiAndBluetooth.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.BlueTooth.Enable</Id>
+      <Value>Disabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.AllCameras.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.IPv6Pxe.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.AlternateBoot.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.BootOrderLock.Enable</Id>
+      <Value>Disabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.USBBoot.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.StartNetwork.Enable</Id>
+      <Value>Disabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.LANBoot.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.UserUsbCPort1.Enable</Id>
+      <Value>UsbPortEnabled</Value>
+      <Type>USB PORT STATE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.Password.Password</Id>
+      <Value>No System Password</Value>
+      <Type>PASSWORD TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.SecurityPage.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.DevicesPage.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.BootConfiguration.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.SetTime.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.SecuredCore.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.SimultaneousMultithreading.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.WakeOnUsbC.Enable</Id>
+      <Value>Disabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.WakeOnPower.Enable</Id>
+      <Value>Disabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.RecoveryUrl.String</Id>
+      <Value/>
+      <Type>STRING TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.RecoveryBootstrapUrl.String</Id>
+      <Value/>
+      <Type>STRING TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.HttpsCert.Binary</Id>
+      <Value/>
+      <Type>CERT TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.RegistrationId.String</Id>
+      <Value/>
+      <Type>STRING TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.TenantId.String</Id>
+      <Value/>
+      <Type>STRING TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>MDM.FriendlyName.String</Id>
+      <Value/>
+      <Type>STRING TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>MDM.TenantName.String</Id>
+      <Value/>
+      <Type>STRING TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Device.CpuAndIoVirtualization.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci3.OnboardWpbt.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Surface.KioskMode.Scenario</Id>
+      <Value>0</Value>
+      <Type>STRING TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Scpc.CertifiedBoot.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.OnboardAudio.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci4.Microphone.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.OnboardRadios.Enable</Id>
+      <Value>Inconsistent</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci4.WiFi.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci4.Bluetooth.Enable</Id>
+      <Value>Disabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.OnboardCameras.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.BootExternalMedia.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.BootOnboardNetwork.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci4.UsbTypeCPort.Enable</Id>
+      <Value>UsbPortEnabled</Value>
+      <Type>USB PORT STATE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci3.ProcessorSMT.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci4.WakeOnLan.Enable</Id>
+      <Value>Disabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci4.WakeOnPower.Enable</Id>
+      <Value>Disabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+    <SettingCurrent>
+      <Id>Dfci.CpuAndIoVirtualization.Enable</Id>
+      <Value>Enabled</Value>
+      <Type>ENABLE/DISABLE TYPE</Type>
+    </SettingCurrent>
+  </Settings>
+  <LSV>0</LSV>
+</CurrentSettingsPacket>
