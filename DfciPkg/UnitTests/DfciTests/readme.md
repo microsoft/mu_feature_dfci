@@ -105,7 +105,7 @@ When a new version is detected, the new fields are added to DfciTests.ini.
 2. Edit DfciTests.ini and set the value of server_host_name to either a host name or an IP address of your HOST device.
 The server_host_name field will be used to populate the Subject Alternative Names list in the DFCI_HTTPS SSL certificates.
 3. In the directory DfciPkg\UnitTests\DfciTests\Certs, run MakeHTTPSCerts.  This will generate two SSL certificates.
-One is for the RefreshServer, and the other is used by the RefreshServer testcase.
+One is for the RefreshServer, and the other is used by the RefreshServer test case.
 4. In the directory DfciPkg\UnitTests\DfciTests\RefreshServer, run CreateDockerContainer.  After the container is created,
 the script will prompt you about starting the container.  I suggest using option 2 for this first test.
 5. In another command window, cd to DfciPkg\UnitTests\DfciTests and run these two unit tests:
@@ -121,14 +121,14 @@ Table of DFCI Test case collections:
 
 * Pre tests to validate the certs and the refresh server setup:
 
-| Test Case Collection | Description of Test Case |
+| Testcase Collection | Description of Testcase |
 | ----- | ----- |
 | DFCI_CertChainingTest | Verifies that a ZeroTouch enroll actually prompts for authorization to Enroll when the enroll package is not signed by the proper key.|
 | DFCI_RefreshServer | Verifies the Refresh Server is operational before attempting the Refresh from Network EFI menu option in place of DFCI_InTuneUnenroll. |
 
 * Testcases to validate the System Under Test:
 
-| Test Case Collection | Description of Test Case |
+| Testcase Collection | Description of Tescase |
 | ----- | ----- |
 | DFCI_InitialState | Verifies that the firmware indicates support for DFCI and that the system is Opted In for InTune, and is not already enrolled into DFCI. |
 | DFCI_InTuneBadUpdate | Tries to apply a settings package signed with the wrong key |
@@ -137,6 +137,13 @@ Table of DFCI Test case collections:
 | DFCI_InTuneRollCerts | Updates the Owner and Manager certificates. This test can be run multiple times as it just swaps between two sets of certificates. |
 | DFCI_InTuneSettings | Applies multiple sets of settings to a InTune Enrolled system. |
 | DFCI_InTuneUnenroll | Applies an InTune Owner unenroll package, that removes both the InTune Owner and the InTune Manager, resets the Permission Database, and restores settings marked No UI to their default state. |
+
+* Other testcases
+
+| Testcase Collection | Description of Testcase
+| ----- | ----- |
+| DfciIdTest | Simple shell application to test the OEM provided library DfciDeviceIdSupportLib.
+| DfciVarLockAudit | Simple shell application to test the state of the Dfci Variables |
 
 ## Note on the firmware for testing DFCI
 
@@ -257,3 +264,16 @@ This test should be run at multiple points during the development cycle, with th
 DfciVarLockAudit test run after enrollment and again after the system has been unenrolled.
 This verifies that the variables that secure the state of DFCI are not compromised.
 The automation to run DfciVarLock test automatically is not available at this time.
+
+To verify that the test passed, inspect the  DfciVarLockAudit_manifest.xml file for:
+
+```xml
+<DfciPass>Dfci variable checks completed successfully</DfciPass>
+```
+
+## Requirements for Intune certification
+
+1. Include the DfciVarLockAudit_manifest.xml in your documentation to Intune.
+
+2. Starting with a clean TestLogs directory, run the [Standard Testing](#standard-testing) test cases.
+When the test cases have completed, zip the TestLogs directory and include the .zip file you just created in your documentation to Intune.
