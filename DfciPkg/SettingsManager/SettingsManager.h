@@ -121,6 +121,11 @@ PopulateCurrentSettingsIfNeeded (
   );
 
 CHAR8 *
+ProviderTypeAsAscii (
+  DFCI_SETTING_TYPE  Type
+  );
+
+CHAR8 *
 ProviderValueAsAscii (
   DFCI_SETTING_PROVIDER  *Provider,
   BOOLEAN                Current

@@ -240,7 +240,7 @@ ApplySettings (
 
     Flags    = 0;
     NodeThis = (XmlNode *)Link;   // Link is first member so just cast it.  this is the <Setting> node
-    Status   = GetInputSettings (NodeThis, &Id, &Value);
+    Status   = GetInputSettings (NodeThis, &Id, &Value, NULL);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "Failed to GetInputSettings.  Bad XML Data. %r\n", Status));
       Data->State = DFCI_PACKET_STATE_BAD_XML;

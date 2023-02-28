@@ -172,7 +172,8 @@ EFIAPI
 GetInputSettings (
   IN CONST XmlNode  *ParentSettingNode,
   OUT CONST CHAR8   **Id,
-  OUT CONST CHAR8   **Value
+  OUT CONST CHAR8   **Value,
+  OUT CONST CHAR8   **Type  OPTIONAL
   )
 {
   XmlNode  *Temp = NULL;
@@ -196,13 +197,8 @@ GetInputSettings (
     return EFI_NOT_FOUND;
   }
 
-  //  Disable translating settings response to strings.
-  //  if ((Temp->Value[0] >= '0') && (Temp->Value[0] <= '9'))
-  //  {
-  //      *Id = DfciV1TranslateString (Temp->Value);
-  //  } else {
   *Id = Temp->Value;
-  //  }
+
   Temp = FindFirstChildNodeByName (ParentSettingNode, SETTING_VALUE_ELEMENT_NAME);
   if (Temp == NULL) {
     DEBUG ((DEBUG_INFO, "%a - Failed to find Value Element\n", __FUNCTION__));
@@ -210,6 +206,17 @@ GetInputSettings (
   }
 
   *Value = Temp->Value;
+
+  if (Type != NULL) {
+    Temp = FindFirstChildNodeByName (ParentSettingNode, SETTING_TYPE_ELEMENT_NAME);
+    if (Temp == NULL) {
+      DEBUG ((DEBUG_INFO, "%a - Failed to find Type Element\n", __FUNCTION__));
+      return EFI_NOT_FOUND;
+    }
+
+    *Type = Temp->Value;
+  }
+
   return EFI_SUCCESS;
 }
 
@@ -312,14 +319,15 @@ EFIAPI
 SetCurrentSettings (
   IN CONST XmlNode  *ParentSettingsListNode,
   IN CONST CHAR8    *Id,
-  IN CONST CHAR8    *Value
+  IN CONST CHAR8    *Value,
+  IN CONST CHAR8    *Type
   )
 {
   XmlNode     *Temp    = NULL;
   XmlNode     *Setting = NULL;
   EFI_STATUS  Status;
 
-  if ((ParentSettingsListNode == NULL) || (Id == NULL) || (Value == NULL)) {
+  if ((ParentSettingsListNode == NULL) || (Id == NULL) || (Value == NULL) || (Type == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -347,6 +355,15 @@ SetCurrentSettings (
     Status = AddNode ((XmlNode *)Setting, CURRENT_SETTING_VALUE_ELEMENT_NAME, Value, &Temp);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "%a - Failed to create Value node %r\n", __FUNCTION__, Status));
+      return EFI_DEVICE_ERROR;
+    }
+  }
+
+  // Make the <Type>
+  if (Type != NULL) {
+    Status = AddNode ((XmlNode *)Setting, CURRENT_SETTING_TYPE_ELEMENT_NAME, Type, &Temp);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "%a - Failed to create Type node %r\n", __FUNCTION__, Status));
       return EFI_DEVICE_ERROR;
     }
   }

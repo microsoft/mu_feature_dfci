@@ -16,6 +16,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 <Setting Type="">
 <Id>%Id%</Id>
 <Value>%Value%</Value>
+<Type>%Type%</Type>
 </Setting>
 ...
 </Settings>
@@ -27,6 +28,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define SETTING_ELEMENT_NAME           "Setting"
 #define SETTING_ID_ELEMENT_NAME        "Id"
 #define SETTING_VALUE_ELEMENT_NAME     "Value"
+#define SETTING_TYPE_ELEMENT_NAME      "Type"
 
 /**
 <Settings>
@@ -53,6 +55,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define CURRENT_SETTING_ELEMENT_NAME        "SettingCurrent"
 #define CURRENT_SETTING_ID_ELEMENT_NAME     "Id"
 #define CURRENT_SETTING_VALUE_ELEMENT_NAME  "Value"
+#define CURRENT_SETTING_TYPE_ELEMENT_NAME   "Type"
 
 /**
 Creates a new XmlNode list following the ResultPacket
@@ -93,7 +96,8 @@ EFIAPI
 GetInputSettings (
   IN CONST XmlNode  *ParentSettingNode,
   OUT CONST CHAR8   **Id,
-  OUT CONST CHAR8   **Value
+  OUT CONST CHAR8   **Value,
+  OUT CONST CHAR8   **Type
   );
 
 EFI_STATUS
@@ -119,7 +123,8 @@ EFIAPI
 SetCurrentSettings (
   IN CONST XmlNode  *ParentSettingsListNode,
   IN CONST CHAR8    *Id,
-  IN CONST CHAR8    *Value
+  IN CONST CHAR8    *Value,
+  IN CONST CHAR8    *Type
   );
 
 XmlNode *

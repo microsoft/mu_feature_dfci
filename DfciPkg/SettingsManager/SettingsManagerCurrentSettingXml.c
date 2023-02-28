@@ -98,8 +98,10 @@ CreateXmlStringFromCurrentSettings (
   //
   for (LIST_ENTRY *Link = mProviderList.ForwardLink; Link != &mProviderList; Link = Link->ForwardLink) {
     CHAR8                             *Value = NULL;
+    CHAR8                             *Type = NULL;
     DFCI_SETTING_PROVIDER_LIST_ENTRY  *Prov  = PROV_LIST_ENTRY_FROM_LINK (Link);
     Value = ProviderValueAsAscii (&(Prov->Provider), TRUE);
+    Type = ProviderTypeAsAscii (Prov->Provider.Type);
 
     if (Value == NULL) {
       DEBUG ((DEBUG_INFO, "%a - Value is NULL for %a\n", __FUNCTION__, Prov->Provider.Id));
@@ -109,9 +111,9 @@ CreateXmlStringFromCurrentSettings (
     if (V1Compatible) {
       DFCI_SETTING_ID_STRING  NumberString;
       NumberString = DfciV1NumberFromId (Prov->Provider.Id);
-      Status       = SetCurrentSettings (CurrentSettingsListNode, NumberString, Value);
+      Status       = SetCurrentSettings (CurrentSettingsListNode, NumberString, Value, Type);
     } else {
-      Status = SetCurrentSettings (CurrentSettingsListNode, Prov->Provider.Id, Value);
+      Status = SetCurrentSettings (CurrentSettingsListNode, Prov->Provider.Id, Value, Type);
     }
 
     if (EFI_ERROR (Status)) {
@@ -230,7 +232,7 @@ CreateXmlStringFromCurrentSettings (
     }
 
     DEBUG ((DEBUG_INFO, "   Group Setting %a is %a\n", Group->GroupId, ReturnValue));
-    Status = SetCurrentSettings (CurrentSettingsListNode, Group->GroupId, ReturnValue);
+    Status = SetCurrentSettings (CurrentSettingsListNode, Group->GroupId, ReturnValue, ProviderTypeAsAscii (GroupType));
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "Error %r\n", Status));
     }
