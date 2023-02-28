@@ -62,18 +62,27 @@ Setting providers is how a platform provides a setting to DFCI
 
 ## Mu Changes
 
-* DFCI Recovery service uses HTTPS certificates with Subject Alternative Names.  This requires a recent version of NetworkPkg.
-To verify you have the correct version, verify that your version of NetworkPkg has one of the following changes:
+DFCI Recovery service uses HTTPS certificates with Subject Alternative Names.  This requires a recent version of Crypto and Networking.
+To verify you have the correct level of your version of the base UEFI code (mu_basecore or tianocore/edk2), check for the commits indicated:
 
-* [mu_basecore - removal of EFI_TLS_VERIFY_FLAG_NO_WILDCARDS from TlsConfigureSession()](https://github.com/microsoft/mu_basecore/commit/931ff1a45ce13a6a8c3e296f89c6de21f23a17ed#diff-620e10fa41a63814688b931d19fefa89R628).
+### Your platform code is using mu_basecore
 
-* [edk2 - removal of EFI_TLS_VERIFY_FLAG_NO_WILDCARDS from TlsConfigureSession()](https://github.com/tianocore/edk2/commit/6f9e83f757ed7c5c78d071f475b2e72d899c2aef).
+* [*mu_basecore* Removal of EFI_TLS_VERIFY_FLAG_NO_WILDCARDS from TlsConfigureSession()](https://github.com/microsoft/mu_basecore/commit/931ff1a45ce13a6a8c3e296f89c6de21f23a17ed#diff-620e10fa41a63814688b931d19fefa89R628).
 
-In addition, OpenSSL has to be configured for modern TLS ciphers.
+* [mu_basecore - Configure OpenSSL to support modern TLS ciphers](https://github.com/microsoft/mu_basecore/commit/9dd964f5e5c5595a1acd5eb438fb088327db86fa)
 
-* [*mu_tiano_plus* Configure OpenSSL to support modern TLS ciphers](https://github.com/microsoft/mu_tiano_plus/commit/1f3b135ddc821718a78c352316197889c5d3e0c2)
+### Your platform code is using tianocore/edk2
+
+* [*edk2* - removal of EFI_TLS_VERIFY_FLAG_NO_WILDCARDS from TlsConfigureSession()](https://github.com/tianocore/edk2/commit/6f9e83f757ed7c5c78d071f475b2e72d899c2aef).
 
 * [*edk2* Ensure ECC Ciphers are included (minimum version)](https://github.com/tianocore/edk2/commit/9dd964f5e5c5595a1acd5eb438fb088327db86fa)
+
+   Due to a design issue with NetworkPkg, not all error codes are available to an app using the http protocol.
+You will need to cherry pick, or otherwise include these two changes from mu_basecore into tianocore/edk2 (the actual ENUM value is not important):
+
+1. [MdePkg\Include\Protocol\http.h](https://github.com/microsoft/mu_basecore/commit/4db927f34eac048de129f13ff3f12332c310323f)
+
+2. [NetworkPkg\Library\DxeNetLib\DxeNetLib.c](https://github.com/microsoft/mu_basecore/commit/ca5a17ce79c5c721a8f46b81b6490327fc188ffc)
 
 ## Platform DSC statements
 
