@@ -332,11 +332,10 @@ SetProviderValueFromAscii (
   return Status;
 }
 
-#define ENABLED_STRING_SIZE                (9)
-#define ASSET_TAG_STRING_MAX_SIZE          (22)
+#define ENABLED_STRING_SIZE                (13)
 #define SECURE_BOOT_ENUM_STRING_SIZE       (20)
 #define SYSTEM_PASSWORD_STATE_STRING_SIZE  (30)
-#define USB_PORT_STATE_STRING_SIZE         (20)
+#define USB_PORT_STATE_STRING_SIZE         (21)
 
 /**
 Helper function to Print out the Value as Ascii text.
