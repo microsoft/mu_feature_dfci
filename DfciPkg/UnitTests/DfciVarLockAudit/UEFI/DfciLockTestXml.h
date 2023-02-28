@@ -47,7 +47,8 @@
 #define VAR_READ_STATUS_ELEMENT_NAME   "ReadStatus"
 #define VAR_WRITE_STATUS_ELEMENT_NAME  "WriteStatus"
 #define DFCI_ENTRY_ELEMENT_NAME        "DfciStatus"
-#define VAR_DFCI_CHECK_ELEMENT_NAME    "DfciError"
+#define VAR_DFCI_ERROR_ELEMENT_NAME    "DfciError"
+#define VAR_DFCI_PASS_ELEMENT_NAME     "DfciPass"
 
 /**
 Creates a new XmlNode list following the List
@@ -121,6 +122,13 @@ New_DfciStatusNodeInList (
 EFI_STATUS
 EFIAPI
 AddDfciErrorToNode (
+  IN XmlNode  *Node,
+  IN CHAR8    *DfciMessage
+  );
+
+EFI_STATUS
+EFIAPI
+AddDfciPassToNode (
   IN XmlNode  *Node,
   IN CHAR8    *DfciMessage
   );

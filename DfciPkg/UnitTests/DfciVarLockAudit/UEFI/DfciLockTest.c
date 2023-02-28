@@ -342,7 +342,7 @@ DfciLockTestEntry (
     goto Exit;
   } else {
     if (gDfciPolicyFailedCount == 0) {
-      AddDfciErrorToNode (gDfciStatusNode, "Dfci variable checks completed successfully");
+      AddDfciPassToNode (gDfciStatusNode, "Dfci variable checks completed successfully");
     } else {
       AddDfciErrorToNode (gDfciStatusNode, "Dfci variable checks found errors");
     }
