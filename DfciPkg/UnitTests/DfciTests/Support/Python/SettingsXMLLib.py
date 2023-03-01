@@ -32,7 +32,9 @@ class SettingsXMLLib(object):
         f.write('    <Version>')
         print (version, end='', file=f)
         f.write('</Version>\n')
-        f.write('    <LowestSupportedVersion>2</LowestSupportedVersion>\n')
+        f.write('    <LowestSupportedVersion>')
+        print (lsv, end='', file=f)
+        f.write('</LowestSupportedVersion>\n')
         f.write('    <Settings>\n')
 
         #

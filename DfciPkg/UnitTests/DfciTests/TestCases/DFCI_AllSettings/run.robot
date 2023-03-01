@@ -104,6 +104,24 @@ Get The DFCI Settings
 
     [return]    ${currentIdxmlFile}
 
+Generate List
+    [Arguments]    ${list}  ${setting1file}  ${setting2file}  ${setting3file}  ${restorefile}
+
+    Generate Settings Lists    ${list}    ${setting1file}    ${setting2file}    ${setting3file}    ${restorefile}
+
+    IF  @{list}==[]
+        Log To Console    .
+        Log To Console    ${yellow}WARNING:${white}
+        Log To Console    There are no settings available to test with the Owner Cert
+    END
+
+    File should Exist    ${setting1file}
+    File should Exist    ${setting2file}
+    File should Exist    ${setting3file}
+    File should Exist    ${restorefile}
+
+
+Generate User List
 
 Initialize lists of tests
 
@@ -117,7 +135,20 @@ Initialize lists of tests
 
     ${OwnerList}  ${UserList}  ${UnsupportedList}=  Generate Master Lists  ${CURRENT_SETTINGS_XML_FILE}  ${CURRENT_PERMISSIONS_XML_FILE}
 
-    Generate Settings Lists    ${OwnerList}    ${OWNER_SETTINGS1_XML_FILE}    ${OWNER_SETTINGS2_XML_FILE}    ${OWNER_SETTINGS3_XML_FILE}    ${OWNER_RESTORE_XML_FILE}
+    ${OwnerSettingCount}=   Get Length    ${OwnerList}
+    ${UserSettingCount}=    Get Length    ${UserList}
+
+    IF  ${OwnerSettingCount}<3
+        Log To Console    .
+        Log To Console    ${red}WARNING:${white}
+        Log To Console    There are insufficient settings for the owenr cert:
+    END
+
+    IF  ${UserSettingCount}<3
+        Log To Console    .
+        Log To Console    ${red}WARNING:${white}
+        Log To Console    There are insufficient settings for the user cert:
+    END
 
     IF  @{UnsupportedList}!=[]
         Log To Console    .
@@ -128,17 +159,9 @@ Initialize lists of tests
         END
     END
 
-    File should Exist    ${OWNER_SETTINGS1_XML_FILE}
-    File should Exist    ${OWNER_SETTINGS2_XML_FILE}
-    File should Exist    ${OWNER_SETTINGS3_XML_FILE}
-    File should Exist    ${OWNER_RESTORE_XML_FILE}
+    Generate List    ${OwnerList}    ${OWNER_SETTINGS1_XML_FILE}    ${OWNER_SETTINGS2_XML_FILE}    ${OWNER_SETTINGS3_XML_FILE}    ${OWNER_RESTORE_XML_FILE}
 
-    Generate Settings Lists    ${UserList}    ${USER_SETTINGS1_XML_FILE}    ${USER_SETTINGS2_XML_FILE}    ${USER_SETTINGS3_XML_FILE}    ${USER_RESTORE_XML_FILE}
-
-    File should Exist    ${USER_SETTINGS1_XML_FILE}
-    File should Exist    ${USER_SETTINGS2_XML_FILE}
-    File should Exist    ${USER_SETTINGS3_XML_FILE}
-    File should Exist    ${USER_RESTORE_XML_FILE}
+    Generate List    ${UserList}    ${USER_SETTINGS1_XML_FILE}    ${USER_SETTINGS2_XML_FILE}    ${USER_SETTINGS3_XML_FILE}    ${USER_RESTORE_XML_FILE}
 
     @{UntestedSettings}    generate_standard_test_coverage    ${OWNER_RESTORE_XML_FILE}    ${USER_RESTORE_XML_FILE}    ${stdSettingsFileName}
 
@@ -153,11 +176,7 @@ Initialize lists of tests
 
 
 Apply Staged Group Settings
-    [Arguments]    ${nameOfTest}  ${initial_action}  ${owner_settings_xml_file}  ${user_settings_xml_file}
-
-    ${StagedOwnerResultFile}=      Set Variable  ${nameofTest}_Owner_Settings_Result.bin
-    ${StagedUserResultFile}=       Set Variable  ${nameofTest}_User_Settings_Result.bin
-    ${StagedCurrentSettingsFile}=  Set Variable  ${nameofTest}_Current_Settings.xml
+    [Arguments]    ${nameOfTest}  ${owner_settings_xml_file}  ${user_settings_xml_file}
 
 # Stage these packets to process later
     Process Settings Packet     ${nameofTest}  ${OWNER}  ${STAGE}  ${OLD_OWNER_PFX}  ${owner_settings_xml_file}  @{TARGET_PARAMETERS}
@@ -167,7 +186,7 @@ Apply Staged Group Settings
     ${StagedUserResultFile}=       Set Variable  ${nameofTest}_User_Settings_Result.bin
     ${StagedCurrentSettingsFile}=  Set Variable  ${nameofTest}_Current_Settings.xml
 
-    Write Staged Action    ${initial_action}
+    Write Staged Action    ResetSystem
     Write Staged Action    GetVariable    ${SETTINGS_RESULT}  ${SETTINGS_GUID}   ${StagedOwnerResultFile}
     Write Staged Action    GetVariable    ${SETTINGS2_RESULT}  ${SETTINGS_GUID}  ${StagedUserResultFile}
     Write Staged Action    GetVariable    ${SETTINGS_CURRENT}  ${SETTINGS_GUID}  ${StagedCurrentSettingsFile}
@@ -235,18 +254,104 @@ Initialize Testcases
 
     Initialize lists of tests
 
+    # Clear all previous staged files
+    Write Staged Action    ClearStagedFiles
+
 Send User settings group 1
     [Setup]    Require test case    Initialize Testcases
     ${nameofTest}=    Set Variable     GroupU1
 
 #   For the first apply, clear the staging list, and all .bin and .all previous xml files
-    Apply Staged Group Settings  ${nameofTest}  ClearStagedFiles  ${OWNER_SETTINGS1_XML_FILE}  ${USER_SETTINGS1_XML_FILE}
+    Apply Staged Group Settings  ${nameofTest}  ${OWNER_SETTINGS1_XML_FILE}  ${USER_SETTINGS1_XML_FILE}
+
+Send User settings group 2
+    [Setup]    Require test case    Send User settings group 1
+    ${nameofTest}=    Set Variable     GroupU2
+
+#   For the subsequesnt applies, use ResetSystem
+    Apply Staged Group Settings  ${nameofTest}  ${OWNER_SETTINGS2_XML_FILE}  ${USER_SETTINGS2_XML_FILE}
+
+
+Send User settings group 3
+    [Setup]    Require test case    Send User settings group 2
+    ${nameofTest}=    Set Variable     GroupU3
+
+#   For the subsequesnt applies, use ResetSystem
+    Apply Staged Group Settings  ${nameofTest}  ${OWNER_SETTINGS3_XML_FILE}  ${USER_SETTINGS3_XML_FILE}
+
+
+Send restore all user settings
+    [Setup]    Require test case    Send User settings group 3
+    ${nameofTest}=    Set Variable     Restore
+
+#   For the subsequesnt applies, use ResetSystem
+    Apply Staged Group Settings  ${nameofTest}  ${OWNER_RESTORE_XML_FILE}  ${USER_RESTORE_XML_FILE}
+
+#   As the last settings group, restart the system one extra time
+    Write Staged Action    ResetSystem
+
+
+Restart sytem to to start staged actions
+    [Setup]    Require test case    Send restore all user settings
+
+    # Stage actions to store the results after the reboot
+
+    #
+    # Restart the system to apply the settings group1 that are in the variables,
+    # and then process the staged commands for group2, group3, and then restore
+    # the settings.
+    #
+    Log To Console    .
+    Log To Console    Restarting the system under test
+
+    Reboot System And Wait For Staged Restarts    10
+
+Verifying the Staged Actions for group 1
+    [Setup]    Require test case    Restart sytem to to start staged actions
+
+    ${nameofTest}=    SetVariable    GroupU1
+
+    Validate Staged Settings Status    ${nameofTest}  ${OWNER}  ${STATUS_SUCCESS}  FULL
+
+    Validate Staged Settings Status    ${nameofTest}  ${USER}  ${STATUS_SUCCESS}  FULL
 
 
 Verifying the Staged Actions for group 2
-    ${nameofTest}=    SetVariable    GroupU1
+    [Setup]    Require test case    Verifying the Staged Actions for group 1
 
-    Write Staged Action    ResetSystem
-    Write Staged Action    ResetSystem
+    ${nameofTest}=    SetVariable    GroupU2
 
-    Reboot System And Wait For Staged Restarts    10
+    Validate Staged Settings Status    ${nameofTest}  ${OWNER}  ${STATUS_SUCCESS}  FULL
+
+    Validate Staged Settings Status    ${nameofTest}  ${USER}  ${STATUS_SUCCESS}  FULL
+
+
+Verifying the Staged Actions for group 3
+    [Setup]    Require test case    Verifying the Staged Actions for group 2
+
+    ${nameofTest}=    SetVariable    GroupU3
+
+    Validate Staged Settings Status    ${nameofTest}  ${OWNER}  ${STATUS_SUCCESS}  FULL
+
+    Validate Staged Settings Status    ${nameofTest}  ${USER}  ${STATUS_SUCCESS}  FULL
+
+
+
+Verifying the Staged Actions for the Restore
+    [Setup]    Require test case    Verifying the Staged Actions for group 3
+
+    ${nameofTest}=    SetVariable    Restore
+
+    Validate Staged Settings Status    ${nameofTest}  ${OWNER}  ${STATUS_SUCCESS}  FULL
+
+    Validate Staged Settings Status    ${nameofTest}  ${USER}  ${STATUS_SUCCESS}  FULL
+
+Get the ending DFCI Settings
+    ${nameofTest}=    Set Variable    DisplaySettingsAtExit
+
+    ${currentIdXmlFile}=    Get The DFCI Settings    ${nameOfTest}
+
+
+Clean Up Mailboxes
+    [Setup]    Require test case    Verifying the Staged Actions for the Restore
+    Verify No Mailboxes Have Data

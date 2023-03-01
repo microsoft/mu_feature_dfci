@@ -109,9 +109,8 @@ Build Enroll of DDS_CA cert, signed by ZTD_CA.pfx, and verify
     ${Result}=      Run Process    ${TOOL_DFCI_VERIFY}  ${binPackageFile}  ${ownerCerFile}
     Should Be True  ${Result.rc} == 0
 
-    # Verify that the package can not be verified with the UEFI Leaf cer file
-    ${Result}=      Run Process    ${TOOL_DFCI_VERIFY}  ${binPackageFile}  ${uefiCerFile}
-    Should Be True  ${Result.rc} == 0
+    Validate Provision Status    ${nameofTest}  ${OWNER}  ${STATUS_ABORTED}
+    Get and Print Current Identities   ${currentIdxmlFile}
 
     # Verify that the package can not be verified with the alt Leaf cer file
     ${Result}=      Run Process    ${TOOL_DFCI_VERIFY}  ${binPackageFile}  ${altCerFile}

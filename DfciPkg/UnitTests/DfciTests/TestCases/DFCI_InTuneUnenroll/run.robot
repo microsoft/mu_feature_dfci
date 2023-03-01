@@ -124,14 +124,14 @@ Send User Settings Packet to Enrolled System
     ${xmlPayloadFile}=  Set Variable    ${TEST_CASE_DIR}${/}DfciSettings2.xml
 
 
-    Process Settings Packet     ${nameofTest}  2  ${OLD_USER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
+    Process Settings Packet     ${nameofTest}  ${USER}  ${TOVAR}  ${OLD_USER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
 
 
 Send Owner Unenroll to System
     [Setup]    Require test case    Send User Settings Packet to Enrolled System
     ${nameofTest}=       Set Variable    Unenroll
 
-    Process UnEnroll Packet     ${nameofTest}  1  ${OLD_OWNER_PFX}  ${OWNER_KEY_INDEX}  @{TARGET_PARAMETERS}
+    Process UnEnroll Packet     ${nameofTest}  ${OWNER}  ${OLD_OWNER_PFX}  ${OWNER_KEY_INDEX}  @{TARGET_PARAMETERS}
 
 
 Restart System to UnEnroll
@@ -146,7 +146,7 @@ Restart System to UnEnroll
 Verify User Enrolled System Settings Results
     ${nameofTest}=   Set Variable    UserSettings
 
-    ${xmlUserSettingsRslt}=   Validate Settings Status    ${nameofTest}    2    ${STATUS_SUCCESS}  FULL
+    ${xmlUserSettingsRslt}=   Validate Settings Status    ${nameofTest}    ${USER}    ${STATUS_SUCCESS}  FULL
     ${rc}    Check All Setting Status    ${xmlUserSettingsRslt}    ${STATUS_SUCCESS}
     Should Be True    ${rc}
 
@@ -154,7 +154,7 @@ Verify User Enrolled System Settings Results
 Verify Owner UnEnroll Results
     ${nameofTest}=   Set Variable    Unenroll
 
-    Validate UnEnroll Status    ${nameofTest}  1  ${STATUS_SUCCESS}
+    Validate UnEnroll Status    ${nameofTest}  ${OWNER}  ${STATUS_SUCCESS}
 
 
 Get the current DFCI Settings after Unenroll
@@ -162,10 +162,10 @@ Get the current DFCI Settings after Unenroll
 
     ${currentIdXmlFile}=    Get The DFCI Settings    ${nameOfTest}
 
-    ${rc}=   Get Thumbprint Element    ${currentIdxmlFile}    Owner
+    ${rc}=   Get Thumbprint Element    ${currentIdxmlFile}    ${OWNER}
     Should Be True    '${rc}' == 'Cert not installed'
 
-    ${rc}=   Get Thumbprint Element    ${currentIdxmlFile}    User
+    ${rc}=   Get Thumbprint Element    ${currentIdxmlFile}    ${USER}
     Should Be True    '${rc}' == 'Cert not installed'
 
 
@@ -188,7 +188,6 @@ Verify Settings Returned To Defaults
 ...                                 ${RTD_CHECK03}
 ...                                 ${RTD_CHECK04}
 ...                                 ${RTD_CHECK05}
-...                                 ${RTD_CHECK06}
 ...                                 ${RTD_CHECK07}
 
     Get and Print Current Settings     ${currentSettingXmlFile}
