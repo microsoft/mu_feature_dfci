@@ -332,11 +332,6 @@ SetProviderValueFromAscii (
   return Status;
 }
 
-#define ENABLED_STRING_SIZE                (13)
-#define SECURE_BOOT_ENUM_STRING_SIZE       (20)
-#define SYSTEM_PASSWORD_STATE_STRING_SIZE  (30)
-#define USB_PORT_STATE_STRING_SIZE         (21)
-
 /**
 Helper function to Print out the Value as Ascii text.
 NOTE: -- This must match the XML format
@@ -355,7 +350,8 @@ ProviderValueAsAscii (
   )
 {
   EFI_STATUS  Status;
-  CHAR8       *Value = NULL;
+  CHAR8       *Value       = NULL;
+  CHAR8       *AsciiString = NULL;
   UINTN       AsciiSize;
   UINT8       *Buffer;
   BOOLEAN     v = FALSE; // Boolean Types
@@ -376,19 +372,23 @@ ProviderValueAsAscii (
         break;
       }
 
-      Value = AllocateZeroPool (ENABLED_STRING_SIZE);
+      if (v == ENABLE_INCONSISTENT) {
+        AsciiString = "Inconsistent";
+      } else if (v) {
+        AsciiString = "Enabled";
+      } else {
+        AsciiString = "Disabled";
+      }
+
+      ValueSize = AsciiStrLen (AsciiString) + 1;
+
+      Value = AllocateZeroPool (ValueSize);
       if (Value == NULL) {
         DEBUG ((DEBUG_ERROR, "Failed - Couldn't allocate for string. \n"));
         break;
       }
 
-      if (v == ENABLE_INCONSISTENT) {
-        AsciiStrCpyS (Value, ENABLED_STRING_SIZE, "Inconsistent");
-      } else if (v) {
-        AsciiStrCpyS (Value, ENABLED_STRING_SIZE, "Enabled");
-      } else {
-        AsciiStrCpyS (Value, ENABLED_STRING_SIZE, "Disabled");
-      }
+      AsciiStrCpyS (Value, ValueSize, AsciiString);
 
       break;
 
@@ -405,22 +405,26 @@ ProviderValueAsAscii (
         break;
       }
 
-      Value = AllocateZeroPool (SECURE_BOOT_ENUM_STRING_SIZE);
+      if (b == 0) {
+        AsciiString = "MsOnly";
+      } else if (b == 1) {
+        AsciiString = "MsPlus3rdParty";
+      } else if (b == 3) {
+        // This is a special case.  Only supported as output.
+        AsciiString = "Custom";
+      } else {
+        AsciiString = "None";
+      }
+
+      ValueSize = AsciiStrLen (AsciiString) + 1;
+
+      Value = AllocateZeroPool (ValueSize);
       if (Value == NULL) {
         DEBUG ((DEBUG_ERROR, "Failed - Couldn't allocate for string. \n"));
         break;
       }
 
-      if (b == 0) {
-        AsciiStrCpyS (Value, SECURE_BOOT_ENUM_STRING_SIZE, "MsOnly");
-      } else if (b == 1) {
-        AsciiStrCpyS (Value, SECURE_BOOT_ENUM_STRING_SIZE, "MsPlus3rdParty");
-      } else if (b == 3) {
-        // This is a special case.  Only supported as output.
-        AsciiStrCpyS (Value, SECURE_BOOT_ENUM_STRING_SIZE, "Custom");
-      } else {
-        AsciiStrCpyS (Value, SECURE_BOOT_ENUM_STRING_SIZE, "None");
-      }
+      AsciiStrCpyS (Value, ValueSize, AsciiString);
 
       break;
 
@@ -437,17 +441,21 @@ ProviderValueAsAscii (
         break;
       }
 
-      Value = AllocateZeroPool (SYSTEM_PASSWORD_STATE_STRING_SIZE);
+      if (v) {
+        AsciiString = "System Password Set";
+      } else {
+        AsciiString = "No System Password";
+      }
+
+      ValueSize = AsciiStrLen (AsciiString) + 1;
+
+      Value = AllocateZeroPool (ValueSize);
       if (Value == NULL) {
         DEBUG ((DEBUG_ERROR, "Failed - Couldn't allocate for string. \n"));
         break;
       }
 
-      if (v) {
-        AsciiStrCpyS (Value, SYSTEM_PASSWORD_STATE_STRING_SIZE, "System Password Set");
-      } else {
-        AsciiStrCpyS (Value, SYSTEM_PASSWORD_STATE_STRING_SIZE, "No System Password");
-      }
+      AsciiStrCpyS (Value, ValueSize, AsciiString);
 
       break;
 
@@ -464,25 +472,29 @@ ProviderValueAsAscii (
         break;
       }
 
-      Value = AllocateZeroPool (USB_PORT_STATE_STRING_SIZE);
+      if (b == DfciUsbPortHwDisabled) {
+        AsciiString = "UsbPortHwDisabled";
+      } else if (b == DfciUsbPortEnabled) {
+        AsciiString = "UsbPortEnabled";
+      } else if (b == DfciUsbPortDataDisabled) {
+        AsciiString = "UsbPortDataDisabled";
+      } else if (b == DfciUsbPortAuthenticated) {
+        AsciiString = "UsbPortAuthenticated";
+      } else if (b == ENABLE_INCONSISTENT) {
+        AsciiString = "Inconsistent";
+      } else {
+        AsciiString = "UnsupportedValue";
+      }
+
+      ValueSize = AsciiStrLen (AsciiString) + 1;
+
+      Value = AllocateZeroPool (ValueSize);
       if (Value == NULL) {
         DEBUG ((DEBUG_ERROR, "Failed - Couldn't allocate for string. \n"));
         break;
       }
 
-      if (b == DfciUsbPortHwDisabled) {
-        AsciiStrCpyS (Value, USB_PORT_STATE_STRING_SIZE, "UsbPortHwDisabled");
-      } else if (b == DfciUsbPortEnabled) {
-        AsciiStrCpyS (Value, USB_PORT_STATE_STRING_SIZE, "UsbPortEnabled");
-      } else if (b == DfciUsbPortDataDisabled) {
-        AsciiStrCpyS (Value, USB_PORT_STATE_STRING_SIZE, "UsbPortDataDisabled");
-      } else if (b == DfciUsbPortAuthenticated) {
-        AsciiStrCpyS (Value, USB_PORT_STATE_STRING_SIZE, "UsbPortAuthenticated");
-      } else if (b == ENABLE_INCONSISTENT) {
-        AsciiStrCpyS (Value, USB_PORT_STATE_STRING_SIZE, "Inconsistent");
-      } else {
-        AsciiStrCpyS (Value, USB_PORT_STATE_STRING_SIZE, "UnsupportedValue");
-      }
+      AsciiStrCpyS (Value, ValueSize, AsciiString);
 
       break;
 
@@ -501,7 +513,7 @@ ProviderValueAsAscii (
         break;
       }
 
-      if (0 == ValueSize ) {
+      if (0 == ValueSize) {
         break;                   // Return NULL for Value silently
       }
 
@@ -555,7 +567,7 @@ ProviderValueAsAscii (
         break;
       }
 
-      if (0 == ValueSize ) {
+      if (0 == ValueSize) {
         ValueSize = sizeof ("");
         Value     = AllocatePool (ValueSize);
         if (NULL != Value) {
@@ -643,7 +655,7 @@ ProviderValueAsAscii (
         break;
       }
 
-      if (0 == ValueSize ) {
+      if (0 == ValueSize) {
         break;                     // Return NULL for Value silently
       }
 
