@@ -1,6 +1,62 @@
 [DfciConfig]
-version = 1
+#
+# DfciTest configuration file.
+#
+# Version 2
+#
+#    Changes from Version 1.
+#
+#    1. Adds known_usb_port_disables.  This list of regular expressions describing the settings
+#       Ids of known Usb ports.
+#
+#    2, Adds verify_known_usb_port_disables
+#
+version = 2
+
 
 [DfciTest]
+#
+# DfciTests settings
+
+#
+# server_host_name is the host name or IP address of the Refresh from Network server.
+#
 server_host_name = host.docker.internal.com
 
+# WARNING:
+#    Disabling USB ports runs the risk of disabling a system under test.  If the system cannot
+#    boot or access a mountable device (NIC, USB drive), the system will be bricked.  Make
+#    sure you have an alternate method to boot the system (ie physically erase NVRAM is one
+#    way to recover a bricked by Dfci system under text).
+#
+#    Only change verify_known_usb_port_disables to True if you have a mechanism to undo
+#    the Usb Port disables outside of Dfci.
+#
+#    verify_known_usb_port_disables may be set to True or False.
+verify_known_usb_port_disables = False
+
+#
+# If, for some reason, you need to exclude particular settings, add them to this list.  This
+# is a list of settings Ids, and not a list of regular expressions. Any setting listed in this
+# section will not be tested, as it is the first list scanned.
+#
+skip_these_settings = [
+]
+
+#
+# test_these_settings is used to test the operation of a setting that is excluded by the
+# known_usb_port_disables wildcard groups.  For example, a known usb port that does can not
+# result in a bricked system.  This is the second list scanned.
+#
+test_these_settings = [
+]
+
+#
+# known_usb_port_disables is a list of regular expressions.  If you add a single setting Id
+# be sure to escape the '.' as in Oem\.OemSetting\.Enable.  This list is scanned only if
+# verify_known_usb_port_disables is set to False.  This is the third list scanned.
+#
+known_usb_port_disables = [
+  'Dfci.*\.UsbType[A,C]Port\.Enable$',
+  '.*\.UserUsbC?Port([1-9]|10)\.Enable)',
+]

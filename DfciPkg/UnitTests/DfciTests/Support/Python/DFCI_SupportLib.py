@@ -12,6 +12,7 @@
 import binascii
 import os
 import random
+import re
 import socket
 import subprocess
 import time
@@ -36,17 +37,20 @@ from Data.PermissionPacketVariable import PermissionResultVariable
 from Data.SecureSettingVariable import SecureSettingsApplyVariable
 from Data.SecureSettingVariable import SecureSettingsResultVariable
 
-SignToolPath = None
-CertMgrPath = None
 DfciTest_Template = 'DfciTests.Template'
 DfciTest_Config = 'DfciTests.ini'
-
-permission_database = None
+DfciTest_Version = 2
 
 
 class DFCI_SupportLib(object):
+    _cert_mgr_path = None
+    _current_config = None
+    _permission_database = None
+    _sign_tool_path = None
 
     def get_test_config(self):
+        if self._current_config is not None:
+            return self._current_config
 
         #
         # The config files are located two directories above where DFCI_SupportLib.py is located.
@@ -62,20 +66,37 @@ class DFCI_SupportLib(object):
             raise Exception(f'Unable to locate test configuration template({template_path}).')
 
         config.read(template_path)
-        template_ver = int(config["DfciConfig"]["version"])
-        update_config = True
-        if os.path.exists(ini_path):
-            config.read(ini_path)
-            current_ver = int(config["DfciConfig"]["version"])
-            if current_ver < template_ver:
-                config["DfciConfig"]["version"] = str(template_ver)
-            else:
-                update_config = False
-        if update_config:
-            with open(ini_path, 'w') as config_file:
-                config.write(config_file)
-                config_file.close()
+        if config['DfciConfig'] is None or config['DfciConfig']['version'] is None:
+            raise Exception(f'Unable to verify DfciTest.Template version.')
 
+        template_ver = int(config["DfciConfig"]["version"])
+
+        if not os.path.exists(ini_path):
+            raise Exception(f'Unable to locate test configuration({ini_path}).')
+
+        config.read(ini_path)
+        if config['DfciConfig'] is None or config['DfciConfig']['version'] is None:
+            raise Exception(f'Unable to verify DfciTest.ini version.')
+
+        current_ver = int(config["DfciConfig"]["version"])
+        if current_ver != template_ver:
+            raise Exception(f'{ini_path} version is out of context with {template_path}).')
+
+        if current_ver != DftiTest_Version:
+            raise Exception(f'{ini_path} version should be {DftiTest_Version}).')
+
+        if (config['DfciTest']['server_host_name'] is None or
+            config['DfciTest']['verify_known_usb_port_disables'] is None or
+            config['DfciTest']['known_usb_port_disables'] is None or
+            config['DfciTest']['skip_these_settings'] is None or
+            config['DfciTest']['test_these_settings'] is None):
+            raise Exception(f'Version 2 required settings not in {ini_path}.')
+
+        if (config['DfciTest']['verify_known_usb_port_disables'] != 'True' and
+           (config['DfciTest']['verify_known_usb_port_disables'] != 'False')):
+            raise Exception(f'verify_known_usb_port_disables has an invalid value')
+
+        self._current_config = config
         return config
 
     def compare_json_files(self, request_name, expected_name):
@@ -91,7 +112,7 @@ class DFCI_SupportLib(object):
             is_equal = all((expected_data.get(k) == v for k, v in requested_data.items()))
         return is_equal
 
-    def _ReturnSessionIdValue(self, input_string):
+    def _return_session_id_value(self, input_string):
         # Session Id:       0xF08A4
         return int(input_string.partition(":")[2].strip(), base=0)
 
@@ -102,14 +123,14 @@ class DFCI_SupportLib(object):
         r = open(resultfile, "r")
         for line in r.readlines():
             if ("SessionId:" in line):
-                resultsid = self._ReturnSessionIdValue(line)
+                resultsid = self._return_session_id_value(line)
                 break
         r.close()
 
         a = open(applyfile, "r")
         for line in a.readlines():
             if ("SessionId:" in line):
-                applysid = self._ReturnSessionIdValue(line)
+                applysid = self._return_session_id_value(line)
                 break
         a.close()
 
@@ -747,34 +768,45 @@ class DFCI_SupportLib(object):
             return False
 
     def get_signtool_path(self):
-        global SignToolPath
-
-        if SignToolPath is None:
-            SignToolPath = FindToolInWinSdk("signtool.exe")
+        if self._sign_tool_path is None:
+            self._sign_tool_path = FindToolInWinSdk("signtool.exe")
 
             # check if exists
-            if SignToolPath is None or not os.path.exists(SignToolPath):
+            if self._sign_tool_path is None or not os.path.exists(self._sign_tool_path):
                 raise Exception("Can't find signtool.exe on this machine.  Please install the Windows 10 WDK - "
                                 "https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit")
 
-        return SignToolPath
+        return self._sign_tool_path
 
     def get_certmgr_path(self):
-        global CertMgrPath
-        if CertMgrPath is None:
-            CertMgrPath = FindToolInWinSdk("certmgr.exe")
+        if self._cert_mgr_path is None:
+            self._cert_mgr_path = FindToolInWinSdk("certmgr.exe")
 
             # check if exists
-            if CertMgrPath is None or not os.path.exists(CertMgrPath):
+            if self._cert_mgr_path is None or not os.path.exists(self._cert_mgr_path):
                 raise Exception("Can't find certmgr.exe on this machine.  Please install the Windows 10 WDK - "
                                 "https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit")
 
-        return CertMgrPath
+        return self._cert_mgr_path
+
+    def _check_known_usb_port_disables(self, id, known_usb_port_disables):
+
+        for mask in known_usb_port_disables:
+            if re.match(mask, id):
+                return True
+
+        return False
 
     def generate_master_lists(self, current_settings_file_name, current_permissions_file_name):
         owner_list = []
         user_list = []
         unsupported_list = []
+
+        config = get_test_config()
+        skip_these_settings = config['DfciTest']['skip_these_settings']
+        test_these_settings = config['DfciTest']['test_these_settings']
+        known_usb_port_disables = config['DfciTest']['known_usb_port_disables']
+        verify_known_usb_port_disables = 'True' == config['DfciTest']['verify_known_usb_port_disables']
 
         self.load_permission_database(current_permissions_file_name)
         try:
@@ -831,7 +863,11 @@ class DFCI_SupportLib(object):
             if (
                   type in ['PASSWORD TYPE', 'CERT TYPE'] or
                   id == 'Dfci.CpuAndIoVirtualization.Enable' or
-                  id == 'Device.CpuAndIoVirtualization.Enable'
+                  id == 'Device.CpuAndIoVirtualization.Enable' or
+                  id in skip_these_settings or
+                  id not in test_these_setting or
+                  not verify_known_usb_port_disables or
+                  _check_known_usb_port_disables(id, known_usb_port_disables)
                   ):
                 unsupported_list.append(new_entry)
             else:
@@ -955,24 +991,22 @@ class DFCI_SupportLib(object):
             raise Exception("Restore list does not match master_list")
 
     def query_permission_database(self, setting):
-        global permission_database
-
-        if permission_database is None:
+        if self._permission_database is None:
             raise Exception("Permission database not loaded")
 
         # Collect the root attributes
         try:
-            p_mask = permission_database.attrib["Default"]
+            p_mask = self._permission_database.attrib["Default"]
         except KeyError:
             p_mask = '0'
 
         try:
-            d_mask = permission_database.attrib["Delegated"]
+            d_mask = self._permission_database.attrib["Delegated"]
         except KeyError:
             d_mask = '0'
 
         exact = False
-        elem = permission_database.findall('./Permissions/PermissionCurrent')
+        elem = self._permission_database.findall('./Permissions/PermissionCurrent')
         for e in elem:
             i = e.find("Id")
             if (i.text == str(setting)):
@@ -988,12 +1022,10 @@ class DFCI_SupportLib(object):
         return int(p_mask), int(d_mask), exact
 
     def load_permission_database(self, xml_filename):
-        global permission_database
-
         try:
             xmlp = ElementTree.XMLParser(encoding="utf-8")
             tree = ElementTree.parse(xml_filename, parser=xmlp)
-            permission_database = tree.getroot()
+            self._permission_database = tree.getroot()
             return True
         except Exception:
             traceback.print_exc()
@@ -1001,9 +1033,7 @@ class DFCI_SupportLib(object):
             return False
 
     def unload_permission_database(self):
-        global permission_database
-
-        permission_database = None
+        self._permission_database = None
 
     def generate_standard_test_coverage(self, tested_settings_filename1, tested_settings_filename2, std_settings_filename):
 
