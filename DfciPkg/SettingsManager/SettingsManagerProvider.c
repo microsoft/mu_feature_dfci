@@ -629,7 +629,8 @@ ProviderValueAsAscii (
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_ERROR, "Unable to get strings from the certificate\n"));
-        ValueSize = sizeof (DRCI_STR_CERT_NOT_AVAILABLE);
+        ValueSize = sizeof (DFCI_STR_CERT_NOT_AVAILABLE);
+
         Value     = AllocatePool (ValueSize);
         if (NULL != Value) {
           AsciiStrnCpyS (Value, ValueSize, DFCI_STR_CERT_NOT_AVAILABLE, ValueSize-sizeof (CHAR8));
