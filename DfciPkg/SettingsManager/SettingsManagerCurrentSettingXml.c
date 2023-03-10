@@ -175,19 +175,19 @@ CreateXmlStringFromCurrentSettings (
         case DFCI_SETTING_TYPE_ENABLE:
           switch (Value) {
             case ENABLE_FALSE:
-              ReturnValue = "Disabled";
+              ReturnValue = DFCI_STR_DISABLED;
               break;
 
             case ENABLE_TRUE:
-              ReturnValue = "Enabled";
+              ReturnValue = DFCI_STR_ENABLED;
               break;
 
             case ENABLE_INCONSISTENT:
-              ReturnValue = "Inconsistent";
+              ReturnValue = DFCI_STR_INCONSISTENT;
               break;
 
             default:
-              ReturnValue = "Unknown";
+              ReturnValue = DFCI_STR_UNKNOWN;
               break;
           }
 
@@ -196,27 +196,27 @@ CreateXmlStringFromCurrentSettings (
         case DFCI_SETTING_TYPE_USBPORTENUM:
           switch (Value) {
             case DfciUsbPortHwDisabled:
-              ReturnValue = "UsbPortHwDisabled";
+              ReturnValue = DFCI_STR_USB_PORT_HW_DISABLED;
               break;
 
             case DfciUsbPortEnabled:
-              ReturnValue = "UsbPortEnabled";
+              ReturnValue = DFCI_STR_USB_PORT_ENABLED;
               break;
 
             case DfciUsbPortDataDisabled:
-              ReturnValue = "UsbPortDataDisabled";
+              ReturnValue = DFCI_STR_USB_PORT_DATA_DISABLED;
               break;
 
             case DfciUsbPortAuthenticated:
-              ReturnValue = "UsbPortAuthenticated";
+              ReturnValue = DFCI_STR_USB_PORT_AUTHENTICATED;
               break;
 
             case ENABLE_INCONSISTENT:
-              ReturnValue = "Inconsistent";
+              ReturnValue = DFCI_STR_INCONSISTENT;
               break;
 
             default:
-              ReturnValue = "UnsupportedValue";
+              ReturnValue = DFCI_STR_UNSUPPORTED_VALUE;
               break;
           }
 
@@ -224,7 +224,7 @@ CreateXmlStringFromCurrentSettings (
 
         default:
           DEBUG ((DEBUG_ERROR, "%a: Group entries for type(%d) not supported\n", __FUNCTION__, GroupType));
-          ReturnValue = "UnsupportedValue";
+          ReturnValue = DFCI_STR_UNSUPPORTED_VALUE;
           break;
       }
     }

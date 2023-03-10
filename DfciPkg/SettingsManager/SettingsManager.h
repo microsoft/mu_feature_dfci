@@ -15,6 +15,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <XmlTypes.h>
 #include <DfciSystemSettingTypes.h>
+#include <DfciSystemSettingStrings.h>
 
 #include <Guid/DfciInternalVariableGuid.h>
 #include <Guid/DfciDeviceIdVariables.h>

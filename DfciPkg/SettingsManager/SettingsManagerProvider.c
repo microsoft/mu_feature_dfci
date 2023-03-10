@@ -14,8 +14,7 @@ LIST_ENTRY  mProviderList = INITIALIZE_LIST_HEAD_VARIABLE (mProviderList); // li
 
 static DFCI_AUTHENTICATION_PROTOCOL  *mAuthenticationProtocol = NULL;
 
-#define CERT_STRING_SIZE    (200)
-#define CERT_NOT_AVAILABLE  "No Cert information available"
+#define CERT_STRING_SIZE  (200)
 
 /**
 Helper function to return the string describing the type enum
@@ -27,28 +26,28 @@ ProviderTypeAsAscii (
 {
   switch (Type) {
     case DFCI_SETTING_TYPE_ENABLE:
-      return "ENABLE/DISABLE TYPE";
+      return DFCI_STR_SETTING_TYPE_ENABLE;
 
     case DFCI_SETTING_TYPE_SECUREBOOTKEYENUM:
-      return "SECURE BOOT KEY ENUM TYPE";
+      return DFCI_STR_SETTING_TYPE_SECUREBOOTKEYENUM;
 
     case DFCI_SETTING_TYPE_PASSWORD:
-      return "PASSWORD TYPE";
+      return DFCI_STR_SETTING_TYPE_PASSWORD;
 
     case DFCI_SETTING_TYPE_USBPORTENUM:
-      return "USB PORT STATE TYPE";
+      return DFCI_STR_SETTING_TYPE_USBPORTENUM;
 
     case DFCI_SETTING_TYPE_STRING:
-      return "STRING TYPE";
+      return DFCI_STR_SETTING_TYPE_STRING;
 
     case DFCI_SETTING_TYPE_BINARY:
-      return "BINARY TYPE";
+      return DFCI_STR_SETTING_TYPE_BINARY;
 
     case DFCI_SETTING_TYPE_CERT:
-      return "CERT TYPE";
+      return DFCI_STR_SETTING_TYPE_CERT;
 
     default:
-      return "Unknown";
+      return DFCI_STR_UNKNOWN;
       break;
   }
 }
@@ -173,12 +172,12 @@ SetProviderValueFromAscii (
     case DFCI_SETTING_TYPE_ENABLE:
       // convert to BOOLEAN
 
-      if (AsciiStrCmp (Value, "Enabled") == 0) {
+      if (AsciiStrCmp (Value, DFCI_STR_ENABLED) == 0) {
         v = TRUE;
-        DEBUG ((DEBUG_INFO, "Setting to Enabled\n"));
-      } else if (AsciiStrCmp (Value, "Disabled") == 0) {
+        DEBUG ((DEBUG_INFO, "Setting to %a\n", Value));
+      } else if (AsciiStrCmp (Value, DFCI_STR_DISABLED) == 0) {
         v = FALSE;
-        DEBUG ((DEBUG_INFO, "Setting to Disabled\n"));
+        DEBUG ((DEBUG_INFO, "Setting to %a\n", Value));
       } else {
         DEBUG ((DEBUG_ERROR, "Invalid Settings Ascii Value for Type Enable (%a)\n", Value));
         return EFI_INVALID_PARAMETER;
@@ -189,14 +188,14 @@ SetProviderValueFromAscii (
       break;
 
     case DFCI_SETTING_TYPE_SECUREBOOTKEYENUM:
-      if (AsciiStrCmp (Value, "MsOnly") == 0) {
-        DEBUG ((DEBUG_INFO, "Setting to MsOnly\n"));
+      if (AsciiStrCmp (Value, DFCI_STR_SECURE_BOOT_KEY_MS_ONLY) == 0) {
+        DEBUG ((DEBUG_INFO, "Setting to %a\n", Value));
         b = 0;
-      } else if (AsciiStrCmp (Value, "MsPlus3rdParty") == 0) {
-        DEBUG ((DEBUG_INFO, "Setting to MsPlus3rdParty\n"));
+      } else if (AsciiStrCmp (Value, DFCI_STR_SECURE_BOOT_KEY_MS_3RD_PARTY) == 0) {
+        DEBUG ((DEBUG_INFO, "Setting to %a\n", Value));
         b = 1;
-      } else if (AsciiStrCmp (Value, "None") == 0) {
-        DEBUG ((DEBUG_INFO, "Setting to None\n"));
+      } else if (AsciiStrCmp (Value, DFCI_STR_SECURE_BOOT_KEY_NONE) == 0) {
+        DEBUG ((DEBUG_INFO, "Setting to %a\n", Value));
         b = 2;
       } else {
         DEBUG ((DEBUG_INFO, "Invalid Secure Boot Key Enum Setting. %a\n", Value));
@@ -251,17 +250,17 @@ SetProviderValueFromAscii (
       break;
 
     case DFCI_SETTING_TYPE_USBPORTENUM:
-      if (AsciiStrCmp (Value, "UsbPortEnabled") == 0) {
-        DEBUG ((DEBUG_INFO, "Setting to Usb Port Enabled\n"));
+      if (AsciiStrCmp (Value, DFCI_STR_USB_PORT_ENABLED) == 0) {
+        DEBUG ((DEBUG_INFO, "Setting to %a\n", Value));
         UsbPortState = DfciUsbPortEnabled;
-      } else if (AsciiStrCmp (Value, "UsbPortHwDisabled") == 0) {
-        DEBUG ((DEBUG_INFO, "Setting to Usb Port HW Disabled\n"));
+      } else if (AsciiStrCmp (Value, DFCI_STR_USB_PORT_HW_DISABLED) == 0) {
+        DEBUG ((DEBUG_INFO, "Setting to %a\n", Value));
         UsbPortState = DfciUsbPortHwDisabled;
-      } else if (AsciiStrCmp (Value, "UsbPortDataDisabled") == 0) {
-        DEBUG ((DEBUG_INFO, "Setting to Usb Data Disabled\n"));
+      } else if (AsciiStrCmp (Value, DFCI_STR_USB_PORT_DATA_DISABLED) == 0) {
+        DEBUG ((DEBUG_INFO, "Setting to %a\n", Value));
         UsbPortState = DfciUsbPortDataDisabled;
-      } else if (AsciiStrCmp (Value, "UsbPortAuthenticated") == 0) {
-        DEBUG ((DEBUG_INFO, "Setting to Usb Authenticated\n"));
+      } else if (AsciiStrCmp (Value, DFCI_STR_USB_PORT_AUTHENTICATED) == 0) {
+        DEBUG ((DEBUG_INFO, "Setting to %a\n", Value));
         UsbPortState = DfciUsbPortAuthenticated;
       } else {
         DEBUG ((DEBUG_INFO, "Invalid or unsupported Usb Port Setting. %a\n", Value));
@@ -373,15 +372,14 @@ ProviderValueAsAscii (
       }
 
       if (v == ENABLE_INCONSISTENT) {
-        AsciiString = "Inconsistent";
+        AsciiString = DFCI_STR_INCONSISTENT;
       } else if (v) {
-        AsciiString = "Enabled";
+        AsciiString = DFCI_STR_ENABLED;
       } else {
-        AsciiString = "Disabled";
+        AsciiString = DFCI_STR_DISABLED;
       }
 
       ValueSize = AsciiStrnSizeS (AsciiString, DFCI_MAX_ID_LEN);
-
 
       Value = AllocateZeroPool (ValueSize);
       if (Value == NULL) {
@@ -407,14 +405,14 @@ ProviderValueAsAscii (
       }
 
       if (b == 0) {
-        AsciiString = "MsOnly";
+        AsciiString = DFCI_STR_SECURE_BOOT_KEY_MS_ONLY;
       } else if (b == 1) {
-        AsciiString = "MsPlus3rdParty";
+        AsciiString = DFCI_STR_SECURE_BOOT_KEY_MS_3RD_PARTY;
       } else if (b == 3) {
         // This is a special case.  Only supported as output.
-        AsciiString = "Custom";
+        AsciiString = DFCI_STR_SECURE_BOOT_KEY_CUSTOM;
       } else {
-        AsciiString = "None";
+        AsciiString = DFCI_STR_SECURE_BOOT_KEY_NONE;
       }
 
       ValueSize = AsciiStrnSizeS (AsciiString, DFCI_MAX_ID_LEN);
@@ -443,9 +441,9 @@ ProviderValueAsAscii (
       }
 
       if (v) {
-        AsciiString = "System Password Set";
+        AsciiString = DFCI_STR_SYSTEM_PASSWORD_SET;
       } else {
-        AsciiString = "No System Password";
+        AsciiString = DFCI_STR_SYSTEM_PASSWORD_NOT_SET;
       }
 
       ValueSize = AsciiStrnSizeS (AsciiString, DFCI_MAX_ID_LEN);
@@ -474,17 +472,17 @@ ProviderValueAsAscii (
       }
 
       if (b == DfciUsbPortHwDisabled) {
-        AsciiString = "UsbPortHwDisabled";
+        AsciiString = DFCI_STR_USB_PORT_HW_DISABLED;
       } else if (b == DfciUsbPortEnabled) {
-        AsciiString = "UsbPortEnabled";
+        AsciiString = DFCI_STR_USB_PORT_ENABLED;
       } else if (b == DfciUsbPortDataDisabled) {
-        AsciiString = "UsbPortDataDisabled";
+        AsciiString = DFCI_STR_USB_PORT_DATA_DISABLED;
       } else if (b == DfciUsbPortAuthenticated) {
-        AsciiString = "UsbPortAuthenticated";
+        AsciiString = DFCI_STR_USB_PORT_AUTHENTICATED;
       } else if (b == ENABLE_INCONSISTENT) {
-        AsciiString = "Inconsistent";
+        AsciiString = DFCI_STR_INCONSISTENT;
       } else {
-        AsciiString = "UnsupportedValue";
+        AsciiString = DFCI_STR_UNSUPPORTED_VALUE;
       }
 
       ValueSize = AsciiStrnSizeS (AsciiString, DFCI_MAX_ID_LEN);
@@ -631,10 +629,10 @@ ProviderValueAsAscii (
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_ERROR, "Unable to get strings from the certificate\n"));
-        ValueSize = sizeof (CERT_NOT_AVAILABLE);
+        ValueSize = sizeof (DRCI_STR_CERT_NOT_AVAILABLE);
         Value     = AllocatePool (ValueSize);
         if (NULL != Value) {
-          AsciiStrnCpyS (Value, ValueSize, CERT_NOT_AVAILABLE, ValueSize-sizeof (CHAR8));
+          AsciiStrnCpyS (Value, ValueSize, DRCI_STR_CERT_NOT_AVAILABLE, ValueSize-sizeof (CHAR8));
         }
       }
 
