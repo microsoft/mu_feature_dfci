@@ -632,7 +632,8 @@ ProviderValueAsAscii (
         ValueSize = sizeof (DRCI_STR_CERT_NOT_AVAILABLE);
         Value     = AllocatePool (ValueSize);
         if (NULL != Value) {
-          AsciiStrnCpyS (Value, ValueSize, DRCI_STR_CERT_NOT_AVAILABLE, ValueSize-sizeof (CHAR8));
+          AsciiStrnCpyS (Value, ValueSize, DFCI_STR_CERT_NOT_AVAILABLE, ValueSize-sizeof (CHAR8));
+
         }
       }
 
