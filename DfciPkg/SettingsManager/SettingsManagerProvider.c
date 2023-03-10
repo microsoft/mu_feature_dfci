@@ -631,10 +631,9 @@ ProviderValueAsAscii (
         DEBUG ((DEBUG_ERROR, "Unable to get strings from the certificate\n"));
         ValueSize = sizeof (DFCI_STR_CERT_NOT_AVAILABLE);
 
-        Value     = AllocatePool (ValueSize);
+        Value = AllocatePool (ValueSize);
         if (NULL != Value) {
           AsciiStrnCpyS (Value, ValueSize, DFCI_STR_CERT_NOT_AVAILABLE, ValueSize-sizeof (CHAR8));
-
         }
       }
 
