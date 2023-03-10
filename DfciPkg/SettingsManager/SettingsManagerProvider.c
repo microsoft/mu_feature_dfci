@@ -417,7 +417,7 @@ ProviderValueAsAscii (
         AsciiString = "None";
       }
 
-      ValueSize = AsciiStrLen (AsciiString) + 1;
+      ValueSize = AsciiStrnSizeS (AsciiString, DFCI_MAX_ID_LEN);
 
       Value = AllocateZeroPool (ValueSize);
       if (Value == NULL) {
