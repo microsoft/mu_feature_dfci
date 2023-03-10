@@ -58,5 +58,4 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define DFCI_STR_UNSUPPORTED_VALUE   "UnsupportedValue"
 #define DFCI_STR_CERT_NOT_AVAILABLE  "No Cert information available"
 
-
 #endif // __DFCI_SETTING_STRINGS_H__
