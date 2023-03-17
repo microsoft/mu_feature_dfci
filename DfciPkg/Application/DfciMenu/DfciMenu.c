@@ -696,18 +696,19 @@ DisplayMessageBox (
 
   if ((NULL == pTitle) || (NULL == pCaption) || (NULL == pBody)) {
     DEBUG ((DEBUG_ERROR, "Invalid message parameters. pTitle=%p, pCaption=%p, pBody=%p\n", pTitle, pCaption, pBody));
-  }
-
-  Status = DfciUiDisplayMessageBox (
-             pTitle,
-             pBody,                                      // Dialog body text.
-             pCaption,                                   // Dialog caption text.
-             MessageBoxType,                             // Show Restart button.
-             0,                                          // No timeout
-             &SwmResult
-             );                                          // Return result.
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "MessageBox failed. Code=%r\n", Status));
+    Status = EFI_INVALID_PARAMETER;
+  } else {
+    Status = DfciUiDisplayMessageBox (
+               pTitle,
+               pBody,                                    // Dialog body text.
+               pCaption,                                 // Dialog caption text.
+               MessageBoxType,                           // Show Restart button.
+               0,                                        // No timeout
+               &SwmResult
+               );                                        // Return result.
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "MessageBox failed. Code=%r\n", Status));
+    }
   }
 
   if (NULL != pTitle) {
