@@ -373,7 +373,7 @@ ProviderValueAsAscii (
 
       if (b == ENABLE_INCONSISTENT) {
         AsciiString = DFCI_STR_INCONSISTENT;
-      } else if (b) {
+      } else if (b == ENABLE_TRUE) {
         AsciiString = DFCI_STR_ENABLED;
       } else {
         AsciiString = DFCI_STR_DISABLED;
@@ -428,7 +428,7 @@ ProviderValueAsAscii (
       break;
 
     case DFCI_SETTING_TYPE_PASSWORD:
-      ValueSize = sizeof (v);
+      ValueSize = sizeof (b);
       if (Current) {
         Status = Provider->GetSettingValue (Provider, &ValueSize, &v);
       } else {
