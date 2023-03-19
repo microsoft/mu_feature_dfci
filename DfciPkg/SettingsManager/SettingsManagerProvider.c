@@ -344,8 +344,8 @@ Caller must free the return string if not null;
 **/
 CHAR8 *
 ProviderValueAsAscii (
-  DFCI_SETTINGPROVIDER  *Provider,
-  BOOLEAN               Current
+  DFCI_SETTING_PROVIDER  *Provider,
+  BOOLEAN                Current
   )
 {
   EFI_STATUS  Status;
