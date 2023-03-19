@@ -344,8 +344,8 @@ Caller must free the return string if not null;
 **/
 CHAR8 *
 ProviderValueAsAscii (
-  DFCI_SETTING_PROVIDER  *Provider,
-  BOOLEAN                Current
+  DFCI_SETTINGPROVIDER  *Provider,
+  BOOLEAN               Current
   )
 {
   EFI_STATUS  Status;
@@ -428,7 +428,7 @@ ProviderValueAsAscii (
       break;
 
     case DFCI_SETTING_TYPE_PASSWORD:
-      ValueSize = sizeof (b);
+      ValueSize = sizeof (v);
       if (Current) {
         Status = Provider->GetSettingValue (Provider, &ValueSize, &v);
       } else {
