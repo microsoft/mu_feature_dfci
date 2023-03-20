@@ -359,11 +359,11 @@ ProviderValueAsAscii (
 
   switch (Provider->Type) {
     case DFCI_SETTING_TYPE_ENABLE:
-      ValueSize = sizeof (v);
+      ValueSize = sizeof (b);
       if (Current) {
-        Status = Provider->GetSettingValue (Provider, &ValueSize, &v);
+        Status = Provider->GetSettingValue (Provider, &ValueSize, &b);
       } else {
-        Status = Provider->GetDefaultValue (Provider, &ValueSize, &v);
+        Status = Provider->GetDefaultValue (Provider, &ValueSize, &b);
       }
 
       if (EFI_ERROR (Status)) {
@@ -371,9 +371,9 @@ ProviderValueAsAscii (
         break;
       }
 
-      if (v == ENABLE_INCONSISTENT) {
+      if (b == ENABLE_INCONSISTENT) {
         AsciiString = DFCI_STR_INCONSISTENT;
-      } else if (v) {
+      } else if (b == ENABLE_TRUE) {
         AsciiString = DFCI_STR_ENABLED;
       } else {
         AsciiString = DFCI_STR_DISABLED;
