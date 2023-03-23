@@ -77,6 +77,7 @@
   DfciSettingChangedNotificationLib|DfciPkg/Library/DfciSettingChangedNotificationLib/DfciSettingChangedNotificationLibNull.inf
   ZeroTouchSettingsLib|ZeroTouchPkg/Library/ZeroTouchSettings/ZeroTouchSettings.inf
   JsonLiteParserLib|MsCorePkg/Library/JsonLiteParser/JsonLiteParser.inf
+  SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
 
   UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLib.inf
   ResetSystemLib|MdeModulePkg/Library/BaseResetSystemLibNull/BaseResetSystemLibNull.inf
