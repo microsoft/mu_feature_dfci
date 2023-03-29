@@ -518,11 +518,6 @@ ProcessFunction (
 
         StringValue = (CHAR8 *)AllocatePool (ValueSize + sizeof (CHAR8));       // Allow for extra NULL
         if (NULL == StringValue) {
-          DEBUG ((DEBUG_ERROR, "Cannot allocate StringValue\n"));
-          return EFI_OUT_OF_RESOURCES;
-        }
-
-        if (NULL == StringValue) {
           DEBUG ((DEBUG_ERROR, "Failed to allocate pool\n"));
           return EFI_OUT_OF_RESOURCES;
         }
@@ -538,6 +533,7 @@ ProcessFunction (
       } else {
         StringValue = AllocateZeroPool (Rqst->ValueLen + sizeof (CHAR8));
         if (NULL == StringValue) {
+          DEBUG ((DEBUG_ERROR, "Failed to allocate pool\n"));
           return EFI_OUT_OF_RESOURCES;
         }
 

@@ -840,8 +840,8 @@ DfciBuildRequestHeaders (
   if (0 != BodyLength) {
     RequestHeaders[4].FieldName  = AllocateCopyPool (AsciiStrSize (HTTP_HEADER_CONTENT_TYPE), HTTP_HEADER_CONTENT_TYPE);
     RequestHeaders[4].FieldValue = AllocateCopyPool (AsciiStrSize (ContentType), ContentType);
-    if ((RequestHeaders[0].FieldName == NULL) ||
-        (RequestHeaders[1].FieldName == NULL))
+    if ((RequestHeaders[4].FieldName == NULL) ||
+        (RequestHeaders[4].FieldValue == NULL))
     {
       return EFI_OUT_OF_RESOURCES;
     }
@@ -1193,7 +1193,7 @@ ProcessHttpRequest (
              &RequestMessage.HeaderCount
              );
   if (EFI_ERROR (Status)) {
-    return Status;
+    goto S_EXIT1;
   }
 
   Status = DfciIssueRequest (NetworkRequest, &RequestToken);
@@ -1898,6 +1898,8 @@ RestoreCertificates (
     DEBUG ((DEBUG_ERROR, "Unable to restore Tls Certificates\n"));
   }
 
+  FreePool (mOldCertificateList);
+
   mOldCertificateList = NULL;
 
   return EFI_SUCCESS;
@@ -2005,6 +2007,8 @@ EnableDfciCertificate (
     DEBUG ((DEBUG_ERROR, "Unable to set Dfci Https certificate. Code=%r\n", Status));
     RestoreCertificates ();
   }
+
+  FreePool (Cert);
 
   return Status;
 }
