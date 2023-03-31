@@ -790,6 +790,9 @@ DfciBuildRequestHeaders (
     return EFI_INVALID_PARAMETER;
   }
 
+  *Headers = NULL;
+  *Count   = 0;
+
   if (0 != BodyLength) {
     HeaderCount = 5;
   } else {
@@ -800,6 +803,9 @@ DfciBuildRequestHeaders (
   if (NULL == RequestHeaders) {
     return EFI_OUT_OF_RESOURCES;
   }
+
+  *Headers = RequestHeaders;
+  *Count   = HeaderCount;
 
   UrlParser = NULL;
 
@@ -829,12 +835,14 @@ DfciBuildRequestHeaders (
       (RequestHeaders[3].FieldName == NULL) ||
       (RequestHeaders[3].FieldValue == NULL))
   {
-    return EFI_OUT_OF_RESOURCES;
+    Status = EFI_OUT_OF_RESOURCES;
+    goto Exit;
   }
 
   Status = HttpUrlGetHostName (Url, UrlParser, &RequestHeaders[0].FieldValue);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to get Host Name from URL\n"));
+    goto Exit;
   }
 
   if (0 != BodyLength) {
@@ -843,13 +851,15 @@ DfciBuildRequestHeaders (
     if ((RequestHeaders[4].FieldName == NULL) ||
         (RequestHeaders[4].FieldValue == NULL))
     {
-      return EFI_OUT_OF_RESOURCES;
+      Status = EFI_OUT_OF_RESOURCES;
+      goto Exit;
     }
   }
 
-  *Headers = RequestHeaders;
-  *Count   = HeaderCount;
-  HttpUrlFreeParser (UrlParser);
+Exit:
+  if (UrlParser != NULL) {
+    HttpUrlFreeParser (UrlParser);
+  }
 
   return Status;
 }
@@ -1180,6 +1190,8 @@ ProcessHttpRequest (
 
   RequestMessage.Body         = NetworkRequest->HttpRequest.Body;
   RequestMessage.Data.Request = &RequestData;
+  RequestMessage.Headers      = NULL;
+  RequestMessage.HeaderCount  = 0;
 
   RequestToken.Event   = NULL;
   RequestToken.Status  = EFI_SUCCESS;
