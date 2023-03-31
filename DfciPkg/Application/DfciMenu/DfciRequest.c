@@ -1638,6 +1638,14 @@ DfciMainLogic (
   *DoneProcessing            = FALSE;
   NetworkRequest->LogicState = DFCI_PRE_BOOTSTRAP;
 
+  //
+  // Step 1. Ping server with Bootstrap URL provided in DFCI settings
+  //
+  Status = BuildJsonBootstrapRequest (NetworkRequest);
+  if (EFI_ERROR (Status)) {
+    goto MAIN_CLEANUP;
+  }
+
   Status = ProcessAsyncRequest (
              NetworkRequest,
              NetworkRequest->HttpRequest.BootstrapUrl,
