@@ -130,11 +130,6 @@
   # Include/Guid/DfciInternalVariableGuid.h
   gDfciInternalVariableGuid = { 0xc6bbd941, 0xbfe0, 0x44b8, { 0xbe, 0xdc, 0x4, 0xd3, 0xa7, 0xe9, 0xa, 0xd9}}
 
-  ## DFCI Variable Lock variable (Dfci is using VARIABLE_POLICY_TYPE_LOCK_ON_VAR_STATE on this variable to lock DFCI variables)
-  #
-  # Include/Guid/DfciInternalVariable.h
-  gDfciLockVariableGuid = { 0x23c4cdad, 0xddeb, 0x452f, {0x93, 0x8b, 0xdf, 0xaa, 0x3c, 0x3e, 0xc8, 0xee}}
-
   ## DFCI notification that Bds is starting (main DXE dispatch cycle complete)
   #  Still within PlatformAuth
   gDfciStartOfBdsNotifyGuid = { 0xc9341466, 0x1a6c, 0x4ded, { 0x89, 0xc2, 0x78, 0x12, 0xb0, 0x29, 0x9c, 0x45}}
