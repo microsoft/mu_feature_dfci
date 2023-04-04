@@ -15,10 +15,11 @@ Resource     Support${/}Robot${/}DFCI_Shared_Keywords2.robot
 
 
 *** Variables ***
-${CMD_MFG}              Get-CimInstance -ClassName Win32_ComputerSystem -Property Manufacturer | Select-Object -ExpandProperty Manufacturer
-${CMD_MODEL}            Get-CimInstance -ClassName Win32_ComputerSystem -Property Model | Select-Object -ExpandProperty Model
-${CMD_SERIALNUMBER}     Get-CimInstance -ClassName Win32_systemenclosure -Property SerialNumber  | Select-Object -ExpandProperty SerialNumber
-${CMD_UUID}             Get-CimInstance -ClassName Win32_computersystemproduct -Property uuid | Select-Object -ExpandProperty uuid
+${CMD_MFG}                 Get-CimInstance -ClassName Win32_ComputerSystem -Property Manufacturer | Select-Object -ExpandProperty Manufacturer
+${CMD_MODEL}               Get-CimInstance -ClassName Win32_ComputerSystem -Property Model | Select-Object -ExpandProperty Model
+${CMD_SERIALNUMBER_TYPE1}  Get-CimInstance -ClassName Win32_BIOS -Property SerialNumber  | Select-Object -ExpandProperty SerialNumber
+${CMD_SERIALNUMBER_TYPE3}  Get-CimInstance -ClassName Win32_systemenclosure -Property SerialNumber  | Select-Object -ExpandProperty SerialNumber
+${CMD_UUID}                Get-CimInstance -ClassName Win32_computersystemproduct -Property uuid | Select-Object -ExpandProperty uuid
 
 
 *** Keywords ***
@@ -36,7 +37,7 @@ Compare Files
 ############################################################
 
 Get System Under Test SerialNumber
-    ${Value}=   Run PowerShell And Return Output   ${CMD_SERIALNUMBER}
+    ${Value}=   Run PowerShell And Return Output   ${CMD_SERIALNUMBER_TYPE1}
     Should Be True  '${Value}' != 'Error'
     Should Be True  '${Value}' != ''
     [Return]        ${Value}
