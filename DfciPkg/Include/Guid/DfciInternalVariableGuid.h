@@ -21,13 +21,4 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 extern EFI_GUID  gDfciInternalVariableGuid;
 
-//
-// Dfci Lock Variable.
-//
-#define DFCI_LOCK_VAR_NAME        L"_DLCK"
-#define DFCI_LOCK_VAR_ATTRIBUTES  (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS)
-#define DFCI_LOCK_VAR_SIZE        sizeof (UINT8)
-
-extern EFI_GUID  gDfciLockVariableGuid;
-
 #endif // __DFCI_INTERNAL_VARIABLE_GUID_H__

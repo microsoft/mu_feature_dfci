@@ -137,14 +137,4 @@ VARIABLE_POLICY_ELEMENT  gMailBoxPolicies[] =
   },
 };
 
-// Set the policy for the Dfci Lock variable.  All variables listed here will be Lock On Create variables.
-VARIABLE_POLICY_ELEMENT  gDfciLockPolicy[] =
-{
-  {
-    .Namespace          = &gDfciLockVariableGuid, .Name = DFCI_LOCK_VAR_NAME,
-    .MinSize            = DFCI_LOCK_VAR_SIZE, .MaxSize = DFCI_LOCK_VAR_SIZE,
-    .AttributesMustHave = DFCI_LOCK_VAR_ATTRIBUTES, .AttributesCantHave = (UINT32) ~DFCI_LOCK_VAR_ATTRIBUTES,
-  },
-};
-
 #endif // __DFCI_VAR_POLICIES_H__
