@@ -81,7 +81,7 @@ New-NetFirewallRule -Name Allow_Ping -DisplayName “Allow Ping”  -Description
 
 # allow robotserver port 8270 and 8271
 New-NetFirewallRule -Name Allow_robotserver -DisplayName “Allow Python Robot server 8270” -Protocol TCP -LocalPort 8270 -Description “PyRobot server” -Enabled True -Profile Any -Action Allow
-New-NetFirewallRule -Name Allow_robotserver -DisplayName “Allow Python Robot server 8271” -Protocol TCP -LocalPort 8271 -Description “PyRobot server” -Enabled True -Profile Any -Action Allow
+New-NetFirewallRule -Name Allow_robotserver2 -DisplayName “Allow Python Robot server 8271” -Protocol TCP -LocalPort 8271 -Description “PyRobot server” -Enabled True -Profile Any -Action Allow
 
 ##set up task scheduler to run robot server
 Register-ScheduledTask -Xml (get-content 'PyRobotServer.xml' | out-string) -TaskName "PyRobot Server" –Force
