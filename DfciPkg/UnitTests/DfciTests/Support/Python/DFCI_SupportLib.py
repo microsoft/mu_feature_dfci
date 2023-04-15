@@ -9,19 +9,20 @@
 #
 # DFCI_SupportLib
 #
-import os
-import xml.etree.ElementTree as ET
 import binascii
+import os
+import random
+import re
+import socket
+import time
 import traceback
 import xml.dom.minidom
-import subprocess
 import configparser
 import json
-import struct
 import pathlib
+import xml.etree.ElementTree as ElementTree
 
-
-from io import StringIO, BytesIO
+from io import BytesIO
 
 from builtins import int
 
@@ -35,14 +36,17 @@ from Data.PermissionPacketVariable import PermissionResultVariable
 from Data.SecureSettingVariable import SecureSettingsApplyVariable
 from Data.SecureSettingVariable import SecureSettingsResultVariable
 
-SignToolPath = None
-CertMgrPath = None
 DfciTest_Template = 'DfciTests.Template'
 DfciTest_Config = 'DfciTests.ini'
 
 class DFCI_SupportLib(object):
+    _cert_mgr_path = None
+    _current_config = None
+    _sign_tool_path = None
 
     def get_test_config(self):
+        if self._current_config is not None:
+            return self._current_config
 
         #
         # The config files are located two directories above where DFCI_SupportLib.py is located.
@@ -58,6 +62,9 @@ class DFCI_SupportLib(object):
             raise Exception(f'Unable to locate test configuration template({template_path}).')
 
         config.read(template_path)
+        if config['DfciConfig'] is None or config['DfciConfig']['version'] is None:
+            raise Exception('Unable to verify DfciTest.Template version.')
+
         template_ver = int(config["DfciConfig"]["version"])
         update_config = True
         if os.path.exists(ini_path):
@@ -71,6 +78,23 @@ class DFCI_SupportLib(object):
             with open(ini_path, 'w') as config_file:
                 config.write(config_file)
                 config_file.close()
+
+        if not os.path.exists(ini_path):
+            raise Exception(f'Unable to locate test configuration({ini_path}).')
+
+        config.read(ini_path)
+        if config['DfciConfig'] is None or config['DfciConfig']['version'] is None:
+            raise Exception('Unable to verify DfciTest.ini version.')
+
+        current_ver = int(config["DfciConfig"]["version"])
+        if current_ver != template_ver:
+            raise Exception(f'{ini_path} version is out of context with {template_path}).')
+
+        if current_ver != DfciTest_Version:
+            raise Exception(f'{ini_path} version should be {DfciTest_Version}).')
+
+        if config['DfciTest']['server_host_name'] is None:
+            raise Exception(f'Version 1 requires server_host_name in {ini_path}.')
 
         return config
 
@@ -87,85 +111,79 @@ class DFCI_SupportLib(object):
             is_equal = all((expected_data.get(k) == v for k, v in requested_data.items()))
         return is_equal
 
-
-    def _ReturnSessionIdValue(self, InputString):
-        #Session Id:       0xF08A4
-        return int(InputString.partition(":")[2].strip(), base=0)
-
+    def _return_session_id_value(self, input_string):
+        # Session Id:       0xF08A4
+        return int(input_string.partition(":")[2].strip(), base=0)
 
     def compare_session_id_match(self, resultfile, applyfile):
         resultsid = 0
         applysid = 1
 
         r = open(resultfile, "r")
-        for l in r.readlines():
-            if("SessionId:" in l):
-                resultsid = self._ReturnSessionIdValue(l)
+        for line in r.readlines():
+            if ("SessionId:" in line):
+                resultsid = self._return_session_id_value(line)
                 break
         r.close()
 
         a = open(applyfile, "r")
-        for l in a.readlines():
-            if("SessionId:" in l):
-                applysid = self._ReturnSessionIdValue(l)
+        for line in a.readlines():
+            if ("SessionId:" in line):
+                applysid = self._return_session_id_value(line)
                 break
         a.close()
 
-        print ("Apply Session Id: 0x%x" % applysid)
-        print ("Result Session Id: 0x%x" % resultsid)
+        print("Apply Session Id: 0x%x" % applysid)
+        print("Result Session Id: 0x%x" % resultsid)
         return resultsid == applysid
 
-
     def check_status(self, resultfile, code):
-        t = -1
         a = open(resultfile, "r")
-        for l in a.readlines():
-            if("Status:" in l):
-                b = l.partition(":")[2]
+        for line in a.readlines():
+            if ("Status:" in line):
+                b = line.partition(":")[2]
                 b = b.partition("(")[2]
                 b = b.strip()
                 b = b.rstrip(')')
                 t = int(b, base=0)
                 break
         a.close()
-        print ("Result Status: %s" % l)
+        print("Result Status: %s" % line)
         return t == int(code, base=0)
 
-
     def check_setting_status(self, resultfile, id, statuscode):
-        t = -1
         xmlstring = ""
         found = False
         a = open(resultfile, "r")
 
-        #find the start of the xml string and then copy all lines to xmlstring variable
-        for l in a.readlines():
-            if(found):
-                xmlstring += l
+        # find the start of the XML string and then copy all lines to XML string variable
+        for line in a.readlines():
+            if (found):
+                xmlstring += line
             else:
-                if l.lstrip().startswith("<?xml"):
-                    xmlstring = l
+                if line.lstrip().startswith("<?xml"):
+                    xmlstring = line
                     found = True
         a.close()
 
         if (len(xmlstring) == 0) or (not found):
-            print ("Result XML not found")
+            print("Result XML not found")
             return False
 
-        #make an element tree from xml string
+        # make an element tree from xml string
         r = None
-        root = ET.fromstring(xmlstring)
+        root = ElementTree.fromstring(xmlstring)
         for e in root.findall("./Settings/SettingResult"):
             i = e.find("Id")
-            if(i.text == str(id)):
+            if (i.text == str(id)):
                 r = e.find("Result")
                 break
-        if(r is None):
-            print ("Failed to find ID (%s) in the Xml results" % str(id))
-            print (xmlstring)
+        if (r is None):
+            print("Failed to find ID (%s) in the Xml results" % str(id))
+            print(xmlstring)
             return False
 
-        print ("Result Status for Id (%s): %s" % (str(id), r.text))
+        print("Result Status for Id (%s): %s" % (str(id), r.text))
         return int(r.text.strip(), base=0) == int(statuscode, base=0)
 
     def check_current_setting_value(self, resultfile, id, valuestring):
@@ -173,36 +191,36 @@ class DFCI_SupportLib(object):
         found = False
         a = open(resultfile, "r")
 
-        #find the start of the xml string and then copy all lines to xmlstring variable
-        for l in a.readlines():
-            if(found):
-                xmlstring += l
+        # find the start of the XML string and then copy all lines to xmlstring variable
+        for line in a.readlines():
+            if (found):
+                xmlstring += line
             else:
-                if l.lstrip().startswith("<?xml"):
-                    xmlstring = l
+                if line.lstrip().startswith("<?xml"):
+                    xmlstring = line
                     found = True
         a.close()
 
         if (len(xmlstring) == 0) or (not found):
-            print ("Result XML not found")
+            print("Result XML not found")
             return False
 
-        #make an element tree from xml string
+        # make an element tree from XML string
         r = None
-        root = ET.fromstring(xmlstring)
+        root = ElementTree.fromstring(xmlstring)
         for e in root.findall("./Settings/SettingCurrent"):
             i = e.find("Id")
-            if(i.text == str(id)):
+            if (i.text == str(id)):
                 r = e.find("Value")
                 break
-        if(r is None):
-            print ("Failed to find ID (%s) in the Xml results" % str(id))
-            print (xmlstring)
+        if (r is None):
+            print("Failed to find ID (%s) in the Xml results" % str(id))
+            print(xmlstring)
             return False
 
-        print ("Result Value for Id (%s): %s" % (str(id), r.text))
+        print("Result Value for Id (%s): %s" % (str(id), r.text))
 
-        if (r.text is None):
+        if r.text is None:
             if valuestring == '':
                 return True
             else:
@@ -214,36 +232,36 @@ class DFCI_SupportLib(object):
         found = False
         a = open(resultfile, "r")
 
-        #find the start of the xml string and then copy all lines to xmlstring variable
-        for l in a.readlines():
-            if(found):
-                xmlstring += l
+        # find the start of the xml string and then copy all lines to xmlstring variable
+        for line in a.readlines():
+            if found:
+                xmlstring += line
             else:
-                if l.lstrip().startswith("<?xml"):
-                    xmlstring = l
+                if line.lstrip().startswith("<?xml"):
+                    xmlstring = line
                     found = True
         a.close()
 
         if (len(xmlstring) == 0) or (not found):
-            print ("Result XML not found")
+            print("Result XML not found")
             return False
 
-        #make an element tree from xml string
+        # make an element tree from xml string
         r1 = None
         r2 = None
-        root = ET.fromstring(xmlstring)
+        root = ElementTree.fromstring(xmlstring)
 
         for e in root.findall("./Permissions/PermissionCurrent"):
             i = e.find("Id")
-            if(i.text == str(id)):
+            if (i.text == str(id)):
                 j = e.find("PMask")
-                if (j != None):
+                if (j is not None):
                     r1 = j.text
                 j = e.find("DMask")
-                if (j != None):
+                if (j is not None):
                     r2 = j.text
                 break
-        print ("Result Value for Id (%s): PMask=%s, DMask=%s" % (str(id), r1, r2))
+        print("Result Value for Id (%s): PMask=%s, DMask=%s" % (str(id), r1, r2))
         return r1, r2
 
     def get_current_permission_defaults(self, resultfile):
@@ -251,203 +269,200 @@ class DFCI_SupportLib(object):
         found = False
         a = open(resultfile, "r")
 
-        #find the start of the xml string and then copy all lines to xmlstring variable
-        for l in a.readlines():
-            if(found):
-                xmlstring += l
+        # find the start of the XML string and then copy all lines to XML string variable
+        for line in a.readlines():
+            if found:
+                xmlstring += line
             else:
-                if l.lstrip().startswith("<?xml"):
-                    xmlstring = l
+                if line.lstrip().startswith("<?xml"):
+                    xmlstring = line
                     found = True
         a.close()
 
         if (len(xmlstring) == 0) or (not found):
-            print ("Result XML not found")
+            print("Result XML not found")
             return False
 
-        #make an element tree from xml string
-        root = ET.fromstring(xmlstring)
+        # make an element tree from xml string
+        root = ElementTree.fromstring(xmlstring)
 
-        #Collect the root attributes
+        # Collect the root attributes
         try:
             r1 = root.attrib["Default"]
-        except:
+        except KeyError:
             r1 = None
 
         try:
             r2 = root.attrib["Delegated"]
-        except:
+        except KeyError:
             r2 = None
 
-        print ("Result Default Values for : Default=%s, Delegated=%s" % (r1, r2))
+        print(f"Result Default Values for : Default={r1}, Delegated={r2}")
         return r1, r2
 
     #
     # Check all individual status codes for each setting and confirm it matches the input status code
     #
     def check_all_permission_status(self, resultfile, status):
-        t = -1
         found = False
         xmlstring = ""
         statuscode = int(status, base=0)
         a = open(resultfile, "r")
 
-        #find the start of the xml string and then copy all lines to xmlstring variable
-        for l in a.readlines():
-            if(found):
-                xmlstring += l
+        # find the start of the XML string and then copy all lines to XML string variable
+        for line in a.readlines():
+            if (found):
+                xmlstring += line
             else:
-                if l.lstrip().startswith("<?xml"):
-                    xmlstring = l
+                if line.lstrip().startswith("<?xml"):
+                    xmlstring = line
                     found = True
         a.close()
 
         if (len(xmlstring) == 0) or (not found):
-            print ("Result XML not found")
+            print("Result XML not found")
             return False
 
-        #make an element tree from xml string
+        # make an element tree from XML string
         r = None
-        root = ET.fromstring(xmlstring)
+        root = ElementTree.fromstring(xmlstring)
         rc = True
         for e in root.findall("./Permissions/PermissionResult"):
             i = e.find("Id")
             r = e.find("Result")
 
-            if(r is None):
+            if (r is None):
                 print("Failed to find a result node for id (%s)" % i.text.strip())
                 return False
 
             result = int(r.text.strip(), base=0)
-            print ("Result Status for Id (%s): %s" % (str(i.text.strip()), r.text))
-            if(result != statuscode):
+            print("Result Status for Id (%s): %s" % (str(i.text.strip()), r.text))
+            if (result != statuscode):
                 print("Error.  Status Code for id (%s) didn't match expected" % i.text.strip())
                 rc = False
-        #done with loop
+        # done with loop
         return rc
 
     #
     # Check all individual status codes for each setting and confirm it matches the input status code
     #
     def check_all_setting_status(self, resultfile, status):
-        t = -1
         found = False
         xmlstring = ""
         statuscode = int(status, base=0)
         a = open(resultfile, "r")
 
-        #find the start of the xml string and then copy all lines to xmlstring variable
-        for l in a.readlines():
-            if(found):
-                xmlstring += l
+        # find the start of the XML string and then copy all lines to XML string variable
+        for line in a.readlines():
+            if (found):
+                xmlstring += line
             else:
-                if l.lstrip().startswith("<?xml"):
-                    xmlstring = l
+                if line.lstrip().startswith("<?xml"):
+                    xmlstring = line
                     found = True
         a.close()
 
         if (len(xmlstring) == 0) or (not found):
-            print ("Result XML not found")
+            print("Result XML not found")
             return False
 
-        #make an element tree from xml string
+        # make an element tree from XML string
         r = None
-        root = ET.fromstring(xmlstring)
+        root = ElementTree.fromstring(xmlstring)
         rc = True
         for e in root.findall("./Settings/SettingResult"):
             i = e.find("Id")
             r = e.find("Result")
 
-            if(r is None):
+            if (r is None):
                 print("Failed to find a result node for id (%s)" % i.text.strip())
                 return False
 
             result = int(r.text.strip(), base=0)
-            print ("Result Status for Id (%s): %s" % (str(i.text.strip()), r.text))
-            if(result != statuscode):
+            print("Result Status for Id (%s): %s" % (str(i.text.strip()), r.text))
+            if (result != statuscode):
                 print("Error.  Status Code for id (%s) didn't match expected" % i.text.strip())
                 rc = False
-        #done with loop
+        # done with loop
         return rc
 
     #
     # Check list list of settings results
     #
     def check_setting_status_by_dictionary(self, resultfile, settingdict):
-        t = -1
         found = False
         xmlstring = ""
         a = open(resultfile, "r")
 
-        #find the start of the xml string and then copy all lines to xmlstring variable
-        for l in a.readlines():
-            if(found):
-                xmlstring += l
+        # find the start of the XML string and then copy all lines to XML string variable
+        for line in a.readlines():
+            if (found):
+                xmlstring += line
             else:
-                if l.lstrip().startswith("<?xml"):
-                    xmlstring = l
+                if line.lstrip().startswith("<?xml"):
+                    xmlstring = line
                     found = True
         a.close()
 
         if (len(xmlstring) == 0) or (not found):
-            print ("Result XML not found")
+            print("Result XML not found")
             return False
 
-        #make an element tree from xml string
+        # make an element tree from XML string
         r = None
-        root = ET.fromstring(xmlstring)
+        root = ElementTree.fromstring(xmlstring)
         rc = True
         for e in root.findall("./Settings/SettingResult"):
             i = e.find("Id")
             r = e.find("Result")
 
-            if(r is None):
+            if (r is None):
                 print("Failed to find a result node for id (%s)" % i.text.strip())
                 return False
 
             index = str(i.text.strip())
             result = int(r.text.strip(), base=0)
-            print ("Result Status for Id (%s): %s" % (str(i.text.strip()), r.text))
+            print("Result Status for Id (%s): %s" % (str(i.text.strip()), r.text))
             if index in settingdict:
                 if result != int(settingdict[index], base=0):
                     print("Error.  Status Code for id (%s) didn't match expected" % i.text.strip())
-                    rc = False;
+                    rc = False
             else:
                 print("Error.  Index %s not in dictionary" % i.text.strip())
-                rc - False;
-        #done with loop
+                rc = False
+        # done with loop
         return rc
 
     def extract_payload_from_current(self, resultfile, payloadfile):
         try:
-            tree = ET.parse(resultfile)
+            tree = ElementTree.parse(resultfile)
             elem = tree.find('./SyncBody/Results/Item/Data')
-        except:
+        except Exception:
             elem = None
 
         if elem is None:
-            return  0x8000000000000007 # EFI_DEVICE_ERROR
+            return 0x8000000000000007  # EFI_DEVICE_ERROR
 
         tree = xml.dom.minidom.parseString(elem.text.encode())
-        f = open(payloadfile,"wb")
+        f = open(payloadfile, "wb")
         f.write(tree.toprettyxml().encode())
         f.close
         return 0
 
     def extract_results_packet(self, resultfile, resultpktfile):
         try:
-            tree = ET.parse(resultfile)
+            tree = ElementTree.parse(resultfile)
             elem = tree.find('./SyncBody/Results/Item/Data')
-        except:
+        except Exception:
             elem = None
 
         if elem is None:
-            return  0x8000000000000007, 0  # EFI_DEVICE_ERROR
+            return (0x8000000000000007, 0)  # EFI_DEVICE_ERROR
 
-        bindata = binascii.a2b_base64(elem.text)   #.decode('utf-16')
+        bindata = binascii.a2b_base64(elem.text)  # .decode('utf-16')
         f = BytesIO(bindata)
 
-        g = open(resultpktfile,"wb")
+        g = open(resultpktfile, "wb")
         g.write(f.read())
         g.close()
         f.close()
@@ -488,27 +503,27 @@ class DFCI_SupportLib(object):
         f.close()
         if (checktype != "FULL") and (checktype != "BASIC"):
             print('checktype invalid')
-            return  0x8000000000000007, 0  # EFI_DEVICE_ERROR
-        RsltRc = rslt.Status
-        if RsltRc == 0 and checktype == "FULL":
+            return (0x8000000000000007, 0)  # EFI_DEVICE_ERROR
+        rslt_rc = rslt.Status
+        if rslt_rc == 0 and checktype == "FULL":
             try:
-                tree = ET.fromstring(rslt.Payload)
+                tree = ElementTree.fromstring(rslt.Payload)
                 for elem in tree.findall('./Settings/SettingResult'):
-                    rc = int (elem.find('Result').text,0)
+                    rc = int(elem.find('Result').text, 0)
                     if rc != 0:
-                        RsltRc = rc
-                    print('Setting %s - Code %s' % (elem.find('Id').text,elem.find('Result').text))
-            except:
+                        rslt_rc = rc
+                    print('Setting %s - Code %s' % (elem.find('Id').text, elem.find('Result').text))
+            except Exception:
                 traceback.print_exc()
-        return RsltRc, rslt.SessionId
+        return rslt_rc, rslt.SessionId
 
     def get_payload_from_permissions_results(self, resultfile, payloadfile):
         f = open(resultfile, 'rb')
         rslt = PermissionResultVariable(f)
         rslt.Print()
         f.close()
-        if rslt.Payload != None:
-            f = open(payloadfile,"w")
+        if rslt.Payload is not None:
+            f = open(payloadfile, "w")
             f.write(rslt.Payload)
             f.close
         return 0
@@ -518,8 +533,8 @@ class DFCI_SupportLib(object):
         rslt = SecureSettingsResultVariable(f)
         rslt.Print()
         f.close()
-        if rslt.Payload != None:
-            f = open(payloadfile,"w")
+        if rslt.Payload is not None:
+            f = open(payloadfile, "w")
             f.write(rslt.Payload)
             f.close
         return 0
@@ -534,7 +549,7 @@ class DFCI_SupportLib(object):
     def get_status_from_dmtools_results(self, resultsfile):
         result = 0x8000000000000007  # EFI_DEVICE_ERROR
         try:
-            tree = ET.parse(resultsfile)
+            tree = ElementTree.parse(resultsfile)
             root = tree.getroot()
             result = 0
             for e in root.findall("./SyncBody/Status"):
@@ -543,193 +558,180 @@ class DFCI_SupportLib(object):
                     result = 0x8000000000000007  # EFI_DEVICE_ERROR
                     break
                 result = 0
-        except:
+        except Exception:
             traceback.print_exc()
 
         return result
 
-    def get_uefistatus_string (self, StatusCode):
-        print(type(StatusCode))
+    def get_uefistatus_string(self, status_code):
+        print(type(status_code))
 
         isint = False
-        if isinstance(StatusCode, int):
+        if isinstance(status_code, int):
             isint = True
 
-        if isint == True:
-            Ret = UefiStatusCode().Convert64BitToString(StatusCode)
+        if isint is True:
+            ret = UefiStatusCode().Convert64BitToString(status_code)
         else:
-            Ret = UefiStatusCode().ConvertHexString64ToString(StatusCode)
+            ret = UefiStatusCode().ConvertHexString64ToString(status_code)
 
-        if Ret == '':
-            Ret = '%x' % StatusCode
-        return Ret
+        if ret == '':
+            ret = '%x' % status_code
+        return ret
 
-    def print_xml_payload(self, XmlFileName):
+    def print_xml_payload(self, xml_file_name):
         try:
-            tree = xml.dom.minidom.parse(XmlFileName)
+            tree = xml.dom.minidom.parse(xml_file_name)
             print('%s' % tree.toprettyxml())
-        except:
+        except Exception:
             traceback.print_exc()
             print('Unable to print settings XML')
 
-    def build_target_parameters(self, Version, SerialNumber = '', Mfg = '', ProdName = ''):
+    def build_target_parameters(self, version, serial_number='', mfg='', prodname=''):
         rslt = []
 
-        if Version == 'V1':
+        if version == 'V1':
             rslt.append('--HdrVersion')
             rslt.append('1')
-            if SerialNumber != '':
+            if serial_number != '':
                 rslt.append('--SnTarget')
-                rslt.append(SerialNumber)
+                rslt.append(serial_number)
 
-        elif Version == 'V2':
+        elif version == 'V2':
             rslt.append('--HdrVersion')
             rslt.append('2')
-            if Mfg != '':
+            if mfg != '':
                 rslt.append('--SMBIOSMfg')
-                rslt.append(Mfg)
-            if ProdName != '':
+                rslt.append(mfg)
+            if prodname != '':
                 rslt.append('--SMBIOSProd')
-                rslt.append(ProdName)
-            if SerialNumber != '':
+                rslt.append(prodname)
+            if serial_number != '':
                 rslt.append('--SMBIOSSerial')
-                rslt.append(SerialNumber)
+                rslt.append(serial_number)
 
         else:
-            raise ValueError ('Invalid version {}'.format(Version))
+            raise ValueError('Invalid version {}'.format(version))
 
         return rslt
 
-    def get_device_ids(self, XmlFileName):
+    def get_device_ids(self, xml_file_name):
         d = {}
         try:
-            tree = ET.parse(XmlFileName)
+            tree = ElementTree.parse(xml_file_name)
             root = tree.getroot()
 
             elem = root.findall('./Identifiers/Identifier')
             for e in elem:
                 xid = e.find('Id')
                 pn = e.find('Value')
-         #       print(' {0} = {1}'.format(xid.text, pn.text)
+                # print(' {0} = {1}'.format(xid.text, pn.text)
                 d[xid.text] = pn.text
 
             for key in d:
-                print (' Key {0} has the value of {1}'.format(key,  d[key]))
+                print(' Key {0} has the value of {1}'.format(key,  d[key]))
 
-        except:
+        except Exception:
             traceback.print_exc()
             print('Unable to extract DeviceIdElements.')
             d = {}
 
         return d
 
-    def get_device_id_element(self, idXmlFile, id):
+    def get_device_id_element(self, id_xml_file, id):
 
-        d = self.get_device_ids(idXmlFile)
+        d = self.get_device_ids(id_xml_file)
         return d[id]
 
-    def verify_device_id(self, XmlFileName, Mfg, ProdName, SN):
+    def verify_device_id(self, xml_file_name, mfg, prodname, sn):
 
-        d = self.get_device_ids(XmlFileName)
+        d = self.get_device_ids(xml_file_name)
 
-        Manufacturer =  d['Manufacturer']
-        ProductName  =  d['Product Name']
-        SerialNumber =  d['Serial Number']
+        manufacturer = d['Manufacturer']
+        productname = d['Product Name']
+        serialnumber = d['Serial Number']
 
-        rc = 0;
-        if Mfg != Manufacturer:
+        rc = 0
+        if mfg != manufacturer:
             rc += 4
-        if ProdName != ProductName:
+        if prodname != productname:
             rc += 8
-        if SN != SerialNumber:
+        if sn != serialnumber:
             rc += 16
 
         return rc
 
-    def get_dfci_version(self, XmlFileName):
+    def get_dfci_version(self, xml_file_name):
         try:
-            tree = ET.parse(XmlFileName)
+            tree = ElementTree.parse(xml_file_name)
             root = tree.getroot()
 
             elem = root.find('./DfciVersion')
             d = elem.text
-            print ('Dfci Version detected as %s' % d)
+            print('Dfci Version detected as %s' % d)
 
-        except:
+        except Exception:
             traceback.print_exc()
-            print('Unable to extract DfciVersion from %s' % XmlFileName)
+            print('Unable to extract DfciVersion from %s' % xml_file_name)
             d = None
 
         return d
 
-    def verify_dfci_version(self, XmlFileName, Version):
+    def verify_dfci_version(self, xml_file_name, version):
 
-        d = self.get_dfci_version(XmlFileName)
+        d = self.get_dfci_version(xml_file_name)
 
-        rc = True;
-        if d != Version:
+        rc = True
+        if d != version:
             rc = False
 
         return rc
 
-    def get_thumbprints(self, XmlFileName):
+    def get_thumbprints(self, xml_file_name):
         d = {}
         try:
-            tree = ET.parse(XmlFileName)
+            tree = ElementTree.parse(xml_file_name)
             root = tree.getroot()
 
             elem = root.findall('./Certificates/Certificate')
             for e in elem:
                 xid = e.find('Id')
                 pn = e.find('Value')
-         #       print(' {0} = {1}'.format(xid.text, pn.text)
+                # print(' {0} = {1}'.format(xid.text, pn.text)
                 d[xid.text] = pn.text
 
             for key in d:
-                print (' Key {0} has the value of {1}'.format(key,  d[key]))
+                print(' Key {0} has the value of {1}'.format(key,  d[key]))
 
-        except:
+        except Exception:
             traceback.print_exc()
             print('Unable to extract DeviceIdElements.')
             d = {}
 
         return d
 
-    def get_thumbprint_element(self, xmlFile, id):
-        d = self.get_thumbprints(xmlFile)
+    def get_thumbprint_element(self, xml_file, id):
+        d = self.get_thumbprints(xml_file)
         return d[id]
 
-    #
-    # Determine if the DUT is online by pinging it
-    #
-    def is_device_online(self, ipaddress):
-        output = subprocess.Popen(["ping.exe", "-n", "1", ipaddress], stdout=subprocess.PIPE).communicate()[0]
-
-        if (b'TTL' in output):
-            return True
-        else:
-            return False
-
     def get_signtool_path(self):
-        global SignToolPath
-        if SignToolPath is None:
-            SignToolPath = FindToolInWinSdk("signtool.exe")
+        if self._sign_tool_path is None:
+            self._sign_tool_path = FindToolInWinSdk("signtool.exe")
 
             # check if exists
-            if SignToolPath is None or not os.path.exists(SignToolPath):
+            if self._sign_tool_path is None or not os.path.exists(self._sign_tool_path):
                 raise Exception("Can't find signtool.exe on this machine.  Please install the Windows 10 WDK - "
                                 "https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit")
 
-        return SignToolPath
+        return self._sign_tool_path
 
     def get_certmgr_path(self):
-        global CertMgrPath
-        if CertMgrPath is None:
-            CertMgrPath = FindToolInWinSdk("certmgr.exe")
+        if self._cert_mgr_path is None:
+            self._cert_mgr_path = FindToolInWinSdk("certmgr.exe")
 
             # check if exists
-            if CertMgrPath is None or not os.path.exists(CertMgrPath):
+            if self._cert_mgr_path is None or not os.path.exists(self._cert_mgr_path):
                 raise Exception("Can't find certmgr.exe on this machine.  Please install the Windows 10 WDK - "
                                 "https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit")
 
-        return CertMgrPath
+        return self._cert_mgr_path
