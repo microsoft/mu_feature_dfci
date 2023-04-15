@@ -38,6 +38,8 @@ from Data.SecureSettingVariable import SecureSettingsResultVariable
 
 DfciTest_Template = 'DfciTests.Template'
 DfciTest_Config = 'DfciTests.ini'
+DfciTest_Version = 1
+
 
 class DFCI_SupportLib(object):
     _cert_mgr_path = None
