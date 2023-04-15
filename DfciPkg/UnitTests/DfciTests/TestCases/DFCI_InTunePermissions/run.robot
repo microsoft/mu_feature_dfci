@@ -151,7 +151,7 @@ Process TestCases
         #
         # Send the user(2) permissions packet to the system under test
         #
-        Process Permission Packet     ${Testname}  2  ${OLD_USER_PFX}  ${newPermissionsXmlFile}  @{TARGET_PARAMETERS}
+        Process Permission Packet     ${Testname}  ${USER}  ${OLD_USER_PFX}  ${newPermissionsXmlFile}  @{TARGET_PARAMETERS}
         #
         # Restart the system to apply the permissions
         #
@@ -163,7 +163,7 @@ Process TestCases
         #
         # Ensure all of the permissions set, were applied correctly
         #
-        ${xmlPermissionsRslt}=    Validate Permission Status    ${Testname}  2  ${STATUS_SUCCESS}
+        ${xmlPermissionsRslt}=    Validate Permission Status    ${Testname}  ${USER}  ${STATUS_SUCCESS}
         #
         # Validate the individual settings after the reboot
         #

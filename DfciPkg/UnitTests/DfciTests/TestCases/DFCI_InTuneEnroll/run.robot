@@ -121,7 +121,7 @@ Send Owner Enroll Packet to System Being Enrolled
 
     ${nameofTest}=       Set Variable    OwnerEnroll
 
-    Process Provision Packet     ${nameofTest}  1  ${ZTD_LEAF_PFX}  ${NEW_OWNER_PFX}  ${NEW_OWNER_CERT}  ${OWNER_KEY_INDEX}  @{TARGET_PARAMETERS}
+    Process Provision Packet     ${nameofTest}  ${OWNER}  ${ZTD_LEAF_PFX}  ${NEW_OWNER_PFX}  ${NEW_OWNER_CERT}  ${OWNER_KEY_INDEX}  @{TARGET_PARAMETERS}
 
 
 Send Owner Permission Packet to Enrolled System
@@ -129,7 +129,7 @@ Send Owner Permission Packet to Enrolled System
     ${nameofTest}=         Set Variable    OwnerPermissions
     ${xmlPayloadFile}=     Set Variable    ${TEST_CASE_DIR}${/}DfciPermission.xml
 
-    Process Permission Packet     ${nameofTest}  1  ${NEW_OWNER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
+    Process Permission Packet     ${nameofTest}  ${OWNER}  ${NEW_OWNER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
 
 
 Send User Enroll to System Being Enrolled
@@ -139,7 +139,7 @@ Send User Enroll to System Being Enrolled
 
     ${nameofTest}=       Set Variable    UserEnroll
 
-    Process Provision Packet     ${nameofTest}  2  ${NEW_OWNER_PFX}  ${NEW_USER_PFX}  ${NEW_USER_CERT}  ${USER_KEY_INDEX}  @{TARGET_PARAMETERS}
+    Process Provision Packet     ${nameofTest}  ${USER}  ${NEW_OWNER_PFX}  ${NEW_USER_PFX}  ${NEW_USER_CERT}  ${USER_KEY_INDEX}  @{TARGET_PARAMETERS}
 
 
 Send User Permission Packet to Enrolled System
@@ -148,7 +148,7 @@ Send User Permission Packet to Enrolled System
     ${nameofTest}=         Set Variable    UserPermissions
     ${xmlPayloadFile}=     Set Variable    ${TEST_CASE_DIR}${/}DfciPermission2.xml
 
-    Process Permission Packet     ${nameofTest}  2  ${NEW_USER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
+    Process Permission Packet     ${nameofTest}  ${USER}  ${NEW_USER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
 
 
 Send Owner Settings Packet to Enrolled System
@@ -157,7 +157,7 @@ Send Owner Settings Packet to Enrolled System
     ${nameofTest}=      Set Variable    OwnerSettings
     ${xmlPayloadFile}=  Set Variable    ${TEST_CASE_DIR}${/}DfciSettings.xml
 
-    Process Settings Packet     ${nameofTest}  1  ${NEW_OWNER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
+    Process Settings Packet     ${nameofTest}  ${OWNER}  ${TOVAR}  ${NEW_OWNER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
 
 
 Send User Settings Packet to Enrolled System
@@ -166,7 +166,7 @@ Send User Settings Packet to Enrolled System
     ${nameofTest}=      Set Variable    UserSettings
     ${xmlPayloadFile}=  Set Variable    ${TEST_CASE_DIR}${/}DfciSettings2.xml
 
-    Process Settings Packet     ${nameofTest}  2  ${NEW_USER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
+    Process Settings Packet     ${nameofTest}  ${USER}  ${TOVAR}  ${NEW_USER_PFX}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
 
 
 Restart System to Apply Enrollment
@@ -186,13 +186,13 @@ Restart System to Apply Enrollment
 Verify Owner Enrolled System Identity Results
     ${nameofTest}=   Set Variable    OwnerEnroll
 
-    Validate Provision Status    ${nameofTest}  1  ${STATUS_SUCCESS}
+    Validate Provision Status    ${nameofTest}  ${OWNER}  ${STATUS_SUCCESS}
 
 
 Verify Owner Enrolled System Permission Results
     ${nameofTest}=   Set Variable    OwnerPermissions
 
-    ${xmlPermissionsRslt}=    Validate Permission Status    ${nameofTest}  1  ${STATUS_SUCCESS}
+    ${xmlPermissionsRslt}=    Validate Permission Status    ${nameofTest}  ${OWNER}  ${STATUS_SUCCESS}
     ${rc}    Check All Permission Status    ${xmlPermissionsRslt}    ${STATUS_SUCCESS}
     Should Be True    ${rc}
 
@@ -200,13 +200,13 @@ Verify Owner Enrolled System Permission Results
 Verify User Enrolled System Identity Results
     ${nameofTest}=   Set Variable    UserEnroll
 
-    Validate Provision Status    ${nameofTest}  2  ${STATUS_SUCCESS}
+    Validate Provision Status    ${nameofTest}  ${USER}  ${STATUS_SUCCESS}
 
 
 Verify User Enrolled System Permission Results
     ${nameofTest}=   Set Variable    UserPermissions
 
-    ${xmlPermissionsRslt}=    Validate Permission Status    ${nameofTest}  2  ${STATUS_SUCCESS}
+    ${xmlPermissionsRslt}=    Validate Permission Status    ${nameofTest}  ${USER}  ${STATUS_SUCCESS}
     ${rc}    Check All Permission Status    ${xmlPermissionsRslt}    ${STATUS_SUCCESS}
     Should Be True    ${rc}
 
@@ -214,14 +214,14 @@ Verify User Enrolled System Permission Results
 Verify Owner Enrolled System Settings Results
     ${nameofTest}=   Set Variable    OwnerSettings
 
-    ${xmlOwnerSettingsRslt}=   Validate Settings Status    ${nameofTest}    1    ${STATUS_SUCCESS}  FULL
+    ${xmlOwnerSettingsRslt}=   Validate Settings Status    ${nameofTest}    ${OWNER}    ${STATUS_SUCCESS}  FULL
     ${rc}    Check All Setting Status    ${xmlOwnerSettingsRslt}    ${STATUS_SUCCESS}
     Should Be True    ${rc}
 
 Verify User Enrolled System Settings Results
     ${nameofTest}=   Set Variable    UserSettings
 
-    ${xmlUserSettingsRslt}=   Validate Settings Status    ${nameofTest}    2    ${STATUS_SUCCESS}  FULL
+    ${xmlUserSettingsRslt}=   Validate Settings Status    ${nameofTest}    ${USER}    ${STATUS_SUCCESS}  FULL
     ${rc}    Check All Setting Status    ${xmlUserSettingsRslt}    ${STATUS_SUCCESS}
     Should Be True    ${rc}
 
@@ -232,11 +232,11 @@ Get the ending DFCI Settings
     ${currentIdXmlFile}=    Get The DFCI Settings    ${nameOfTest}
 
     ${OwnerThumbprint}     Get Thumbprint From Pfx    ${NEW_OWNER_CERT}
-    ${rc}=   Get Thumbprint Element    ${currentIdxmlFile}    Owner
+    ${rc}=   Get Thumbprint Element    ${currentIdxmlFile}    ${OWNER}
     Should Be True    '${rc}' == '${OwnerThumbprint}'
 
     ${UserThumbprint}     Get Thumbprint From Pfx    ${NEW_USER_CERT}
-    ${rc}=   Get Thumbprint Element    ${currentIdxmlFile}    User
+    ${rc}=   Get Thumbprint Element    ${currentIdxmlFile}    ${USER}
     Should Be True    '${rc}' == '${UserThumbprint}'
 
 
