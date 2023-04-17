@@ -1,6 +1,6 @@
 # Building and Running QemuQ35Pkg with DFCI
 
-QemuQ35Pkg virtual machine environment is avaiable at
+QemuQ35Pkg virtual machine environment is available at
 [here](https://github.com/microsoft/mu_tiano_platforms.git).
 
 This document describes how to build and Run a QuemuQ35Pkg virtual device to
@@ -11,7 +11,7 @@ exercise the DFCI test cases.
 You will need the following:
 
 1. Knowledge that the sub directory DfciDutFiles is used for both the build and run scripts for
-Q35, the emulated usb drives used to install windows, and setup the Dfci Test solution into the QemuQ35Pkg VM.
+Q35, the emulated USB drives used to install windows, and setup the DFCI Test solution into the QemuQ35Pkg VM.
 2. An install image for Windows 11 (available when you purchase a license for Windows 11).
     - Using the [Windows Media Creation Tool](https://support.microsoft.com/en-us/windows/create-installation-media-for-windows-99a58364-8c02-206f-aa6f-40c3b507420d),
 create a USB storage device from your install media.
@@ -111,7 +111,7 @@ You will be presented with a Microsoft Surface like firmware interface
 
 The QemuQ35Pkg virtual system is used by Project Mu for various testing activities, and had
 setting set a certain way for that test environment.
-For Dfci testing, some of the hard coded defaults need to be changed before we install the OS.
+For DFCI testing, some of the hard coded defaults need to be changed before we install the OS.
 
 Here are the keyboard shortcuts for the Microsoft Surface like FrontPage:
 
@@ -159,7 +159,8 @@ Install Windows as you normally would.
 At this point, let the Windows system update itself.
 During some idle time, check Task Manager to see what is using the idle time.
 Uninstall applications that are using a lot of CPU.
-By uninstalling unnecessary application that are not needed for testing, perfomnce of the QemuQ35Pkg virtual machine will be improved.
+By uninstalling unnecessary application that are not needed for testing, performance of the QemuQ35Pkg
+virtual device will be improved.
 
 After you have finished the install of Windows, and uninstalling a few preinstalled applications,
 do a normal OS Shutdown.  When the OS finally shuts down, the display window will close, and the
@@ -182,7 +183,7 @@ You can follow the steps at
 
 Finally, restart the system and make sure the new user logs in automatically.
 
-Once the system is booting with the autologged on user, look for the D: drive.
+Once the system is booting with the automatically logged on user, look for the D: drive.
 It should list the files that are in the DfciDutFiles.
 Run the command:
 
@@ -194,7 +195,7 @@ This will download and install Python, robotframework, robotremoteserver, and py
 In addition, the SetupDUT command will update the firewall for the robot framework testing, and a make a couple of
 configuration changes to Windows for a better test experience.
 
-## Testing the QemuQ35Pkg Device Under Test.
+## Testing the QemuQ35Pkg Device Under Test
 
 The last way to start the QemQ35Pkg virtual system is with no extra parameters.
 Just run:
@@ -204,7 +205,7 @@ Just run:
     ```
 
 No parameter means just boot the QemuQ35Pkg virtual system.
-This is the normal way to boot to Windows and test Dfci.
+This is the normal way to boot to Windows and test DFCI.
 
 With QemuQ35Pkg virtual system up and running, you should see the python remote server window.
 
