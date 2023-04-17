@@ -790,6 +790,9 @@ DfciBuildRequestHeaders (
     return EFI_INVALID_PARAMETER;
   }
 
+  *Headers = NULL;
+  *Count   = 0;
+
   if (0 != BodyLength) {
     HeaderCount = 5;
   } else {
@@ -800,6 +803,9 @@ DfciBuildRequestHeaders (
   if (NULL == RequestHeaders) {
     return EFI_OUT_OF_RESOURCES;
   }
+
+  *Headers = RequestHeaders;
+  *Count   = HeaderCount;
 
   UrlParser = NULL;
 
@@ -829,27 +835,31 @@ DfciBuildRequestHeaders (
       (RequestHeaders[3].FieldName == NULL) ||
       (RequestHeaders[3].FieldValue == NULL))
   {
-    return EFI_OUT_OF_RESOURCES;
+    Status = EFI_OUT_OF_RESOURCES;
+    goto Exit;
   }
 
   Status = HttpUrlGetHostName (Url, UrlParser, &RequestHeaders[0].FieldValue);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to get Host Name from URL\n"));
+    goto Exit;
   }
 
   if (0 != BodyLength) {
     RequestHeaders[4].FieldName  = AllocateCopyPool (AsciiStrSize (HTTP_HEADER_CONTENT_TYPE), HTTP_HEADER_CONTENT_TYPE);
     RequestHeaders[4].FieldValue = AllocateCopyPool (AsciiStrSize (ContentType), ContentType);
-    if ((RequestHeaders[0].FieldName == NULL) ||
-        (RequestHeaders[1].FieldName == NULL))
+    if ((RequestHeaders[4].FieldName == NULL) ||
+        (RequestHeaders[4].FieldValue == NULL))
     {
-      return EFI_OUT_OF_RESOURCES;
+      Status = EFI_OUT_OF_RESOURCES;
+      goto Exit;
     }
   }
 
-  *Headers = RequestHeaders;
-  *Count   = HeaderCount;
-  HttpUrlFreeParser (UrlParser);
+Exit:
+  if (UrlParser != NULL) {
+    HttpUrlFreeParser (UrlParser);
+  }
 
   return Status;
 }
@@ -1180,6 +1190,8 @@ ProcessHttpRequest (
 
   RequestMessage.Body         = NetworkRequest->HttpRequest.Body;
   RequestMessage.Data.Request = &RequestData;
+  RequestMessage.Headers      = NULL;
+  RequestMessage.HeaderCount  = 0;
 
   RequestToken.Event   = NULL;
   RequestToken.Status  = EFI_SUCCESS;
@@ -1193,7 +1205,7 @@ ProcessHttpRequest (
              &RequestMessage.HeaderCount
              );
   if (EFI_ERROR (Status)) {
-    return Status;
+    goto S_EXIT1;
   }
 
   Status = DfciIssueRequest (NetworkRequest, &RequestToken);
@@ -1898,6 +1910,8 @@ RestoreCertificates (
     DEBUG ((DEBUG_ERROR, "Unable to restore Tls Certificates\n"));
   }
 
+  FreePool (mOldCertificateList);
+
   mOldCertificateList = NULL;
 
   return EFI_SUCCESS;
@@ -2005,6 +2019,8 @@ EnableDfciCertificate (
     DEBUG ((DEBUG_ERROR, "Unable to set Dfci Https certificate. Code=%r\n", Status));
     RestoreCertificates ();
   }
+
+  FreePool (Cert);
 
   return Status;
 }

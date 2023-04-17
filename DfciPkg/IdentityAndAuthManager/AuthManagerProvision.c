@@ -617,7 +617,7 @@ ApplyNewIdentityPacket (
                );
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "DfciUiGetAnswerFromUser failed %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "LocalGetAnswerFromUser failed %r\n", Status));
       if (Status == EFI_NOT_READY) {
         Data->State      = DFCI_PACKET_STATE_DATA_SYSTEM_ERROR;
         Data->StatusCode = EFI_NOT_READY;
@@ -634,7 +634,7 @@ ApplyNewIdentityPacket (
   }
 
   if (Data->State != DFCI_PACKET_STATE_DATA_USER_APPROVED) {
-    DEBUG ((DEBUG_ERROR, "DfciUiGetAnswerFromUser - User Rejected Change\n"));
+    DEBUG ((DEBUG_ERROR, "LocalGetAnswerFromUser - User Rejected Change\n"));
     goto CLEANUP;
   }
 
