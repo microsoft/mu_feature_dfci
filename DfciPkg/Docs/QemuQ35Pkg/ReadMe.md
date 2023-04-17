@@ -3,7 +3,7 @@
 QemuQ35Pkg virtual machine environment is available at
 [here](https://github.com/microsoft/mu_tiano_platforms.git).
 
-This document describes how to build and Run a QuemuQ35Pkg virtual device to
+This document describes how to build and Run a QemuQ35Pkg virtual device to
 exercise the DFCI test cases.
 
 ## Getting started
@@ -15,7 +15,7 @@ Q35, the emulated USB drives used to install windows, and setup the DFCI Test so
 2. An install image for Windows 11 (available when you purchase a license for Windows 11).
     - Using the [Windows Media Creation Tool](https://support.microsoft.com/en-us/windows/create-installation-media-for-windows-99a58364-8c02-206f-aa6f-40c3b507420d),
 create a USB storage device from your install media.
-3. An upper end X64 desktop system that can dedicate three processor cores to the QuemuQ35Pkg virtual device.
+3. An upper end X64 desktop system that can dedicate three processor cores to the QemuQ35Pkg virtual device.
 4. The HOST needs to be setup to run the DFCI test cases.
 See [Setting up the Host](https://github.com/microsoft/mu_feature_dfci/blob/main/DfciPkg/UnitTests/DfciTests/readme.md#setting-up-the-host-system-with-the-refresh-from-network-server-running-in-a-container).
 
