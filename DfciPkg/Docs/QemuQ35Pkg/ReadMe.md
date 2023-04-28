@@ -110,7 +110,7 @@ You will be presented with a Microsoft Surface like firmware interface
 ![FrontPage](ScreenShots/FrontPage.png)
 
 The QemuQ35Pkg virtual system is used by Project Mu for various testing activities, and had
-setting set a certain way for that test environment.
+settings set a certain way for that test environment.
 For DFCI testing, some of the hard coded defaults need to be changed before we install the OS.
 
 Here are the keyboard shortcuts for the Microsoft Surface like FrontPage:
