@@ -11,6 +11,8 @@ Library     Process
 Library     Remote  http://${IP_OF_DUT}:${RF_PORT}
 Library     Support${/}Python${/}DFCI_SupportLib.py
 
+#Import the Generic Shared keywords
+Resource        Support${/}Robot${/}DFCI_Shared_Paths.robot
 
 *** Keywords ***
 
@@ -48,15 +50,15 @@ Get Current Identities
 
 
 Apply Identity
-    [Arguments]     ${mailbox}  ${binPkgFile}
-    ${identityApply}=  Set Variable If  '${mailbox}' == '1'  ${IDENTITY_APPLY}  ${IDENTITY2_APPLY}
+    [Arguments]     ${Identity}  ${binPkgFile}
+    ${identityApply}=  Set Variable If  '${Identity}' == '${OWNER}'  ${IDENTITY_APPLY}  ${IDENTITY2_APPLY}
 
     Generic Set With Variables    ${identityApply}  ${IDENTITY_GUID}  ${binPkgFile}
 
 
 Get Identity Results
-    [Arguments]     ${mailbox}  ${binResultPkgFile}
-    ${identityResult}=  Set Variable If  '${mailbox}' == '1'  ${IDENTITY_RESULT}  ${IDENTITY2_RESULT}
+    [Arguments]     ${Identity}  ${binResultPkgFile}
+    ${identityResult}=  Set Variable If  '${Identity}' == '${OWNER}'  ${IDENTITY_RESULT}  ${IDENTITY2_RESULT}
 
     Generic Get With Variables    ${identityResult}  ${IDENTITY_GUID}  ${binResultPkgFIle}  ${None}
 
@@ -70,15 +72,15 @@ Get Current Permissions
 
 
 Apply Permission
-    [Arguments]     ${mailbox}  ${binPkgFile}
-    ${permissionApply}=  Set Variable If  '${mailbox}' == '1'  ${PERMISSION_APPLY}  ${PERMISSION2_APPLY}
+    [Arguments]     ${Identity}  ${binPkgFile}
+    ${permissionApply}=  Set Variable If  '${Identity}' == '${OWNER}'  ${PERMISSION_APPLY}  ${PERMISSION2_APPLY}
 
     Generic Set With Variables    ${permissionApply}  ${PERMISSION_GUID}  ${binPkgFile}
 
 
 Get Permission Results
-    [Arguments]     ${mailbox}  ${binResultPkgFile}
-    ${permissionResult}=  Set Variable If  '${mailbox}' == '1'  ${PERMISSION_RESULT}  ${PERMISSION2_RESULT}
+    [Arguments]     ${Identity}  ${binResultPkgFile}
+    ${permissionResult}=  Set Variable If  '${Identity}' == '${OWNER}'  ${PERMISSION_RESULT}  ${PERMISSION2_RESULT}
 
     Generic Get With Variables    ${permissionResult}  ${PERMISSION_GUID}  ${binResultPkgFIle}  ${None}
 
@@ -92,14 +94,25 @@ Get Current Settings
 
 
 Apply Settings
-    [Arguments]     ${mailbox}  ${binPkgFile}
-    ${settingsApply}=  Set Variable If  '${mailbox}' == '1'  ${SETTINGS_APPLY}  ${SETTINGS2_APPLY}
+    [Arguments]     ${Identity}  ${binPkgFile}
+    ${settingsApply}=  Set Variable If  '${Identity}' == '${OWNER}'  ${SETTINGS_APPLY}  ${SETTINGS2_APPLY}
 
     Generic Set With Variables    ${settingsApply}  ${SETTINGS_GUID}  ${binPkgFile}
 
 
+Apply Staged Settings
+    [Arguments]     ${Identity}  ${binPkgFile}
+    ${settingsApply}=  Set Variable If  '${Identity}' == '${OWNER}'  ${SETTINGS_APPLY}  ${SETTINGS2_APPLY}
+
+    ${FileContents}=   Get Binary File  ${binPkgFile}
+    ${StagedFileName}=  Get Base Name From Path   ${binPkgFile}
+    @{rc}=    Write Staged File    ${StagedFileName}  ${FileContents}
+    Should Be True    ${rc}[0] == 1
+
+    Write Staged Action    SetVariable  arg1=${settingsApply}  arg2=${SETTINGS_GUID}  arg3=${DFCI_ATTRIBUTES}  arg4=${StagedFileName}
+
 Get Settings Results
-    [Arguments]     ${mailbox}  ${binResultPkgFile}
-    ${settingsResult}=  Set Variable If  '${mailbox}' == '1'  ${SETTINGS_RESULT}  ${SETTINGS2_RESULT}
+    [Arguments]     ${Identity}  ${binResultPkgFile}
+    ${settingsResult}=  Set Variable If  '${Identity}' == '${OWNER}'  ${SETTINGS_RESULT}  ${SETTINGS2_RESULT}
 
     Generic Get With Variables    ${settingsResult}  ${SETTINGS_GUID}  ${binResultPkgFIle}  ${None}

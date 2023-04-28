@@ -196,7 +196,7 @@ Process TestCases
         #
         # Send the user(2) settings packet to the system under test
         #
-        Process Settings Packet     ${Testname}  1  UNSIGNED  ${newSettingsXmlFile}  @{TARGET_PARAMETERS}
+        Process Settings Packet     ${Testname}  ${OWNER}  ${TOVAR}  UNSIGNED  ${newSettingsXmlFile}  @{TARGET_PARAMETERS}
         #
         # Restart the system to apply the settings
         #
@@ -208,7 +208,7 @@ Process TestCases
         #
         # Ensure all of the setting set, were applied correctly
         #
-        ${xmlSettingsRslt}=    Validate Settings Status    ${Testname}  1  ${STATUS_SUCCESS}  BASIC
+        ${xmlSettingsRslt}=    Validate Settings Status    ${Testname}  ${OWNER}  ${STATUS_SUCCESS}  BASIC
         #
         # Validate the individual settings after the reboot
         #

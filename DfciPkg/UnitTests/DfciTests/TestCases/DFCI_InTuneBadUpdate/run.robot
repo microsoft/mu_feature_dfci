@@ -120,7 +120,7 @@ Send User Settings Packet Signed with wrong cert to Enrolled System
     ${signerPfxFile}=   Set Variable    ${NEW_USER_PFX}
     ${xmlPayloadFile}=  Set Variable    ${TEST_CASE_DIR}${/}DfciSettings2.xml
 
-    Process Settings Packet     ${nameofTest}  2  ${signerPfxFile}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
+    Process Settings Packet     ${nameofTest}  ${USER}  ${TOVAR}  ${signerPfxFile}  ${xmlPayloadFile}  @{TARGET_PARAMETERS}
 
 
 Restart System to Apply Bad Settings
@@ -135,7 +135,7 @@ Restart System to Apply Bad Settings
 Verify User Update System Settings Results
     ${nameofTest}=   Set Variable    UserSettings
 
-    Validate Settings Status    ${nameofTest}  2  ${STATUS_SECURITY_VIOLATION}  FULL
+    Validate Settings Status    ${nameofTest}  ${USER}  ${STATUS_SECURITY_VIOLATION}  FULL
 
 
 Get the ending DFCI Settings

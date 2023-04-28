@@ -16,8 +16,12 @@
     <LowestSupportedVersion>2</LowestSupportedVersion>
     <Settings>
         <Setting>
-            <Id>Dfci.OnboardCameras.Enable</Id>
-            <Value>Enabled</Value>
+            <Id>MDM.FriendlyName.String</Id>
+            <Value>Setting that will go away at unenroll</Value>
+        </Setting>
+        <Setting>
+            <Id>MDM.TenantName.String</Id>
+            <Value>Another setting that will go away at unenroll</Value>
         </Setting>
     </Settings>
 </SettingsPacket>

@@ -167,7 +167,7 @@ Process TestCases
         #
         # Send the user(2) settings packet to the system under test
         #
-        Process Settings Packet     ${Testname}  2  ${OLD_USER_PFX}  ${newSettingsXmlFile}  @{TARGET_PARAMETERS}
+        Process Settings Packet     ${Testname}  ${USER}  ${TOVAR}  ${OLD_USER_PFX}  ${newSettingsXmlFile}  @{TARGET_PARAMETERS}
         #
         # Restart the system to apply the settings
         #
@@ -179,7 +179,7 @@ Process TestCases
         #
         # Ensure all of the setting set, were applied correctly
         #
-        ${xmlSettingsRslt}=    Validate Settings Status    ${Testname}  2  ${STATUS_SUCCESS}  BASIC
+        ${xmlSettingsRslt}=    Validate Settings Status    ${Testname}  ${USER}  ${STATUS_SUCCESS}  BASIC
         #
         # Validate the individual settings after the reboot
         #

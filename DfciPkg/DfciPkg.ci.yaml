@@ -114,7 +114,8 @@
             "SDCARD",
             "SECUREBOOTKEYENUM",
             "USBPORTENUM",
-            "cherrypy"
+            "cherrypy",
+            "xcopy"
         ]
     }
 }

@@ -1,36 +1,119 @@
 # Testing DFCI
 
-This describes the test structure for insuring DFCI operates properly.
+This describes the test structure for ensuring DFCI operates properly.
 
 1. A Host System (HOST) to run the test cases.
-2. A Device Under Test (DUT) to be tested, with the new DFCI supported firmware, running the current
-version of Windows.
-3. Both systems on the same network.
+2. A system to run the Refresh From Network server.
+The refresh server is a Docker Container running Linux web server that the firmware on the DUT
+will access from the firmware setting menu.
+The Refresh From Network server may run on the HOST system.
+3. A Device Under Test (DUT) to be tested, with the new DFCI supported firmware, running the
+current version of Windows.
+
+To validate your DFCI test framework, you can use the [Project Mu Tiano Platforms](https://github.com/microsoft/mu_tiano_platforms)
+QemuQ35Pkg virtual system as the DUT.
+This virtual system implements a minimal DFCI system that is sufficient to exercise all of the
+unit tests in DfciPkg.
+
+The QemuQ35 virtual system may also run on the HOST system.
 
 ## Overview
 
-The DFCI tests are a collection of Robot Framework test cases.
-Each Robot Framework test case collection is contained in a directory, and, as a minimum, contains a run.robot file.
+The steps below will setup the HOST system, set up the Refresh From Network Docker Container,
+and then test that this environment is working correctly before setting up the device under test.
 
-Each test case collection is run manually in a proscribed order, and its status is verified before running the next test
-case.
-The tests must be run in order, with some exceptions, as they alter the system state, much like the real usage of DFCI.
+The DFCI tests are a collection of Robot Framework test cases.
+Each Robot Framework test case collection is contained in a directory, and, as a minimum,
+that directory contains a run.robot file.
+
+Each test case collection is run manually in a proscribed order, and its status is verified
+before running the next test case.
+The tests must be run in order, with some exceptions, as they alter the system state, much like
+the real usage of DFCI.
 
 ## Equipment needed
 
-The following equipment is needed to run the DFCI tests:
+You need a capable x64 system to be the HOST for running the DFCI test cases.
+This will be especially true if you run the QemuQ35Pkg virtual system to verify that the
+DFCI test framework if functioning well.
 
-1. A system to run the test cases running a current version of Windows.
-2. A System Under Test also running current version of Windows.
-3. Both systems able to communicate with each other across the same network.
-
-Optional equipment is a mechanism to collect firmware logs from the system under test.
+Optional equipment for a physical DUT is a mechanism to collect firmware logs.
 Included is a serial port support function that looks for an FTDI serial connection.
 See the Platforms\SimpleFTDI\ folder.
 
-## Setting up the Device Under Test (DUT)
+## Setting up the HOST system with the Refresh From Network server running is a container
 
-Copy the files needed for the DUT.
+A Refresh From Network server is required to run the Refresh From Network portion of the DFCI
+E2E tests.
+In addition, Refresh From Network may be run from the DUT firmware menu in lieu of running the
+DFCI_InTuneUnEnroll test case.
+
+Instructions given here are to setup a Docker container running Ubuntu on Windows using Windows
+Subsystem for Linux 2 (WSL2).
+You will need the IP address of the system that will run the RefreshFromNetwork container in
+order to generate the SSL certificate used to access the RefreshFromNetwork server.
+
+The HOST system requires the following software (NOTE - There are dependencies on x86-64 versions of Windows):
+
+1. No other web server using ports 80 or 443 may run on the system chosen for the RefreshServer.
+2. A current version of Windows x86-64.
+3. Clone the [mu_feature_dfci]<https://github.com/microsoft/mu_feature_dfci> repository, as it
+will be needed in the following steps.
+4. The current Windows SDK, available here [Windows SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk).
+5. Python x86-64 (the version tested), available here [Python 3.11.0](https://www.python.org/ftp/python/3.11.0/python-3.11.0-amd64.exe).
+6. The testcase tree needs to be on the test host.  This can be your build repository, or you can clone just the files
+needed by using this bat file to clone just the DfciTest tree: DfciPkg\UnitTests\DfciTests\CloneUnitTests.bat.
+7. Install the required python packages by running using the pip-requirements.txt file in the
+DfciPkg\UnitTests\DfciTests directory:
+
+      ```text
+         python -m pip install --upgrade -r pip-requirements.txt
+       ```
+
+8. Install Git for Windows, available here  [Git for Windows](https://gitforwindows.org/).
+This is probably already installed, but the certificate generation in the next session will need to use the openssl.exe command.
+Git for Windows distributes an acceptable version of openssl.exe that will be used in the preparation of the DFCI_HTTPS certificates.
+9. Install Windows Subsystem for Linux. Install instructions here [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install).
+10. Install Docker Desktop, available here [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/).
+
+### Configure DfciTests.ini, and initialize the Refresh Server Container
+
+Dfci testing now uses a test configuration file, DfciTest.ini.
+DfciTests.Template is the master .ini file.
+If new settings are added in the future, they will be added to the DfciTests.Template file.
+Every time that the DfciTests.ini file is read, the version is compared with DfciTest.Template.
+When a new version is detected, and the test is failed until you the new fields are added to DfciTests.ini.
+
+1. Copy DfciTests.Template to DfciTests.ini
+2. Edit DfciTests.ini and set the value of server_host_name to either a host name or an IP address of your HOST device.
+The server_host_name field will be used to populate the Subject Alternative Names list in the DFCI_HTTPS SSL certificates.
+3. In the directory DfciPkg\UnitTests\DfciTests\Certs, run MakeHTTPSCerts.  This will generate two SSL certificates.
+One is for the RefreshServer, and the other is used by the RefreshServer testcase.
+4. In the directory DfciPkg\UnitTests\DfciTests\RefreshServer, run CreateDockerContainer.  After the container is created,
+the script will prompt you about starting the container.  I suggest using option 2 for this first test.
+5. In another command window, cd to DfciPkg\UnitTests\DfciTests and run these two unit tests:
+
+      ```text
+         RunDfciTest.bat TestCases\DFCI_RefreshServer
+         RunDfciTest.bat TestCases\DFCI_CertChainingTest
+      ```
+
+## Setting up a physical device to be the Device Under Test
+
+For the QemuQ35Pkg virtual device, please follow the (*NOTE!!! Fix this link*)
+[ReadMe in mu_tiano_platforms]<https://github.com/microsoft/mu_tiano_platforms/blob/main/Readme.rst>#setting-up-qemuq35pkg-to-be-the-device-under-test
+
+At this point, it would be much easier to run the Dfci Test cases if the Device Under Test automatically logged in to
+a local administrator account after booting.
+To do this, use Computer Management to add a new user, and add that new user to the Administrators group.
+Create this account with the Password Never Expires option enabled.
+Next, run NtwPlWiz.
+You can follow the steps at
+[Running NetPlWiz](https://answers.microsoft.com/en-us/windows/forum/all/how-to-login-automatically-to-windows-11/c0e9301e-392e-445a-a5cb-f44d00289715).
+
+Finally, restart the system and make sure the new user logs in automatically.
+
+Copy the files needed for the Device Under Test (DUT).
 There is a script to help you do this.
 
 1. Mount a USB device on the HOST system (the one with the DFCI source package).
@@ -81,39 +164,22 @@ The HOST system requires the following software (NOTE - There are dependencies o
 4. Python x86-64 (the version tested), available here [Python 3.11.0](https://www.python.org/ftp/python/3.11.0/python-3.11.0-amd64.exe).
 5. The testcase tree needs to be on the test host.  This can be your build repository, or you can clone just the files
 needed by using this bat file to clone just the DfciTest tree: DfciPkg\UnitTests\DfciTests\CloneUnitTests.bat.
-6. Install the required python packages by running using the pip-requirements.txt file in the DfciTests directory:
+6. Install the required python packages that are needed to run the testcases.
+This is a different list that needed for building DfciPkg itself.
+Install these python requirements by running the following command in the DfciTests directory:
+
+      Change the directory on the host system to ..\DfciPkg\UnitTests\DfctTests, then run:
 
       ```text
-         python -m pip install --upgrade -r pip-requirements.txt
-       ```
+        python -m pip install --upgrade -r pip-requirements.txt
+      ```
 
 7. Install Git for Windows, available here  [Git for Windows](https://gitforwindows.org/).
 This is probably already installed, but the certificate generation in the next session will need to use the openssl.exe command.
 Git for Windows distributes an acceptable version of openssl.exe that will be used in the preparation of the DFCI_HTTPS certificates.
-8. Install Windows Subsystem for Linux. Install instructions here [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install).
-9. Install Docker Desktop, available here [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/).
-
-### Configure DfciTests.ini, and initialize the Refresh Server Container
-
-Dfci testing now uses a test configuration file, DfciTest.ini.
-DfciTests.Template is the master .ini file.
-If new settings are added in the future, they will be added to the DfciTests.Template file.
-Every time that the DfciTests.ini file is read, the version is compared with DfciTest.Template.
-When a new version is detected, the new fields are added to DfciTests.ini.
-
-1. Copy DfciTests.Template DfciTests.ini
-2. Edit DfciTests.ini and set the value of server_host_name to either a host name or an IP address of your HOST device.
-The server_host_name field will be used to populate the Subject Alternative Names list in the DFCI_HTTPS SSL certificates.
-3. In the directory DfciPkg\UnitTests\DfciTests\Certs, run MakeHTTPSCerts.  This will generate two SSL certificates.
-One is for the RefreshServer, and the other is used by the RefreshServer testcase.
-4. In the directory DfciPkg\UnitTests\DfciTests\RefreshServer, run CreateDockerContainer.  After the container is created,
-the script will prompt you about starting the container.  I suggest using option 2 for this first test.
-5. In another command window, cd to DfciPkg\UnitTests\DfciTests and run these two unit tests:
-
-      ```text
-         RunDfciTest.bat TestCases\DFCI_RefreshServer
-         RunDfciTest.bat TestCases\DFCI_CertChainingTest
-      ```
+8. Ensure 'C:\Program Files\Git\usr\bin' is added to your PATH along with 'C:\Program Files\Git\cmd.'
+9. Install Windows Subsystem for Linux. Install instructions here [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install).
+10. Install Docker Desktop, available here [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/).
 
 ## Test Cases Collections
 
@@ -182,7 +248,7 @@ Ensure Mailboxes Are Clean                                            ..
 DfciTests\TestCases\DFCI_InitialState\run.robot
 Ensure Mailboxes Are Clean                                            | PASS |
 ------------------------------------------------------------------------------
-Verify System Unter Test is Opted In                                  | PASS |
+Verify System Under Test is Opted In                                  | PASS |
 ------------------------------------------------------------------------------
 Check that the starting DFCI Ownership is Unenrolled                  | PASS |
 ------------------------------------------------------------------------------
