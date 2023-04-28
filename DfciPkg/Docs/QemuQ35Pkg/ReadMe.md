@@ -1,6 +1,6 @@
 # Building and Running QemuQ35Pkg with DFCI
 
-QemuQ35Pkg virtual machine environment is available at
+QemuQ35Pkg virtual machine environment is available
 [here](https://github.com/microsoft/mu_tiano_platforms.git).
 
 This document describes how to build and Run a QemuQ35Pkg virtual device to
