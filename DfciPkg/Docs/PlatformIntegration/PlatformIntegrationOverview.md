@@ -81,8 +81,31 @@ Adding DFCI to your system consists of:
 
 1. Write your settings providers. Use **DfciPkg/Library/DfciSampleProvider**.
 2. Writing three library classes for the DfciDeviceIdSupportLib, DfciGroupLib, and DfciUiSupportLib.
-3. Adding the DSC sections below.
-4. Adding the FDF sections below.
+3. [Ensure you have enabled HTTP Connections in your platform build.](#enabling-http-connections)
+4. [Adding the DSC sections below.](#platform-dsc-statements)
+5. [Adding the FDF sections below.](#platform-fdf-statements)
+
+### Enabling HTTP Connections
+
+
+Ensure that you have the following PCD set in your `NetworkPcds.dsc.inc`
+> NetworkPcds.dsc.inc
+> ```text
+> !if $(NETWORK_ALLOW_HTTP_CONNECTIONS) == TRUE
+>   gEfiNetworkPkgTokenSpaceGuid.PcdAllowHttpConnections|TRUE
+> !endif
+> ```
+
+Then in your platform DSC file such as `QemuQ35.dsc` add the following to your define section:
+
+> QemuQ35.dsc
+>```text
+>[Defines]
+>    DEFINE NETWORK_ALLOW_HTTP_CONNECTIONS = TRUE
+>```
+
+
+### Platform DSC statements
 
 ```text
 [LibraryClasses.XXX]
