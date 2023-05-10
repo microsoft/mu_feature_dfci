@@ -87,7 +87,6 @@ Adding DFCI to your system consists of:
 
 ### Enabling HTTP Connections
 
-
 Ensure that you have the following PCD set in your `NetworkPcds.dsc.inc`
 > NetworkPcds.dsc.inc
 > ```text
@@ -103,7 +102,6 @@ Then in your platform DSC file such as `QemuQ35.dsc` add the following to your d
 >[Defines]
 >    DEFINE NETWORK_ALLOW_HTTP_CONNECTIONS = TRUE
 >```
-
 
 ### Platform DSC statements
 
