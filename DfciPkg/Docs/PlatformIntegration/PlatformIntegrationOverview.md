@@ -75,12 +75,12 @@ In addition, OpenSSL has to be configured for modern TLS ciphers.
 
 * [*edk2* Ensure ECC Ciphers are included (minimum version)](https://github.com/tianocore/edk2/commit/9dd964f5e5c5595a1acd5eb438fb088327db86fa)
 
-## Platform DSC statements
+## Adding DFCI to your platform build
 
-Adding DFCI to your system consists of:
+Adding DFCI to your platform build consists of:
 
-1. Write your settings providers. Use **DfciPkg/Library/DfciSampleProvider**.
-2. Writing three library classes for the DfciDeviceIdSupportLib, DfciGroupLib, and DfciUiSupportLib.
+1. Writing your settings providers. See [DfciSettingProviders](./DfciSettingProviders.md) for an example.
+2. Writing three library classes for the [DfciDeviceIdSupportLib](./DfciDeviceIdSupportLib.md), [DfciGroupLib](./DfciGroups.md), and [DfciUiSupportLib.](./DfciUiSupportLib.md)
 3. [Ensure you have enabled HTTP Connections in your platform build.](#enabling-http-connections)
 4. [Adding the DSC sections below.](#platform-dsc-statements)
 5. [Adding the FDF sections below.](#platform-fdf-statements)
