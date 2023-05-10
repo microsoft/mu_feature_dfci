@@ -182,7 +182,7 @@ Reboot System And Wait For System Online
 
         TRY
             ${reboot_complete}=  is_reboot_complete
-        EXCEPT  Connection to remote server broken  type=start
+        EXCEPT
             ${reboot_complete}=  Set Variable  ${False}
             BREAK
         END
@@ -198,7 +198,7 @@ Reboot System And Wait For System Online
 
         TRY
             ${reboot_complete}=  is_reboot_complete
-        EXCEPT  Connection to remote server broken  type=start
+        EXCEPT
             ${reboot_complete}=  Set Variable  ${False}
         END
     END
