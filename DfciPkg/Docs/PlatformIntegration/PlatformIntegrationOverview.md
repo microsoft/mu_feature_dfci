@@ -80,14 +80,15 @@ In addition, OpenSSL has to be configured for modern TLS ciphers.
 
 Adding DFCI to your platform build consists of:
 
-1. Writing your settings providers. See [DfciSettingProviders](./DfciSettingProviders.md) for an example.
+1. Writing your settings providers
+    * See [DfciSettingProviders](./DfciSettingProviders.md) for an example.
 2. Writing three library classes:
     * [DfciDeviceIdSupportLib](./DfciDeviceIdSupportLib.md)
     * [DfciGroupLib](./DfciGroups.md)
     * [DfciUiSupportLib](./DfciUiSupportLib.md)
-3. [Ensure you have enabled HTTP Connections in your platform build.](#enabling-http-connections)
-4. [Adding the DSC sections below.](#platform-dsc-statements)
-5. [Adding the FDF sections below.](#platform-fdf-statements)
+3. [Ensure you have enabled HTTP Connections in your platform build](#enabling-http-connections)
+4. [Adding the DSC sections below](#platform-dsc-statements)
+5. [Adding the FDF sections below](#platform-fdf-statements)
 
 ### Enabling HTTP Connections
 
