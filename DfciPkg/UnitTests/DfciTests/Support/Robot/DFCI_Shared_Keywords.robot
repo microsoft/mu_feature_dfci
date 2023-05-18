@@ -167,7 +167,7 @@ Reboot System And Wait For System Online
 
     TRY
         remote_warm_reboot
-    EXCEPT  Connection to remote server broken  type=start
+    EXCEPT
         BREAK
     END
 
@@ -182,8 +182,9 @@ Reboot System And Wait For System Online
 
         TRY
             ${reboot_complete}=  is_reboot_complete
-        EXCEPT
+        EXCEPT     AS    ${error_message}
             ${reboot_complete}=  Set Variable  ${False}
+            Log To Console    ${error_message}
             BREAK
         END
     END
@@ -198,9 +199,16 @@ Reboot System And Wait For System Online
 
         TRY
             ${reboot_complete}=  is_reboot_complete
-        EXCEPT
+        EXCEPT     AS    ${error_message}
             ${reboot_complete}=  Set Variable  ${False}
+            Log To Console    ${error_message}
         END
+    END
+
+    IF    ${reboot_complete} == ${True}
+        Log To Console     Device Responded
+    ELSE
+        Log to Console     Device Failed To Respond
     END
 
 
