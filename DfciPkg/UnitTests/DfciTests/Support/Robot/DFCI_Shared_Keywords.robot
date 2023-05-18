@@ -154,10 +154,52 @@ Get and Print Device Identifier
 
 
 ############################################################
-#      Resetting system and wait for PyRobotRemote         #
+#      Resetting system and wait for reboot complete       #
 ############################################################
+Wait For System Online
+    [Arguments]     ${retries}
+    FOR    ${index}    IN RANGE    ${retries}
+       ${result} =     Is Device Online    ${IP_OF_DUT}
+       Exit For Loop If    '${result}' == 'True'
+       Sleep   5sec    "Waiting for system to come back Online"
+    END
+    Should Be True    ${result}    System failed to come online: pinging ${IP_OF_DUT} failed ${retries} times
+Wait For System Offline
+    [Arguments]     ${retries}
+    FOR    ${index}    IN RANGE    ${retries}
+       ${result} =     Is Device Online    ${IP_OF_DUT}
+       Exit For Loop If    '${result}' == 'False'
+       Sleep   5sec    "Waiting for system to go offline"
+    END
+    Should Not Be True    ${result}    System failed to go offline: pinged ${IP_OF_DUT} ${retries} times
+Wait For Remote Robot
+    [Arguments]     ${timeinseconds}
+    FOR    ${retries}  IN RANGE    ${timeinseconds}
+       Log To Console      Waiting for Robot To Ack ${retries}
+       ${status}   ${message}  Run Keyword And Ignore Error    Remote Ack
+       Return From Keyword If      '${status}' == 'PASS'   ${message}
+       Sleep       1
+    END
+    Return From Keyword     ${False}
 
 Reboot System And Wait For System Online
+    remote_warm_reboot
+    Wait For System Offline    60
+    Wait For System Online    60
+    Wait For Remote Robot    15
+
+Reboot System To Firmware And Wait For System Online
+    remote_reboot_to_firmware
+    Wait For System Offline    60
+    Wait For System Online    120
+    Wait For Remote Robot    15
+
+############################################################
+#      Resetting system and wait for PyRobotRemote         #
+############################################################
+# TODO this is needed for QemuQ35 but appears to be causing issues for physical machines
+
+Reboot System And Wait For System Online QemuQ35
     [Timeout]  10minutes
 
     #
@@ -183,6 +225,7 @@ Reboot System And Wait For System Online
         TRY
             ${reboot_complete}=  is_reboot_complete
         EXCEPT     AS    ${error_message}
+        EXCEPT     AS    ${error_message}
             ${reboot_complete}=  Set Variable  ${False}
             Log To Console    ${error_message}
             BREAK
@@ -200,9 +243,17 @@ Reboot System And Wait For System Online
         TRY
             ${reboot_complete}=  is_reboot_complete
         EXCEPT     AS    ${error_message}
+        EXCEPT     AS    ${error_message}
             ${reboot_complete}=  Set Variable  ${False}
             Log To Console    ${error_message}
+            Log To Console    ${error_message}
         END
+    END
+
+    IF    ${reboot_complete} == ${True}
+        Log To Console     Device Responded
+    ELSE
+        Log to Console     Device Failed To Respond
     END
 
     IF    ${reboot_complete} == ${True}
