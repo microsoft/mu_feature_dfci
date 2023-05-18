@@ -21,6 +21,7 @@ import configparser
 import json
 import pathlib
 import xml.etree.ElementTree as ElementTree
+import subprocess
 
 from io import BytesIO
 
@@ -715,6 +716,17 @@ class DFCI_SupportLib(object):
     def get_thumbprint_element(self, xml_file, id):
         d = self.get_thumbprints(xml_file)
         return d[id]
+    
+        #
+    # Determine if the DUT is online by pinging it
+    #
+    def is_device_online(self, ipaddress):
+        output = subprocess.Popen(["ping.exe", "-n", "1", ipaddress], stdout=subprocess.PIPE).communicate()[0]
+
+        if (b'TTL' in output):
+            return True
+        else:
+            return False
 
     def get_signtool_path(self):
         if self._sign_tool_path is None:
