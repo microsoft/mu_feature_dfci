@@ -36,11 +36,3 @@ extends:
         Pkgs: 'ZeroTouchPkg'
         Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
         SelfHostAgent: false
-      TARGET_DFCI_ARM:
-        Pkgs: 'DfciPkg'
-        Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
-        SelfHostAgent: true
-      TARGET_ZERO_ARM:
-        Pkgs: 'ZeroTouchPkg'
-        Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
-        SelfHostAgent: true
