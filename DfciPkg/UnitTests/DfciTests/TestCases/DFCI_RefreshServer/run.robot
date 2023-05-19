@@ -18,6 +18,8 @@ Library         Support${/}Python${/}DependencyLib.py
 #Import the Generic Shared keywords
 Resource        Support${/}Robot${/}DFCI_Shared_Paths.robot
 Resource        Support${/}Robot${/}CertSupport.robot
+Resource        Support${/}Robot${/}DFCI_Shared_Keywords2.robot
+
 
 Suite setup     Make Dfci Output
 Test Teardown   Terminate All Processes    kill=True

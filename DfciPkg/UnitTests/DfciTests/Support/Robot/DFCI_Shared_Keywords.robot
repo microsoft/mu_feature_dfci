@@ -8,10 +8,14 @@ Documentation    DFCI Shared Keywords
 
 Library     OperatingSystem
 Library     Process
+Library     DateTime
 Library     Remote  http://${IP_OF_DUT}:${RF_PORT}
 Library     Support${/}Python${/}DFCI_SupportLib.py
 
 Resource     Support${/}Robot${/}DFCI_Shared_Keywords2.robot
+
+#Import the Generic Shared keywords
+Resource        Support${/}Robot${/}DFCI_Shared_Paths.robot
 
 
 *** Variables ***
@@ -23,6 +27,23 @@ ${CMD_UUID}                Get-CimInstance -ClassName Win32_computersystemproduc
 
 
 *** Keywords ***
+Initialize Colors
+    ${red}=       Evaluate    "\\033[31m"
+    ${green}=     Evaluate    "\\033[32m"
+    ${yellow}=    Evaluate    "\\033[33m"
+    ${blue}=      Evaluate    "\\033[34m"
+    ${purple}=    Evaluate    "\\033[35m"
+    ${cyan}=      Evaluate    "\\033[36m"
+    ${white}=     Evaluate    "\\033[37m"
+
+    Set Suite Variable   ${red}
+    Set Suite Variable   ${green}
+    Set Suite Variable   ${yellow}
+    Set Suite Variable   ${blue}
+    Set Suite Variable   ${purple}
+    Set Suite Variable   ${cyan}
+    Set Suite Variable   ${white}
+
 Compare Files
     [Arguments]     ${CompareFile1}  ${CompareFile2}  ${ExpectedRC}
 
@@ -134,48 +155,54 @@ Get and Print Device Identifier
 
 
 ############################################################
-#      Resetting system and wait for reboot complete       #
+#      Resetting system and wait for PyRobotRemote         #
 ############################################################
 
-Wait For System Online
-    [Arguments]     ${retries}
-    FOR    ${index}    IN RANGE    ${retries}
-       ${result} =     Is Device Online    ${IP_OF_DUT}
-       Exit For Loop If    '${result}' == 'True'
-       Sleep   5sec    "Waiting for system to come back Online"
-    END
-    Should Be True    ${result}    System failed to come online: pinging ${IP_OF_DUT} failed ${retries} times
-
-Wait For System Offline
-    [Arguments]     ${retries}
-    FOR    ${index}    IN RANGE    ${retries}
-       ${result} =     Is Device Online    ${IP_OF_DUT}
-       Exit For Loop If    '${result}' == 'False'
-       Sleep   5sec    "Waiting for system to go offline"
-    END
-    Should Not Be True    ${result}    System failed to go offline: pinged ${IP_OF_DUT} ${retries} times
-
-Wait For Remote Robot
-    [Arguments]     ${timeinseconds}
-    FOR    ${retries}  IN RANGE    ${timeinseconds}
-       Log To Console      Waiting for Robot To Ack ${retries}
-       ${status}   ${message}  Run Keyword And Ignore Error    Remote Ack
-       Return From Keyword If      '${status}' == 'PASS'   ${message}
-       Sleep       1
-    END
-    Return From Keyword     ${False}
-
 Reboot System And Wait For System Online
-    remote_warm_reboot
-    Wait For System Offline    60
-    Wait For System Online    60
-    Wait For Remote Robot    15
+    [Timeout]  10minutes
 
-Reboot System To Firmware And Wait For System Online
-    remote_reboot_to_firmware
-    Wait For System Offline    60
-    Wait For System Online    120
-    Wait For Remote Robot    15
+    #
+    # remote warm reboot sets reboot_complete to False.
+    #
+    ${reboot_complete}=  Set Variable  ${False}
+
+    TRY
+        remote_warm_reboot
+    EXCEPT  Connection to remote server broken  type=start
+        BREAK
+    END
+
+    Log To Console  .
+    ${index}=  Set Variable  ${0}
+    WHILE  ${reboot_complete} == ${False}
+        Sleep  1sec  "Waiting for Robot Framework Remote Server To to go offline"
+
+        ${mod}=  Evaluate  ${index} % 10
+        ${index}=  Evaluate  ${index} + 1
+        Run keyword if  ${mod} == 0  Log To Console  Waiting for Robot Framework Remote Server To to go offline(${index})
+
+        TRY
+            ${reboot_complete}=  is_reboot_complete
+        EXCEPT
+            ${reboot_complete}=  Set Variable  ${False}
+            BREAK
+        END
+    END
+
+    ${index}=  Set Variable  ${0}
+    WHILE  ${reboot_complete} == ${False}
+        Sleep  1sec    "Waiting for Robot Framework Remote Server To come back online"
+
+        ${mod}=  Evaluate  ${index} % 10
+        ${index}=  Evaluate  ${index} + 1
+        Run keyword if  ${mod} == 0  Log To Console  Waiting for Robot Framework Remote Server To come back online(${index})
+
+        TRY
+            ${reboot_complete}=  is_reboot_complete
+        EXCEPT
+            ${reboot_complete}=  Set Variable  ${False}
+        END
+    END
 
 
 ############################################################
@@ -194,19 +221,19 @@ Verify No Mailboxes Have Data
 
     @{rcperm}=    GetUefiVariable    ${PERMISSION_APPLY}  ${PERMISSION_GUID}  ${None}
     Run Keyword If   ${rcperm}[0] != ${STATUS_VARIABLE_NOT_FOUND}
-    ...    SetUefiVariable    ${PERMISSION_APPLY}  ${IDENTITY_GUID}
+    ...    SetUefiVariable    ${PERMISSION_APPLY}  ${PERMISSION_GUID}
 
     @{rcperm2}=    GetUefiVariable    ${PERMISSION2_APPLY}  ${PERMISSION_GUID}  ${None}
     Run Keyword If   ${rcperm2}[0] != ${STATUS_VARIABLE_NOT_FOUND}
-    ...    SetUefiVariable    ${PERMISSION2_APPLY}  ${IDENTITY_GUID}
+    ...    SetUefiVariable    ${PERMISSION2_APPLY}  ${PERMISSION_GUID}
 
     @{rcset}=    GetUefiVariable    ${SETTINGS_APPLY}  ${SETTINGS_GUID}  ${None}
     Run Keyword If   ${rcset}[0] != ${STATUS_VARIABLE_NOT_FOUND}
-    ...    SetUefiVariable    ${SETTINGS_APPLY}  ${IDENTITY_GUID}
+    ...    SetUefiVariable    ${SETTINGS_APPLY}  ${SETTINGS_GUID}
 
     @{rcset2}=    GetUefiVariable    ${SETTINGS2_APPLY}  ${SETTINGS_GUID}  ${None}
     Run Keyword If   ${rcset2}[0] != ${STATUS_VARIABLE_NOT_FOUND}
-    ...    SetUefiVariable    ${SETTINGS2_APPLY}  ${IDENTITY_GUID}
+    ...    SetUefiVariable    ${SETTINGS2_APPLY}  ${SETTINGS_GUID}
 
     Should Be True    ${rcid}[0] == ${STATUS_VARIABLE_NOT_FOUND}
     Should Be True    ${rcperm}[0] == ${STATUS_VARIABLE_NOT_FOUND}
@@ -219,24 +246,24 @@ Verify No Mailboxes Have Data
 #      Apply a Provision (Identity) Package, and check the results     #
 ########################################################################
 Process Provision Packet
-    [Arguments]    ${TestName}  ${mailbox}  ${signPfxFile}  ${testsignPfxFile}  ${ownerCertFile}  ${KEY_INDEX}  @{TargetParms}
-    ${applyPackageFile}=   Set Variable    ${TOOL_STD_OUT_DIR}${/}${TestName}_Provision_apply.log
-    ${binPackageFile}=     Set Variable    ${TOOL_DATA_OUT_DIR}${/}${TestName}_Provision_apply.bin
+    [Arguments]    ${nameofTest}  ${Identity}  ${signPfxFile}  ${testsignPfxFile}  ${ownerCertFile}  ${KEY_INDEX}  @{TargetParms}
+    ${applyPackageFile}=   Set Variable    ${TOOL_STD_OUT_DIR}${/}${nameofTest}_${Identity}_Provision_apply.log
+    ${binPackageFile}=     Set Variable    ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Provision_apply.bin
 
     #Create and deploy an identity packet
 
     Create Dfci Provisioning Package     ${binPackageFile}  ${signPfxFile}  ${testsignPfxFile}  ${ownerCertFile}  ${KEY_INDEX}  @{TargetParms}
     Print Provisioning Package           ${binPackageFile}  ${applyPackageFile}
 
-    Apply Identity  ${mailbox}  ${binPackageFile}
+    Apply Identity  ${Identity}  ${binPackageFile}
 
 
 Validate Provision Status
-    [Arguments]    ${TestName}  ${mailbox}  ${expectedStatus}
-    ${binPackageFile}=     Set Variable    ${TOOL_DATA_OUT_DIR}${/}${TestName}_Provision_apply.bin
-    ${binResultFile}=      Set Variable    ${TOOL_DATA_OUT_DIR}${/}${TestName}_Provision_result.bin
+    [Arguments]    ${nameofTest}  ${Identity}  ${expectedStatus}
+    ${binPackageFile}=     Set Variable    ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Provision_apply.bin
+    ${binResultFile}=      Set Variable    ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Provision_result.bin
 
-    Get Identity Results  ${mailbox}  ${binResultFile}
+    Get Identity Results  ${Identity}  ${binResultFile}
 
     Verify Provision Response   ${binPackageFile}  ${binResultFile}  ${expectedStatus}
 
@@ -245,9 +272,9 @@ Validate Provision Status
 #      Apply a Permission Package, and check the results     #
 ##############################################################
 Process Permission Packet
-    [Arguments]  ${TestName}  ${mailbox}  ${ownerPfxFile}  ${PayloadFile}  @{TargetParms}
-    ${applyPackageFile}=  Set Variable  ${TOOL_STD_OUT_DIR}${/}${TestName}_Permission_apply.log
-    ${binPackageFile}=    Set Variable  ${TOOL_DATA_OUT_DIR}${/}${TestName}_Permission_apply.bin
+    [Arguments]  ${nameofTest}  ${Identity}  ${ownerPfxFile}  ${PayloadFile}  @{TargetParms}
+    ${applyPackageFile}=  Set Variable  ${TOOL_STD_OUT_DIR}${/}${nameofTest}_${Identity}_Permission_apply.log
+    ${binPackageFile}=    Set Variable  ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Permission_apply.bin
 
 
     #Create and deploy a permissions packet
@@ -255,16 +282,16 @@ Process Permission Packet
     Create Dfci Permission Package  ${binPackageFile}  ${ownerPfxFile}  ${PayloadFile}  @{TargetParms}
     Print Permission Package        ${binPackageFile}  ${applyPackageFile}
 
-    Apply Permission  ${mailbox}  ${binPackageFile}
+    Apply Permission  ${Identity}  ${binPackageFile}
 
 
 Validate Permission Status
-    [Arguments]  ${TestName}  ${mailbox}  ${expectedStatus}
-    ${binPackageFile}=  Set Variable  ${TOOL_DATA_OUT_DIR}${/}${TestName}_Permission_apply.bin
-    ${binResultFile}=   Set Variable  ${TOOL_DATA_OUT_DIR}${/}${TestName}_Permission_result.bin
-    ${xmlResultFile}=   Set Variable  ${TOOL_DATA_OUT_DIR}${/}${TestName}_Permission_result.xml
+    [Arguments]  ${nameofTest}  ${Identity}  ${expectedStatus}
+    ${binPackageFile}=  Set Variable  ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Permission_apply.bin
+    ${binResultFile}=   Set Variable  ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Permission_result.bin
+    ${xmlResultFile}=   Set Variable  ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Permission_result.xml
 
-    Get Permission Results  ${mailbox}  ${binResultFile}
+    Get Permission Results  ${Identity}  ${binResultFile}
 
     Verify Permission Response  ${binPackageFile}  ${binResultFile}  ${expectedStatus}
 
@@ -280,25 +307,29 @@ Validate Permission Status
 #      Apply a Settings Package, and check the results     #
 ############################################################
 Process Settings Packet
-    [Arguments]  ${TestName}  ${mailbox}  ${ownerPfxFile}  ${PayloadFile}  @{TargetParms}
-    ${applyPackageFile}=  Set Variable  ${TOOL_STD_OUT_DIR}${/}${TestName}_Settings_apply.log
-    ${binPackageFile}=    Set Variable  ${TOOL_DATA_OUT_DIR}${/}${TestName}_Settings_apply.bin
+    [Arguments]  ${nameofTest}  ${Identity}  ${Staged}  ${ownerPfxFile}  ${PayloadFile}  @{TargetParms}
+    ${applyPackageFile}=  Set Variable  ${TOOL_STD_OUT_DIR}${/}${nameofTest}_${Identity}_Settings_apply.log
+    ${binPackageFile}=    Set Variable  ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Settings_apply.bin
 
     #Create and deploy a settings packet
 
     Create Dfci Settings Package  ${binPackageFile}  ${ownerPfxFile}  ${PayloadFile}  @{TargetParms}
     Print Settings Package        ${binPackageFile}    ${applyPackageFile}
 
-    Apply Settings  ${mailbox}  ${binPackageFile}
+    IF  '${Staged}' == '${STAGE}'
+        Apply Staged Settings  ${Identity}  ${binPackageFile}
+    ELSE
+        Apply Settings  ${Identity}  ${binPackageFile}
+    END
 
 
 Validate Settings Status
-    [Arguments]  ${TestName}  ${mailbox}  ${expectedStatus}  ${full}
-    ${binPackageFile}=  Set Variable  ${TOOL_DATA_OUT_DIR}${/}${TestName}_Settings_apply.bin
-    ${binResultFile}=   Set Variable  ${TOOL_DATA_OUT_DIR}${/}${TestName}_Settings_result.bin
-    ${xmlResultFile}=   Set Variable  ${TOOL_DATA_OUT_DIR}${/}${TestName}_Settings_result.xml
+    [Arguments]  ${nameofTest}  ${Identity}  ${expectedStatus}  ${full}
+    ${binPackageFile}=  Set Variable  ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Settings_apply.bin
+    ${binResultFile}=   Set Variable  ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Settings_result.bin
+    ${xmlResultFile}=   Set Variable  ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_Settings_result.xml
 
-    Get Settings Results  ${mailbox}  ${binResultFile}
+    Get Settings Results  ${Identity}  ${binResultFile}
 
     Verify Settings Response    ${binPackageFile}  ${binResultFile}  ${expectedStatus}  ${full}
 
@@ -311,23 +342,23 @@ Validate Settings Status
 #      Process Unenroll Package                                        #
 ########################################################################
 Process UnEnroll Packet
-    [Arguments]    ${TestName}  ${mailbox}  ${signPfxFile}  ${KEY_INDEX}  @{TargetParms}
-    ${applyPackageFile}=   Set Variable    ${TOOL_STD_OUT_DIR}${/}${TestName}_UnEnroll_apply.log
-    ${binPackageFile}=     Set Variable    ${TOOL_DATA_OUT_DIR}${/}${TestName}_UnEnroll_apply.bin
+    [Arguments]    ${nameofTest}  ${Identity}  ${signPfxFile}  ${KEY_INDEX}  @{TargetParms}
+    ${applyPackageFile}=   Set Variable    ${TOOL_STD_OUT_DIR}${/}${nameofTest}_${Identity}_UnEnroll_apply.log
+    ${binPackageFile}=     Set Variable    ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_UnEnroll_apply.bin
 
     #Create and deploy an identity packet
 
     Create Dfci Unenroll Package     ${binPackageFile}  ${signPfxFile}  ${KEY_INDEX}  @{TargetParms}
     Print Provisioning Package       ${binPackageFile}  ${applyPackageFile}
 
-    Apply Identity  ${mailbox}  ${binPackageFile}
+    Apply Identity  ${Identity}  ${binPackageFile}
 
 
 Validate UnEnroll Status
-    [Arguments]    ${TestName}  ${mailbox}  ${expectedStatus}
-    ${binPackageFile}=     Set Variable    ${TOOL_DATA_OUT_DIR}${/}${TestName}_UnEnroll_apply.bin
-    ${binResultFile}=      Set Variable    ${TOOL_DATA_OUT_DIR}${/}${TestName}_UnEnroll_result.bin
+    [Arguments]    ${nameofTest}  ${Identity}  ${expectedStatus}
+    ${binPackageFile}=     Set Variable    ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_UnEnroll_apply.bin
+    ${binResultFile}=      Set Variable    ${TOOL_DATA_OUT_DIR}${/}${nameofTest}_${Identity}_UnEnroll_result.bin
 
-    Get Identity Results  ${mailbox}  ${binResultFile}
+    Get Identity Results  ${Identity}  ${binResultFile}
 
     Verify Provision Response    ${binPackageFile}  ${binResultFile}  ${expectedStatus}

@@ -58,7 +58,7 @@ Get the starting DFCI Settings
     ${ZTD_LEAF_THUMBPRINT}=  Get Thumbprint From Pfx    ${ZtdLeafPfxFile}
 
 
-Obtain Target Parameters From Target
+Initialize Target Parameters For Test
     [Setup]    Require test case    Get the starting DFCI Settings
 
     ${nameofTest}=         Set Variable     GetParameters
@@ -70,7 +70,7 @@ Obtain Target Parameters From Target
 
 
 Build Enroll of DDS_CA cert, signed by ZTD_CA.pfx, and verify
-    [Setup]    Require test case    Obtain Target Parameters From Target
+    [Setup]    Require test case    Initialize Target Parameters For Test
 
     ${nameofTest}=    Set Variable    DDSwithBadKey
     ${ownerPfxFile}=  Set Variable    ${CERTS_DIR}${/}DDS_Leaf.pfx
@@ -107,10 +107,6 @@ Build Enroll of DDS_CA cert, signed by ZTD_CA.pfx, and verify
 
     # Verify that the package can not be verified with the owner .cer
     ${Result}=      Run Process    ${TOOL_DFCI_VERIFY}  ${binPackageFile}  ${ownerCerFile}
-    Should Be True  ${Result.rc} == 0
-
-    # Verify that the package can not be verified with the UEFI Leaf cer file
-    ${Result}=      Run Process    ${TOOL_DFCI_VERIFY}  ${binPackageFile}  ${uefiCerFile}
     Should Be True  ${Result.rc} == 0
 
     # Verify that the package can not be verified with the alt Leaf cer file

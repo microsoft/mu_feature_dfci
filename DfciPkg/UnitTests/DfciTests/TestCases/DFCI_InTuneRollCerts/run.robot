@@ -119,7 +119,7 @@ Send Owner Roll Certificate Packet to System Being Transitioned
 
     ${nameofTest}=       Set Variable    OwnerEnroll
 
-    Process Provision Packet     ${nameofTest}  1  ${OLD_OWNER_PFX}  ${NEW_OWNER_PFX}  ${NEW_OWNER_CERT}  ${OWNER_KEY_INDEX}  @{TARGET_PARAMETERS}
+    Process Provision Packet     ${nameofTest}  ${OWNER}  ${OLD_OWNER_PFX}  ${NEW_OWNER_PFX}  ${NEW_OWNER_CERT}  ${OWNER_KEY_INDEX}  @{TARGET_PARAMETERS}
 
 
 Send User Roll Certificate to System Being Transitioned
@@ -129,7 +129,7 @@ Send User Roll Certificate to System Being Transitioned
 
     ${nameofTest}=       Set Variable    UserEnroll
 
-    Process Provision Packet     ${nameofTest}  2  ${OLD_USER_PFX}  ${NEW_USER_PFX}  ${NEW_USER_CERT}  ${USER_KEY_INDEX}  @{TARGET_PARAMETERS}
+    Process Provision Packet     ${nameofTest}  ${USER}  ${OLD_USER_PFX}  ${NEW_USER_PFX}  ${NEW_USER_CERT}  ${USER_KEY_INDEX}  @{TARGET_PARAMETERS}
 
 
 Restart System to Apply Enrollment
@@ -144,13 +144,13 @@ Restart System to Apply Enrollment
 Verify Owner Roll Ceritificate Identity Results
     ${nameofTest}=   Set Variable    OwnerEnroll
 
-    Validate Provision Status    ${nameofTest}  1  ${STATUS_SUCCESS}
+    Validate Provision Status    ${nameofTest}  ${OWNER}  ${STATUS_SUCCESS}
 
 
 Verify User Roll ceritificate Identity Results
     ${nameofTest}=   Set Variable    UserEnroll
 
-    Validate Provision Status    ${nameofTest}  2  ${STATUS_SUCCESS}
+    Validate Provision Status    ${nameofTest}  ${USER}  ${STATUS_SUCCESS}
 
 
 Get the ending DFCI Settings

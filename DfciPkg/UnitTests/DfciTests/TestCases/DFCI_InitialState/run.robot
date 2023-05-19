@@ -125,7 +125,7 @@ Ensure Mailboxes Are Clean
     Log To Console    .
     Log To Console    ${SUITE SOURCE}
 
-Verify System Unter Test is Opted In
+Verify System Under Test is Opted In
     [Setup]    Require test case    Ensure Mailboxes Are Clean
 
                        Get The DFCI Settings    InitialSettings
@@ -136,7 +136,7 @@ Verify System Unter Test is Opted In
 
 
 Check that the starting DFCI Ownership is Unenrolled
-    [Setup]    Require test case    Verify System Unter Test is Opted In
+    [Setup]    Require test case    Verify System Under Test is Opted In
 
     ${OwnerThumbprint}=    Get Thumbprint Element    ${currentIdXmlFile}  Owner
     ${UserThumbprint}=     Get Thumbprint Element    ${currentIdXmlFile}  User
