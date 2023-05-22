@@ -63,11 +63,14 @@ parameters:
   type: stepList
   default:
     - script: echo No extra steps provided
+- name: extra_jobs
+  displayName: Extra Jobs to be run after build
+  type: jobList
+  default: []
 
 jobs:
 - template: Jobs/PrGate.yml@mu_devops
   parameters:
-    arch_list: $(arch_list)
     do_ci_build: ${{ parameters.do_ci_build }}
     do_ci_setup: ${{ parameters.do_ci_setup }}
     do_pr_eval: ${{ parameters.do_pr_eval }}
@@ -80,3 +83,5 @@ jobs:
     vm_image: $(vm_image)
     container_build: ${{ parameters.container_build }}
     linux_container_image: ghcr.io/tianocore/containers/fedora-37-build:3b3eb8f
+
+- ${{ parameters.extra_jobs }}

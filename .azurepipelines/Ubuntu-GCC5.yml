@@ -32,8 +32,10 @@ extends:
       TARGET_DFCI:
         Pkgs: 'DfciPkg'
         Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
+        ArchList: $(arch_list)
         SelfHostAgent: false
       TARGET_ZERO:
         Pkgs: 'ZeroTouchPkg'
         Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
+        ArchList: $(arch_list)
         SelfHostAgent: false
