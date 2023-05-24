@@ -62,7 +62,8 @@ Setting providers is how a platform provides a setting to DFCI
 
 ## Mu Changes
 
-* DFCI Recovery service uses HTTPS certificates with Subject Alternative Names.  This requires a recent version of NetworkPkg.
+DFCI Recovery service uses HTTPS certificates with Subject Alternative Names. This requires a recent version of NetworkPkg.
+
 To verify you have the correct version, verify that your version of NetworkPkg has one of the following changes:
 
 * [mu_basecore - removal of EFI_TLS_VERIFY_FLAG_NO_WILDCARDS from TlsConfigureSession()](https://github.com/microsoft/mu_basecore/commit/931ff1a45ce13a6a8c3e296f89c6de21f23a17ed#diff-620e10fa41a63814688b931d19fefa89R628).
@@ -75,14 +76,41 @@ In addition, OpenSSL has to be configured for modern TLS ciphers.
 
 * [*edk2* Ensure ECC Ciphers are included (minimum version)](https://github.com/tianocore/edk2/commit/9dd964f5e5c5595a1acd5eb438fb088327db86fa)
 
-## Platform DSC statements
+## Adding DFCI to your platform build
 
-Adding DFCI to your system consists of:
+Adding DFCI to your platform build consists of:
 
-1. Write your settings providers. Use **DfciPkg/Library/DfciSampleProvider**.
-2. Writing three library classes for the DfciDeviceIdSupportLib, DfciGroupLib, and DfciUiSupportLib.
-3. Adding the DSC sections below.
-4. Adding the FDF sections below.
+1. Writing your settings providers
+    * See [DfciSettingProviders](./DfciSettingProviders.md) for an example.
+2. Writing three library classes:
+    * [DfciDeviceIdSupportLib](./DfciDeviceIdSupportLib.md)
+    * [DfciGroupLib](./DfciGroups.md)
+    * [DfciUiSupportLib](./DfciUiSupportLib.md)
+3. [Ensure you have enabled HTTP Connections in your platform build](#enabling-http-connections)
+4. [Adding the DSC sections below](#platform-dsc-statements)
+5. [Adding the FDF sections below](#platform-fdf-statements)
+
+### Enabling HTTP Connections
+
+Ensure that you have the following PCD set in your `NetworkPcds.dsc.inc`
+> NetworkPcds.dsc.inc
+>
+> ```text
+> !if $(NETWORK_ALLOW_HTTP_CONNECTIONS) == TRUE
+>   gEfiNetworkPkgTokenSpaceGuid.PcdAllowHttpConnections|TRUE
+> !endif
+> ```
+
+Then in your platform DSC file such as `QemuQ35.dsc` add the following to your define section:
+
+> QemuQ35.dsc
+>
+>```text
+>[Defines]
+>    DEFINE NETWORK_ALLOW_HTTP_CONNECTIONS = TRUE
+>```
+
+### Platform DSC statements
 
 ```text
 [LibraryClasses.XXX]
