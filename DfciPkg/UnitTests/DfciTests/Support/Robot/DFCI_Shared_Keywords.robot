@@ -58,7 +58,7 @@ Compare Files
 ############################################################
 
 Get System Under Test SerialNumber
-    ${Value}=   Run PowerShell And Return Output   ${CMD_SERIALNUMBER_TYPE1}
+    ${Value}=   Run PowerShell And Return Output   ${CMD_SERIALNUMBER_TYPE3}
     Should Be True  '${Value}' != 'Error'
     Should Be True  '${Value}' != ''
     [Return]        ${Value}
