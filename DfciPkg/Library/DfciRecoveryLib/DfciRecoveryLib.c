@@ -66,7 +66,10 @@ GetRecoveryChallenge (
   //
   // Locate the RNG Protocol. This will be needed for the nonce.
   Status = gBS->LocateProtocol (&gEfiRngProtocolGuid, NULL, (VOID **)&RngProtocol);
-  DEBUG ((DEBUG_VERBOSE, "%a: LocateProtocol(RNG) = %r\n", __FUNCTION__, Status));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a: LocateProtocol(RNG) = %r\n", __FUNCTION__, Status));
+    return EFI_NOT_FOUND;
+  }
 
   //
   // From now on, don't proceed on errors.
@@ -74,12 +77,11 @@ GetRecoveryChallenge (
 
   //
   // Allocate the buffer...
-  if (!EFI_ERROR (Status)) {
-    NewChallenge = AllocatePool (sizeof (DFCI_RECOVERY_CHALLENGE) + DFCI_MULTI_STRING_MAX_SIZE);
-    // Exit if we ran out of resources
-    if (NewChallenge == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
+  NewChallenge = AllocatePool (sizeof (DFCI_RECOVERY_CHALLENGE) + DFCI_MULTI_STRING_MAX_SIZE);
+
+  // Exit if we ran out of resources
+  if (NewChallenge == NULL) {
+    return EFI_OUT_OF_RESOURCES;
   }
 
   //
