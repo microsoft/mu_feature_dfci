@@ -76,8 +76,9 @@ GetRecoveryChallenge (
   // Allocate the buffer...
   if (!EFI_ERROR (Status)) {
     NewChallenge = AllocatePool (sizeof (DFCI_RECOVERY_CHALLENGE) + DFCI_MULTI_STRING_MAX_SIZE);
+    // Exit if we ran out of resources
     if (NewChallenge == NULL) {
-      Status = EFI_OUT_OF_RESOURCES;
+      return EFI_OUT_OF_RESOURCES;
     }
   }
 
