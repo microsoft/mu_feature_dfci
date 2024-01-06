@@ -8,6 +8,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
+#ifndef DFCI_SETTING_CHANGED_NOTIFICATION_LIB_H_
+#define DFCI_SETTING_CHANGED_NOTIFICATION_LIB_H_
+
 /**
  * Process Setting Changed    - Called for any setting that has changed.  Not called when a setting
  *                              has not changed.  The setting value is also supplied.
@@ -48,3 +51,5 @@ EFIAPI
 DfciSettingChangedResetNotification (
   VOID
   );
+
+#endif
