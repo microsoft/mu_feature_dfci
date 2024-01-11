@@ -8,6 +8,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
+#ifndef DFCI_GROUP_LIB_H_
+#define DFCI_GROUP_LIB_H_
+
 typedef struct {
   DFCI_SETTING_ID_STRING    GroupId;               // Pointer to Group Id
   DFCI_SETTING_ID_STRING    *GroupMembers;         // Pointer to array of Setting Id's
@@ -26,3 +29,5 @@ EFIAPI
 DfciGetGroupEntries (
   VOID
   );
+
+#endif
