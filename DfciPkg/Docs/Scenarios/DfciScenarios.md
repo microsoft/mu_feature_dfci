@@ -21,7 +21,8 @@ service by an OEM or [Microsoft Cloud Solution Provider](https://docs.microsoft.
 
 ### OEMs that support DFCI
 
-[See the latest list at the offical Microsoft documentation site](https://learn.microsoft.com/en-us/autopilot/dfci-management#oems-that-support-dfci)
+[See the latest list at the offical Microsoft documentation site](https://learn.microsoft.com/autopilot/dfci-management#oems-that-support-dfci)
+
 
 ## Lifecycle
 
