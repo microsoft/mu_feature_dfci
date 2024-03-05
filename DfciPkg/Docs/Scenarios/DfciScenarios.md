@@ -21,9 +21,8 @@ service by an OEM or [Microsoft Cloud Solution Provider](https://docs.microsoft.
 
 ### OEMs that support DFCI
 
-[![Microsoft Surface](collateral/SurfaceLogo_mu.png)](https://docs.microsoft.com/en-us/surface/surface-manage-dfci-guide)
+[See the latest list at the offical Microsoft documentation site](https://learn.microsoft.com/autopilot/dfci-management#oems-that-support-dfci)
 
-More are in the works...
 
 ## Lifecycle
 
