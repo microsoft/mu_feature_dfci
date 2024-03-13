@@ -49,7 +49,7 @@ def hello_world():
         else:
             raise Exception(f'Unsupported format URL {request.url}')
         msg += '\nRequest from '
-        msg += request.remote_addr
+        msg += escape(request.remote_addr)  # sanitize user input
         return msg
     except Exception:
         msg = ''.join(traceback.format_exc())
