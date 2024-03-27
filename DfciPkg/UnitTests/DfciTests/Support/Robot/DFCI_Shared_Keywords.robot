@@ -61,21 +61,21 @@ Get System Under Test SerialNumber
     ${Value}=   Run PowerShell And Return Output   ${CMD_SERIALNUMBER_TYPE1}
     Should Be True  '${Value}' != 'Error'
     Should Be True  '${Value}' != ''
-    [Return]        ${Value}
+    RETURN        ${Value}
 
 
 Get System Under Test Manufacturer
     ${Value}=   Run PowerShell And Return Output   ${CMD_MFG}
     Should Be True  '${Value}' != 'Error'
     Should Be True  '${Value}' != ''
-    [Return]        ${Value}
+    RETURN        ${Value}
 
 
 Get System Under Test ProductName
     ${Value}=   Run PowerShell And Return Output   ${CMD_MODEL}
     Should Be True  '${Value}' != 'Error'
     Should Be True  '${Value}' != ''
-    [Return]        ${Value}
+    RETURN        ${Value}
 
 
 ############################################################
@@ -300,7 +300,7 @@ Validate Permission Status
 
     Get Payload From Permissions Results  ${binResultFile}  ${xmlResultFile}
     File Should Exist  ${xmlResultFile}
-    [return]  ${xmlResultFile}
+    RETURN  ${xmlResultFile}
 
 
 ############################################################
@@ -335,7 +335,7 @@ Validate Settings Status
 
     Get Payload From Settings Results  ${binResultFile}  ${xmlResultFile}
     Run Keyword If  '${expectedStatus}' == ${STATUS_SUCCESS}  File Should Exist  ${xmlResultFile}
-    [return]  ${xmlResultFile}
+    RETURN  ${xmlResultFile}
 
 
 ########################################################################

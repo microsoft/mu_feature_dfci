@@ -75,7 +75,7 @@ Get The DFCI Settings
 
     Get and Print Current Settings     ${currentSettingsxmlFile}
 
-    [return]    ${currentIdxmlFile}
+    RETURN    ${currentIdxmlFile}
 
 
 *** Test Cases ***
