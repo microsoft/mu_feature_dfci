@@ -40,6 +40,9 @@ if __name__ == '__main__':
     # Set the Minimum Protocol Version supported by Intune
     ctx.set_min_proto_version(SSL.TLS1_2_VERSION)
 
+    # The server will use the cipher list in the order of the server's preference
+    ctx.set_options(SSL.OP_CIPHER_SERVER_PREFERENCE)
+
     # Set the Cipher List supported by Intune
     # You may verify the cipher list with the following command:
     # nmap --script ssl-enum-ciphers -p 443 127.0.0.1
