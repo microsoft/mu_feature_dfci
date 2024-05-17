@@ -74,7 +74,7 @@ Get Response header
     ${good}=  Evaluate  "${value}" != "Not Found"
     Should Be True  ${good}
 
-    [return]  ${value}
+    RETURN  ${value}
 
 
 *** Test Cases ***

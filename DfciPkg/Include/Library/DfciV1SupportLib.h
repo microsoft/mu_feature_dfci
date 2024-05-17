@@ -8,6 +8,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
+#ifndef DFCI_V1_SUPPORT_LIB_H_
+#define DFCI_V1_SUPPORT_LIB_H_
+
 /**
  * Return V2 string from V1 Id String
  *
@@ -49,3 +52,5 @@ EFIAPI
 DfciV1NumberFromId (
   DFCI_SETTING_ID_STRING  Id
   );
+
+#endif

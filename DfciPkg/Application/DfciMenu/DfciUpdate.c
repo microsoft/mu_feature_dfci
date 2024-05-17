@@ -321,8 +321,7 @@ BuildUsbRequest (
   //  replace the invalid character with an '@'.
   //
   for (i = 0; i < PktNameLen; i++) {
-    if (((PktFileName[i] >= 0x00) &&
-         (PktFileName[i] <= 0x1F)) ||
+    if ((PktFileName[i] <= 0x1F) ||
         (PktFileName[i] == L'\"') ||
         (PktFileName[i] == L'*')  ||
         (PktFileName[i] == L'/')  ||

@@ -8,6 +8,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
+#ifndef DFCI_ASSET_TAG_SETTING_LIB_H_
+#define DFCI_ASSET_TAG_SETTING_LIB_H_
+
 /**
  * Settings Provider AssetTagGet routine for pre SettingsManager access.
  *
@@ -25,3 +28,5 @@ DfciGetAssetTag (
   IN  OUT   UINTN  *ValueSize,
   OUT       VOID   *Value
   );
+
+#endif

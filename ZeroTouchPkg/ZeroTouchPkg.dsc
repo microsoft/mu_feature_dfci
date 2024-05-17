@@ -21,6 +21,7 @@
 [PcdsFixedAtBuild]
 
 [LibraryClasses.common]
+  NULL|MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf
 
 [LibraryClasses.IA32]
 
