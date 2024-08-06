@@ -25,7 +25,7 @@ RUN apt update \
   && apt install python3 -y \
   && apt install python3-pip -y \
   && rm -rf /var/lib/apt/lists/* \
-  && pip3 install cython cherrypy flask pyOpenSSL
+  && pip3 install --break-system-packages cython cherrypy flask pyOpenSSL
 
 COPY Src/ ${WEB_DIR}/
 WORKDIR ${WEB_DIR}
