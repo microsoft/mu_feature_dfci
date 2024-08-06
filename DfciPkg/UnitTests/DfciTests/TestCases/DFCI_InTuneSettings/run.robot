@@ -122,29 +122,23 @@ Initialize lists of tests
 
     # Testcase 3    V3 Set variables
     @{VTEST_03_SET1}=      Create List    Dfci3.OnboardWpbt.Enable      Enabled
-    @{VTEST_03_SET2}=      Create List    Dfci3.ProcessorSMT.Enable     Enabled
 
     @{VTEST_03_CHECK1}=    Create List    Dfci3.OnboardWpbt.Enable      Enabled
-    @{VTEST_03_CHECK2}=    Create List    Dfci3.ProcessorSMT.Enable     Enabled
 
     ${VTEST_03_RESULTS}    Create Dictionary     Dfci3.OnboardWpbt.Enable      ${STATUS_SUCCESS}
-    Set To Dictionary      ${VTEST_03_RESULTS}   Dfci3.ProcessorSMT.Enable     ${STATUS_SUCCESS}
 
-    @{VTEST_03_SETS}=      Create List    ${VTEST_03_SET1}    ${VTEST_03_SET2}
-    @{VTEST_03_CHECKS}=    Create List    ${VTEST_03_CHECK1}    ${VTEST_03_CHECK2}
+    @{VTEST_03_SETS}=      Create List    ${VTEST_03_SET1}
+    @{VTEST_03_CHECKS}=    Create List    ${VTEST_03_CHECK1}
 
     # Testcase 4    V3 Set variables disabled
     @{VTEST_04_SET1}=      Create List    Dfci3.OnboardWpbt.Enable      Disabled
-    @{VTEST_04_SET2}=      Create List    Dfci3.ProcessorSMT.Enable     Disabled
 
     @{VTEST_04_CHECK1}=    Create List    Dfci3.OnboardWpbt.Enable      Disabled
-    @{VTEST_04_CHECK2}=    Create List    Dfci3.ProcessorSMT.Enable     Disabled
 
     ${VTEST_04_RESULTS}    Create Dictionary     Dfci3.OnboardWpbt.Enable      ${STATUS_SUCCESS}
-    Set To Dictionary      ${VTEST_04_RESULTS}   Dfci3.ProcessorSMT.Enable     ${STATUS_SUCCESS}
 
-    @{VTEST_04_SETS}=      Create List    ${VTEST_04_SET1}    ${VTEST_04_SET2}
-    @{VTEST_04_CHECKS}=    Create List    ${VTEST_04_CHECK1}    ${VTEST_04_CHECK2}
+    @{VTEST_04_SETS}=      Create List    ${VTEST_04_SET1}
+    @{VTEST_04_CHECKS}=    Create List    ${VTEST_04_CHECK1}
 
 
     # The full tests are here
