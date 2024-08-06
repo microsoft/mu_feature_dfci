@@ -109,6 +109,16 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define DFCI_STD_SETTING_ID_V4_ENABLE_WAKE_ON_POWER  "Dfci4.WakeOnPower.Enable"
 
 //
+// Enable or Disable Wake After Power Loss.
+//
+#define DFCI_STD_SETTING_ID_V4_ENABLE_WAKE_AFTER_POWER_LOSS  "Dfci4.WakeAfterPowerLoss.Enable"
+
+//
+// Enable or Disable Wake Always
+//
+#define DFCI_STD_SETTING_ID_V4_ENABLE_WAKE_ALWAYS  "Dfci4.WakeAlways.Enable"
+
+//
 // Enable or Disable the Front Camera(s).
 //
 #define DFCI_STD_SETTING_ID_V4_ENABLE_FRONT_CAMERA  "Dfci4.FrontCamera.Enable"
