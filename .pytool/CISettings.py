@@ -16,13 +16,7 @@ from edk2toolext.invocables.edk2_pr_eval import PrEvalSettingsManager
 from edk2toollib.utility_functions import GetHostInfo
 from pathlib import Path
 
-try:
-    # May not be present until submodules are populated
-    root = Path(__file__).parent.parent.resolve()
-    sys.path.append(str(root/'MU_BASECORE'/'.pytool'/'Plugin'/'CodeQL'/'integration'))
-    import stuart_codeql as codeql_helpers
-except ImportError:
-    pass
+from edk2toolext import codeql as codeql_helpers
 
 
 class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsManager, SetupSettingsManager, PrEvalSettingsManager):
@@ -148,10 +142,6 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
                 scopes += codeql_helpers.get_scopes(self.codeql)
 
                 if self.codeql:
-                    shell_environment.GetBuildVars().SetValue(
-                        "STUART_CODEQL_AUDIT_ONLY",
-                        "TRUE",
-                        "Set in CISettings.py")
                     codeql_filter_files = [str(n) for n in glob.glob(
                         os.path.join(self.GetWorkspaceRoot(),
                             '**/CodeQlFilters.yml'),
