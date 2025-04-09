@@ -445,6 +445,8 @@ ValidateSettingsPacket (
 
   // == in size means unsigned packet
   if ((UINT8 *)Data->Signature == NULL) {
+    // For unsigned packets, EndData should be the end of the packet
+    EndData = &Data->Packet->Hdr.Pkt[Data->PacketSize];
     if (Data->SignedDataLength != Data->PacketSize) {
       DEBUG ((DEBUG_ERROR, "%a - Signed Data in unsigned packet. %d != %d.\n", __FUNCTION__, Data->SignedDataLength, Data->PacketSize));
     }
