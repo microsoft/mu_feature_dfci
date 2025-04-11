@@ -36,9 +36,9 @@ set OutputFileName=%3_%2_%1.Dfi
 echo Creating  %OutputFileName%
 
 echo python.exe ..\..\Support\Python\GenerateSettingsPacketData.py --Step1Enable --PrepResultFile Unsigned_Settings_apply.bin --XmlFilePath UnsignedSettings.xml --HdrVersion 2 %MfgParm% %ProductParm% %SerialParm%
-python.exe ..\..\Support\Python\GenerateSettingsPacketData.py --Step1Enable --PrepResultFile Unsigned_Settings_apply.bin --XmlFilePath DfciSettings.xml --HdrVersion 2 %MfgParm% %ProductParm% %SerialParm%
+python.exe ..\..\Support\Python\GenerateSettingsPacketData.py --Step1Enable --PrepResultFile Unsigned_Settings_apply.bin --XmlFilePath UnsignedSettings.xml --HdrVersion 2 %MfgParm% %ProductParm% %SerialParm%
 
-..\..\Support\Python\BldDskPkt.py -s Unsigned_Settings_apply.bin -o %OutputFileName%
+python.exe ..\..\Support\Python\BldDskPkt.py -s Unsigned_Settings_apply.bin -o %OutputFileName%
 
 rem erase Unsigned_Settings_apply.bin
 
