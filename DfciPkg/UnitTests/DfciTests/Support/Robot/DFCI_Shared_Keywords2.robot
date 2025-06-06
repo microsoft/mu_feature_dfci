@@ -148,8 +148,9 @@ Create Dfci Permission Package
 Create Dfci Settings Package
     [Arguments]     ${binfile}  ${signPfx}  ${xmlFile}  @{TargetParms}
     File Should Exist   ${xmlFile}
-
-    IF  '${signPfx}' == 'UNSIGNED'
+    
+    ${is_unsigned}=    Evaluate    r"""${signPfx}""" == 'UNSIGNED'
+    IF  ${is_unsigned}
         ${Result}=    Run Process    python.exe    ${GEN_SETTINGS}  --HdrVersion  2  --Step1Enable  --PrepResultFile  ${binfile}  --XmlFilePath  ${xmlFile}  @{TargetParms}
     ELSE
         File Should Exist   ${signPfx}
