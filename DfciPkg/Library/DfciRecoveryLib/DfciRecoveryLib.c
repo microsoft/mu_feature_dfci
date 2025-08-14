@@ -129,6 +129,16 @@ GetRecoveryChallenge (
                                 &NewChallenge->Nonce.Bytes[0]
                                 );
         DEBUG ((DEBUG_VERBOSE, "%a: GetRNG(Hash256) = %r\n", __FUNCTION__, Status));
+        DEBUG ((DEBUG_INFO, "If non of above available, will use default RNG algorithm\n"));
+        if (EFI_ERROR (Status)) {
+          Status = RngProtocol->GetRNG (
+                                  RngProtocol,
+                                  NULL,
+                                  DFCI_RECOVERY_NONCE_SIZE,
+                                  &NewChallenge->Nonce.Bytes[0]
+                                  );
+          DEBUG ((DEBUG_INFO, "GetRNG's default algorithm - Status = %r\n", Status));
+        }
       }
     }
   }
@@ -273,6 +283,16 @@ EncryptRecoveryChallenge (
                                 &ExtraSeed[0]
                                 );
         DEBUG ((DEBUG_VERBOSE, "%a: GetRNG(Hash256) = %r\n", __FUNCTION__, Status));
+        DEBUG ((DEBUG_INFO, "If non of above available, will use default RNG algorithm\n"));
+        if (EFI_ERROR (Status)) {
+          Status = RngProtocol->GetRNG (
+                                  RngProtocol,
+                                  NULL,
+                                  RANDOM_SEED_BUFFER_SIZE,
+                                  &ExtraSeed[0]
+                                  );
+          DEBUG ((DEBUG_INFO, "GetRNG's default algorithm - Status = %r\n", Status));
+        }
       }
     }
   }
