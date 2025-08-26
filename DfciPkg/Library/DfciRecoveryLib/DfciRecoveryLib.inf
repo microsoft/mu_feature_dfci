@@ -47,6 +47,7 @@
   gEfiRngAlgorithmSp80090Ctr256Guid
   gEfiRngAlgorithmSp80090Hmac256Guid
   gEfiRngAlgorithmSp80090Hash256Guid
+  gEfiRngAlgorithmArmRndr
 
 
 ## Required for drivers.

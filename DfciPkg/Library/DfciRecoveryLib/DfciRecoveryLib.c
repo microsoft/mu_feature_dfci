@@ -22,6 +22,89 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #define   RANDOM_SEED_BUFFER_SIZE  64   // We'll seed with 64 bytes of random so that OAEP can work its best.
 
+//
+// These represent UEFI SPEC defined algorithms that should be supported by
+// the RNG protocol and are generally considered secure for DFCI purposes.
+//
+static EFI_GUID *CONST  mSecureRngAlgorithms[] = {
+  &gEfiRngAlgorithmSp80090Ctr256Guid,  // SP800-90A DRBG CTR using AES-256
+  &gEfiRngAlgorithmSp80090Hmac256Guid, // SP800-90A DRBG HMAC using SHA-256
+  &gEfiRngAlgorithmSp80090Hash256Guid, // SP800-90A DRBG Hash using SHA-256
+  &gEfiRngAlgorithmArmRndr,            // unspecified SP800-90B DRBG via ARM RNDR register
+};
+
+#define SECURE_RNG_ALGORITHMS_SIZE  (ARRAY_SIZE (mSecureRngAlgorithms))
+
+/**
+  Generate a random output of a given length using an algorithm considered secure.
+
+  @param[out] Output        The buffer to store the generated random data.
+  @param[in]  OutputLength  The length of the output buffer.
+
+  @retval EFI_SUCCESS           The random data was generated successfully.
+  @retval EFI_INVALID_PARAMETER The output buffer is NULL or the output length is zero.
+  @retval EFI_NOT_FOUND         RNG protocol not found or a secure algorithm is not supported.
+  @retval Others                An error occurred while generating random data.
+**/
+EFI_STATUS
+EFIAPI
+GetRandomValue (
+  OUT  VOID   *Output,
+  IN   UINTN  OutputLength
+  )
+{
+  EFI_RNG_PROTOCOL  *RngProtocol;
+  EFI_STATUS        Status;
+  UINTN             AlgorithmIndex;
+
+  if ((Output == NULL) || (OutputLength == 0)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Status = gBS->LocateProtocol (&gEfiRngProtocolGuid, NULL, (VOID **)&RngProtocol);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a: Failed to locate EFI_RNG_PROTOCOL: %r\n", __func__, Status));
+    ASSERT_EFI_ERROR (Status);
+    return Status;
+  }
+
+  for (AlgorithmIndex = 0; AlgorithmIndex < SECURE_RNG_ALGORITHMS_SIZE; AlgorithmIndex++) {
+    Status = RngProtocol->GetRNG (RngProtocol, mSecureRngAlgorithms[AlgorithmIndex], OutputLength, (UINT8 *)Output);
+    if (!EFI_ERROR (Status)) {
+      //
+      // The secure algorithm is supported on this platform
+      //
+      return EFI_SUCCESS;
+    } else if (Status == EFI_UNSUPPORTED) {
+      //
+      // The secure algorithm is not supported on this platform
+      //
+      DEBUG ((DEBUG_VERBOSE, "%a: Failed to generate random data using secure algorithm %d: %r\n", __func__, AlgorithmIndex, Status));
+
+      //
+      // Try the next secure algorithm
+      //
+      continue;
+    } else {
+      //
+      // Some other error occurred
+      //
+      DEBUG ((DEBUG_ERROR, "%a: Failed to generate random data using secure algorithm %d: %r\n", __func__, AlgorithmIndex, Status));
+      ASSERT_EFI_ERROR (Status);
+      return Status;
+    }
+  }
+
+  //
+  // If we get here, we failed to generate random data using any secure algorithm
+  // Platform owner should ensure that at least one secure algorithm is supported
+  //
+  DEBUG ((DEBUG_ERROR, "%a: Failed to generate random data, no supported secure algorithm found\n", __func__));
+  ASSERT_EFI_ERROR (Status);
+
+  return EFI_NOT_FOUND;
+}
+
 /**
   This function will attempt to allocate and populate a buffer
   with a DFCI recovery challenge structure. If unsuccessful,
@@ -45,7 +128,6 @@ GetRecoveryChallenge (
 {
   EFI_STATUS               Status;
   DFCI_RECOVERY_CHALLENGE  *NewChallenge;
-  EFI_RNG_PROTOCOL         *RngProtocol;
   CHAR8                    *Element;
   UINTN                    ElementSize;
 
@@ -62,14 +144,6 @@ GetRecoveryChallenge (
   // Set default state...
   *Challenge   = NULL;
   NewChallenge = NULL;
-
-  //
-  // Locate the RNG Protocol. This will be needed for the nonce.
-  Status = gBS->LocateProtocol (&gEfiRngProtocolGuid, NULL, (VOID **)&RngProtocol);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "%a: LocateProtocol(RNG) = %r\n", __FUNCTION__, Status));
-    return EFI_NOT_FOUND;
-  }
 
   //
   // From now on, don't proceed on errors.
@@ -94,43 +168,13 @@ GetRecoveryChallenge (
 
   //
   // Grab a timestamp...
-  if (!EFI_ERROR (Status)) {
-    Status = gRT->GetTime (&NewChallenge->Timestamp, NULL);
-    DEBUG ((DEBUG_VERBOSE, "%a: GetTime() = %r\n", __FUNCTION__, Status));
-  }
+  Status = gRT->GetTime (&NewChallenge->Timestamp, NULL);
+  DEBUG ((DEBUG_VERBOSE, "%a: GetTime() = %r\n", __FUNCTION__, Status));
 
   //
   // Generate the random nonce...
   if (!EFI_ERROR (Status)) {
-    Status = RngProtocol->GetRNG (
-                            RngProtocol,
-                            &gEfiRngAlgorithmSp80090Ctr256Guid,
-                            DFCI_RECOVERY_NONCE_SIZE,
-                            &NewChallenge->Nonce.Bytes[0]
-                            );
-    DEBUG ((DEBUG_VERBOSE, "%a: GetRNG(Ctr256) = %r\n", __FUNCTION__, Status));
-    //
-    // If Ctr256 failed, let's try Hmac256
-    if (EFI_ERROR (Status)) {
-      Status = RngProtocol->GetRNG (
-                              RngProtocol,
-                              &gEfiRngAlgorithmSp80090Hmac256Guid,
-                              DFCI_RECOVERY_NONCE_SIZE,
-                              &NewChallenge->Nonce.Bytes[0]
-                              );
-      DEBUG ((DEBUG_VERBOSE, "%a: GetRNG(Hmac256) = %r\n", __FUNCTION__, Status));
-      //
-      // Finally, try Hash256
-      if (EFI_ERROR (Status)) {
-        Status = RngProtocol->GetRNG (
-                                RngProtocol,
-                                &gEfiRngAlgorithmSp80090Hash256Guid,
-                                DFCI_RECOVERY_NONCE_SIZE,
-                                &NewChallenge->Nonce.Bytes[0]
-                                );
-        DEBUG ((DEBUG_VERBOSE, "%a: GetRNG(Hash256) = %r\n", __FUNCTION__, Status));
-      }
-    }
+    Status = GetRandomValue (&NewChallenge->Nonce.Bytes[0], DFCI_RECOVERY_NONCE_SIZE);
   }
 
   //
@@ -204,7 +248,8 @@ GetRecoveryChallenge (
 
   @retval     EFI_SUCCESS           Challenge was successfully encrypted and can be found in buffer.
   @retval     EFI_INVALID_PARAMETER Nuff said.
-  @retval     EFI_NOT_FOUND         Could not locate the RNG protocol.
+  @retval     EFI_NOT_FOUND         Could not locate the RNG protocol or a secure RNG algorithm
+                                    supported by the platform.
   @retval     EFI_ABORTED           Call to Pkcs1v2Encrypt() failed.
   @retval     Others                Error returned from LocateProtocol or GetRNG.
 
@@ -219,9 +264,8 @@ EncryptRecoveryChallenge (
   OUT  UINTN                   *EncryptedDataSize
   )
 {
-  EFI_STATUS        Status;
-  EFI_RNG_PROTOCOL  *RngProtocol;
-  UINT8             ExtraSeed[RANDOM_SEED_BUFFER_SIZE];
+  EFI_STATUS  Status;
+  UINT8       ExtraSeed[RANDOM_SEED_BUFFER_SIZE];
 
   DEBUG ((DEBUG_INFO, "%a()\n", __FUNCTION__));
 
@@ -242,40 +286,7 @@ EncryptRecoveryChallenge (
   // NOTE: This *could* be done with a direct call to RandomSeed() rather than
   //       passing it into the Pkcs1v2Encrypt() function. There are merits to
   //       each implementation.
-  Status = gBS->LocateProtocol (&gEfiRngProtocolGuid, NULL, (VOID **)&RngProtocol);
-  DEBUG ((DEBUG_VERBOSE, "%a: LocateProtocol(RNG) = %r\n", __FUNCTION__, Status));
-  // Assuming we found the protocol, let's grab a seed.
-  if (!EFI_ERROR (Status)) {
-    Status = RngProtocol->GetRNG (
-                            RngProtocol,
-                            &gEfiRngAlgorithmSp80090Ctr256Guid,
-                            RANDOM_SEED_BUFFER_SIZE,
-                            &ExtraSeed[0]
-                            );
-    DEBUG ((DEBUG_VERBOSE, "%a: GetRNG(Ctr256) = %r\n", __FUNCTION__, Status));
-    //
-    // If Ctr256 failed, let's try Hmac256
-    if (EFI_ERROR (Status)) {
-      Status = RngProtocol->GetRNG (
-                              RngProtocol,
-                              &gEfiRngAlgorithmSp80090Hmac256Guid,
-                              RANDOM_SEED_BUFFER_SIZE,
-                              &ExtraSeed[0]
-                              );
-      DEBUG ((DEBUG_VERBOSE, "%a: GetRNG(Hmac256) = %r\n", __FUNCTION__, Status));
-      //
-      // Finally, try Hash256
-      if (EFI_ERROR (Status)) {
-        Status = RngProtocol->GetRNG (
-                                RngProtocol,
-                                &gEfiRngAlgorithmSp80090Hash256Guid,
-                                RANDOM_SEED_BUFFER_SIZE,
-                                &ExtraSeed[0]
-                                );
-        DEBUG ((DEBUG_VERBOSE, "%a: GetRNG(Hash256) = %r\n", __FUNCTION__, Status));
-      }
-    }
-  }
+  Status = GetRandomValue (&ExtraSeed[0], RANDOM_SEED_BUFFER_SIZE);
 
   //
   // Now, we should be able to encrypt the data and be done with it.
