@@ -186,7 +186,7 @@ class Settings(CiSetupSettingsManager, CiBuildSettingsManager, UpdateSettingsMan
             {
                 "Path": "Common/MU",
                 "Url": "https://github.com/microsoft/mu_plus.git",
-                "Branch": "release/202405"
+                "Branch": "release/202502"
             },
         ]
 
