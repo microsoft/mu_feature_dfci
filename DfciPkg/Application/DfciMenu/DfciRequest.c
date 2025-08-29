@@ -2027,6 +2027,7 @@ EnableDfciCertificate (
 
 STATIC
 UINTN
+EFIAPI
 GetResponseMsgLength (
   IN  CONST CHAR8  *FormatMessage,
   ...
