@@ -51,7 +51,7 @@ The following libraries have to be provided by the platform:
 | Library | Documentation | Function |
 | ----- | -----| ----- |
 | DfciDeviceIdSupportLib | [Documentation](DfciDeviceIdSupportLib.md) | Provides SMBIOS information - Manufacturer, Product, and Serial number |
-| DfciGroupLib | [Documentation](DfciGroups.md) | Provides lists of platform settings that are in the Dfci group settings.
+| DfciGroupLib | [Documentation](DfciGroups.md) | Provides lists of platform settings that are in the Dfci group settings. |
 | DfciUiSupportLib | [Documentation](DfciUiSupportLib.md) | Provides UI for various user interactions |
 
 ## DFCI Setting Providers

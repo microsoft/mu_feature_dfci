@@ -68,9 +68,9 @@ DfciPkg\UnitTests\DfciTests directory:
 
       ```text
          python -m pip install --upgrade -r pip-requirements.txt
-       ```
+      ```
 
-8. Install Git for Windows, available here  [Git for Windows](https://gitforwindows.org/).
+8. Install Git for Windows, available here [Git for Windows](https://gitforwindows.org/).
 This is probably already installed, but the certificate generation in the next session will need to use the openssl.exe command.
 Git for Windows distributes an acceptable version of openssl.exe that will be used in the preparation of the DFCI_HTTPS certificates.
 9. Install Windows Subsystem for Linux. Install instructions here [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install).

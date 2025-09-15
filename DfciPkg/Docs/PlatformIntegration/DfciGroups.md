@@ -36,7 +36,7 @@ from the setting providers to allow better flexibility and better maintainabilit
 
 | Interfaces          | Usage |
 | ---                 | --- |
-| DfciGetGroupEntries | DfciGetGroupEntries returns an array of groups, and each group points to a list of settings that are members of the group.
+| DfciGetGroupEntries | DfciGetGroupEntries returns an array of groups, and each group points to a list of settings that are members of the group. |
 
 ## DFCI Standard Groups for OEM extension
 

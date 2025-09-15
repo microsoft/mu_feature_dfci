@@ -21,7 +21,7 @@ There are seven Identities known by DFCI:
 | Identity   | Owner Mask | Use of the Identity |
 | ---        | ---  | --- |
 | Owner      | 0x80 | The system owner. Used by a controlling agent - that authorizes Use to control some settings |
-| User       | 0x40 |  A delegated user.  Used by Microsoft Intune.
+| User       | 0x40 |  A delegated user.  Used by Microsoft Intune. |
 | User1      | 0x20 |  Not currently used |
 | User2      | 0x10 |  Not currently used |
 | Zero Touch | 0x08 |  Limited use Identity to allow an Enroll from a controlling agent.  The system has the Zero Touch Certificate installed during manufacturing.  Zero Touch cannot be enrolled through the normal enroll operation. Zero Touch has no use when a system is enrolled. |
@@ -78,8 +78,8 @@ Header-PublicCert-TestSignature by:
 | Operation | Signing Key |
 | ---       | --- |
 | Enroll    | The private key of the matching Public Key Certificate |
-| Roll      | The private key matching the public cert of the Identity being rolled.
-| Unenroll  | The private key matching the public cert of the Identity being unenrolled.
+| Roll      | The private key matching the public cert of the Identity being rolled. |
+| Unenroll  | The private key matching the public cert of the Identity being unenrolled. |
 
 ![Identity packet signatures](Images/EnrollPacketSignature_mu.jpg)
 
