@@ -80,7 +80,6 @@
 
   UnitTestLib|UnitTestFrameworkPkg/Library/UnitTestLib/UnitTestLib.inf
   ResetSystemLib|MdeModulePkg/Library/BaseResetSystemLibNull/BaseResetSystemLibNull.inf
-  NULL|MdePkg/Library/StackCheckLibNull/StackCheckLibNull.inf
 
 [LibraryClasses.common.UEFI_APPLICATION]
   UnitTestPersistenceLib|UnitTestFrameworkPkg/Library/UnitTestPersistenceLibSimpleFileSystem/UnitTestPersistenceLibSimpleFileSystem.inf
@@ -147,7 +146,7 @@
   DfciPkg/Library/DfciAssetTagSettingLib/DfciAssetTagSetting.inf
   DfciPkg/Library/DfciSettingChangedNotificationLib/DfciSettingChangedNotificationLibNull.inf
   DfciPkg/SettingsManager/SettingsManagerDxe.inf {
-        #Platform should add all it settings libs here
+  #Platform should add all it settings libs here
   <LibraryClasses>
         NULL|DfciPkg/Library/DfciPasswordProvider/DfciPasswordProvider.inf
         NULL|DfciPkg/Library/DfciSettingsLib/DfciSettingsLib.inf
