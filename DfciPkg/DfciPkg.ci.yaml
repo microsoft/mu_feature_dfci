@@ -118,7 +118,8 @@
             "SECUREBOOTKEYENUM",
             "USBPORTENUM",
             "cherrypy",
-            "xcopy"
+            "xcopy",
+            "UINTN"
         ]
     }
 }
