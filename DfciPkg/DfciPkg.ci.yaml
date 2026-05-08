@@ -61,6 +61,17 @@
         "IgnoreHeaderFile": []
     },
 
+    ## options defined ci/Plugin/HostUnitTestCompilerPlugin
+    "HostUnitTestCompilerPlugin": {
+        "DscPath": "Test/DfciPkgHostTest.dsc"
+    },
+
+    ## options defined ci/Plugin/HostUnitTestDscCompleteCheck
+    "HostUnitTestDscCompleteCheck": {
+        "IgnoreInf": [""],
+        "DscPath": "Test/DfciPkgHostTest.dsc"
+    },
+
     ## options defined ci/Plugin/SpellCheck
     "SpellCheck": {
         "AuditOnly": False,           # Fails test but run in AuditOnly mode to collect log

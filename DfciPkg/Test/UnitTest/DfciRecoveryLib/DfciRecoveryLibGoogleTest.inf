@@ -1,0 +1,61 @@
+## @file
+# Host-based GoogleTest unit tests for DfciRecoveryLib.
+#
+# Public-API test of the contract documented in
+# `DfciPkg/Include/Library/DfciRecoveryLib.h`. External dependencies
+# (UefiBootServicesTableLib, UefiRuntimeServicesTableLib, BaseCryptLib,
+# DfciDeviceIdSupportLib, EFI_RNG_PROTOCOL) are replaced with the
+# corresponding gMock mock libraries via the DSC's <LibraryClasses>
+# overrides.
+#
+# Copyright (C) Microsoft Corporation. All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = DfciRecoveryLibGoogleTest
+  FILE_GUID      = 7B14CFAE-7B7C-4FAB-95E1-2D6F2A5C9E10
+  MODULE_TYPE    = HOST_APPLICATION
+  VERSION_STRING = 1.0
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  DfciRecoveryLibGoogleTest.cpp
+  #
+  # The MockRng protocol mock is published as a .cpp file (no INF /
+  # library class) - consumers compile it directly. See
+  # SecurityPkg/Library/DxeImageVerificationLib/GoogleTest/...inf for
+  # the canonical example of this pattern.
+  #
+  ../../../../MU_BASECORE/MdePkg/Test/Mock/Library/GoogleTest/Protocol/MockRng.cpp
+
+[Packages]
+  MdePkg/MdePkg.dec
+  CryptoPkg/CryptoPkg.dec
+  DfciPkg/DfciPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+
+[LibraryClasses]
+  GoogleTestLib
+  BaseLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  DebugLib
+  DfciRecoveryLib
+  BaseCryptLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  DfciDeviceIdSupportLib
+
+[Protocols]
+  gEfiRngProtocolGuid
+
+[Guids]
+  gEfiRngAlgorithmSp80090Ctr256Guid
+  gEfiRngAlgorithmSp80090Hmac256Guid
+  gEfiRngAlgorithmSp80090Hash256Guid
+  gEfiRngAlgorithmArmRndr

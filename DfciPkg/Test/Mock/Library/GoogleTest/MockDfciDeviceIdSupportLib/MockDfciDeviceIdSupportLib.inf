@@ -1,0 +1,32 @@
+## @file
+# Google Test mocks for DfciDeviceIdSupportLib
+#
+# Copyright (C) Microsoft Corporation. All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = MockDfciDeviceIdSupportLib
+  FILE_GUID                      = 7AB22D9E-E61F-4F2C-B7C1-1D6F8A1E2C3B
+  MODULE_TYPE                    = HOST_APPLICATION
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = DfciDeviceIdSupportLib
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  MockDfciDeviceIdSupportLib.cpp
+
+[Packages]
+  MdePkg/MdePkg.dec
+  DfciPkg/DfciPkg.dec
+  UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec
+
+[LibraryClasses]
+  GoogleTestLib
+
+[BuildOptions]
+  MSFT:*_*_*_CC_FLAGS = /EHsc
