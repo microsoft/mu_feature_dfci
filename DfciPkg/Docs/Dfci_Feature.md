@@ -100,6 +100,7 @@ See the [section on platform integRation](PlatformIntegration/PlatformIntegratio
 1. [**Scenarios:** Building the Microsoft Scenarios with DFCI](Scenarios/DfciScenarios.md)
 2. [**Integration:** Integrating DFCI code into your platforms](PlatformIntegration/PlatformIntegrationOverview.md)
 3. [**Architecture:** DFCI Code Internals](Internals/DfciInternals.md)
+4. [**Threat Model:** DFCI security goals, trust boundaries, and protections](Dfci_Threat_Model.md)
 
 ---
 
