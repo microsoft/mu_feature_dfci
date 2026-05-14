@@ -9,6 +9,6 @@
 
 MOCK_INTERFACE_DEFINITION (MockDfciDeviceIdSupportLib);
 MOCK_FUNCTION_DEFINITION (MockDfciDeviceIdSupportLib, DfciIdSupportV1GetSerialNumber, 1, EFIAPI);
-MOCK_FUNCTION_DEFINITION (MockDfciDeviceIdSupportLib, DfciIdSupportGetManufacturer,   2, EFIAPI);
-MOCK_FUNCTION_DEFINITION (MockDfciDeviceIdSupportLib, DfciIdSupportGetProductName,    2, EFIAPI);
-MOCK_FUNCTION_DEFINITION (MockDfciDeviceIdSupportLib, DfciIdSupportGetSerialNumber,   2, EFIAPI);
+MOCK_FUNCTION_DEFINITION (MockDfciDeviceIdSupportLib, DfciIdSupportGetManufacturer, 2, EFIAPI);
+MOCK_FUNCTION_DEFINITION (MockDfciDeviceIdSupportLib, DfciIdSupportGetProductName, 2, EFIAPI);
+MOCK_FUNCTION_DEFINITION (MockDfciDeviceIdSupportLib, DfciIdSupportGetSerialNumber, 2, EFIAPI);

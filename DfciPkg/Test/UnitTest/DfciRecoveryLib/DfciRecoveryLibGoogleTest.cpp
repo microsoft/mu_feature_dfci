@@ -88,13 +88,13 @@ CloneAsciiToHeap (
 
 class DfciRecoveryLibTest : public ::testing::Test {
 protected:
-  StrictMock<MockUefiBootServicesTableLib>     BsMock;
-  StrictMock<MockUefiRuntimeServicesTableLib>  RtMock;
-  StrictMock<MockBaseCryptLib>                 CryptMock;
-  StrictMock<MockDfciDeviceIdSupportLib>       IdMock;
-  StrictMock<MockRng>                          RngMock;
+  StrictMock<MockUefiBootServicesTableLib> BsMock;
+  StrictMock<MockUefiRuntimeServicesTableLib> RtMock;
+  StrictMock<MockBaseCryptLib> CryptMock;
+  StrictMock<MockDfciDeviceIdSupportLib> IdMock;
+  StrictMock<MockRng> RngMock;
 
-  EFI_TIME  HappyTime = {
+  EFI_TIME HappyTime = {
     /* Year       */ 2026,
     /* Month      */ 5,
     /* Day        */ 8,
@@ -105,7 +105,7 @@ protected:
     /* Nanosecond */ 0,
     /* TimeZone   */ 0,
     /* Daylight   */ 0,
-    /* Pad2       */ { 0, 0 }
+    /* Pad2       */ 0
   };
 
   //
@@ -143,17 +143,17 @@ protected:
       .WillOnce (
          Invoke (
            [FillByte](
-             EFI_RNG_PROTOCOL    *,
-             EFI_RNG_ALGORITHM   *,
-             UINTN               Len,
-             UINT8               *Out
-             ) -> EFI_STATUS {
-             for (UINTN I = 0; I < Len; I++) {
-               Out[I] = (UINT8)((FillByte + I) & 0xFF);
-             }
+                      EFI_RNG_PROTOCOL    *,
+                      EFI_RNG_ALGORITHM   *,
+                      UINTN               Len,
+                      UINT8               *Out
+           ) -> EFI_STATUS {
+      for (UINTN I = 0; I < Len; I++) {
+        Out[I] = (UINT8)((FillByte + I) & 0xFF);
+      }
 
-             return EFI_SUCCESS;
-           }
+      return EFI_SUCCESS;
+    }
            )
          );
   }
@@ -163,33 +163,33 @@ protected:
   //
   void
   ExpectDeviceIdSuccess (
-    CONST CHAR8  *Serial = "SN-12345",
+    CONST CHAR8  *Serial  = "SN-12345",
     CONST CHAR8  *Product = "TestProduct",
-    CONST CHAR8  *Manuf = "TestManufacturer"
+    CONST CHAR8  *Manuf   = "TestManufacturer"
     )
   {
     EXPECT_CALL (IdMock, DfciIdSupportGetSerialNumber (_, _))
       .WillOnce (
          Invoke (
            [Serial](CHAR8 **Out, UINTN *Size) -> EFI_STATUS {
-             return CloneAsciiToHeap (Serial, Out, Size);
-           }
+      return CloneAsciiToHeap (Serial, Out, Size);
+    }
            )
          );
     EXPECT_CALL (IdMock, DfciIdSupportGetProductName (_, _))
       .WillOnce (
          Invoke (
            [Product](CHAR8 **Out, UINTN *Size) -> EFI_STATUS {
-             return CloneAsciiToHeap (Product, Out, Size);
-           }
+      return CloneAsciiToHeap (Product, Out, Size);
+    }
            )
          );
     EXPECT_CALL (IdMock, DfciIdSupportGetManufacturer (_, _))
       .WillOnce (
          Invoke (
            [Manuf](CHAR8 **Out, UINTN *Size) -> EFI_STATUS {
-             return CloneAsciiToHeap (Manuf, Out, Size);
-           }
+      return CloneAsciiToHeap (Manuf, Out, Size);
+    }
            )
          );
   }
@@ -205,6 +205,7 @@ TEST_F (DfciRecoveryLibTest, GetChallenge_NullChallengePtrIsRejected) {
   // Per docstring: NULL Challenge must produce EFI_INVALID_PARAMETER
   // and no side-effect on any external dependency.
   EFI_STATUS  Status = GetRecoveryChallenge (NULL, &Size);
+
   EXPECT_EQ (Status, EFI_INVALID_PARAMETER);
 }
 
@@ -213,7 +214,7 @@ TEST_F (DfciRecoveryLibTest, GetChallenge_NullChallengePtrIsRejected) {
 // ===========================================================================
 
 TEST_F (DfciRecoveryLibTest, GetChallenge_HappyPath_AllocatesAndPopulates) {
-  DFCI_RECOVERY_CHALLENGE  *Challenge = NULL;
+  DFCI_RECOVERY_CHALLENGE  *Challenge    = NULL;
   UINTN                    ChallengeSize = 0;
   EFI_STATUS               Status;
 
@@ -261,7 +262,7 @@ TEST_F (DfciRecoveryLibTest, GetChallenge_HappyPath_AllocatesAndPopulates) {
 // ===========================================================================
 
 TEST_F (DfciRecoveryLibTest, GetChallenge_LocateRngFailureIsPropagated) {
-  DFCI_RECOVERY_CHALLENGE  *Challenge = (DFCI_RECOVERY_CHALLENGE *)0x1;
+  DFCI_RECOVERY_CHALLENGE  *Challenge    = (DFCI_RECOVERY_CHALLENGE *)0x1;
   UINTN                    ChallengeSize = 0xDEAD;
   EFI_STATUS               Status;
 
@@ -282,7 +283,7 @@ TEST_F (DfciRecoveryLibTest, GetChallenge_LocateRngFailureIsPropagated) {
 }
 
 TEST_F (DfciRecoveryLibTest, GetChallenge_GetTimeFailureIsPropagated) {
-  DFCI_RECOVERY_CHALLENGE  *Challenge = (DFCI_RECOVERY_CHALLENGE *)0x1;
+  DFCI_RECOVERY_CHALLENGE  *Challenge    = (DFCI_RECOVERY_CHALLENGE *)0x1;
   UINTN                    ChallengeSize = 0xDEAD;
   EFI_STATUS               Status;
 
@@ -296,7 +297,7 @@ TEST_F (DfciRecoveryLibTest, GetChallenge_GetTimeFailureIsPropagated) {
 }
 
 TEST_F (DfciRecoveryLibTest, GetChallenge_GetRngFailureIsPropagated) {
-  DFCI_RECOVERY_CHALLENGE  *Challenge = (DFCI_RECOVERY_CHALLENGE *)0x1;
+  DFCI_RECOVERY_CHALLENGE  *Challenge    = (DFCI_RECOVERY_CHALLENGE *)0x1;
   UINTN                    ChallengeSize = 0xDEAD;
   EFI_STATUS               Status;
 
@@ -332,7 +333,7 @@ TEST_F (DfciRecoveryLibTest, GetChallenge_SerialIdFailure_DocSaysIgnored_ButCode
   // any future change to either the docstring or the code is forced
   // to update this test deliberately.
   //
-  DFCI_RECOVERY_CHALLENGE  *Challenge = NULL;
+  DFCI_RECOVERY_CHALLENGE  *Challenge    = NULL;
   UINTN                    ChallengeSize = 0;
   EFI_STATUS               Status;
 
@@ -385,34 +386,52 @@ TEST_F (DfciRecoveryLibTest, GetChallenge_NonceDiffersAcrossTwoCalls) {
     .WillOnce (
        Invoke (
          [](EFI_RNG_PROTOCOL *, EFI_RNG_ALGORITHM *, UINTN Len, UINT8 *Out) -> EFI_STATUS {
-           SetMem (Out, Len, 0xAA);
-           return EFI_SUCCESS;
-         }
+    SetMem (Out, Len, 0xAA);
+    return EFI_SUCCESS;
+  }
          )
        )
     .WillOnce (
        Invoke (
          [](EFI_RNG_PROTOCOL *, EFI_RNG_ALGORITHM *, UINTN Len, UINT8 *Out) -> EFI_STATUS {
-           SetMem (Out, Len, 0x55);
-           return EFI_SUCCESS;
-         }
+    SetMem (Out, Len, 0x55);
+    return EFI_SUCCESS;
+  }
          )
        );
   EXPECT_CALL (IdMock, DfciIdSupportGetSerialNumber (_, _))
     .Times (2)
-    .WillRepeatedly (Invoke ([](CHAR8 **Out, UINTN *Size) { return CloneAsciiToHeap ("SN", Out, Size); }));
+    .WillRepeatedly (
+       Invoke (
+         [](CHAR8 **Out, UINTN *Size) {
+    return CloneAsciiToHeap ("SN", Out, Size);
+  }
+         )
+       );
   EXPECT_CALL (IdMock, DfciIdSupportGetProductName (_, _))
     .Times (2)
-    .WillRepeatedly (Invoke ([](CHAR8 **Out, UINTN *Size) { return CloneAsciiToHeap ("P", Out, Size); }));
+    .WillRepeatedly (
+       Invoke (
+         [](CHAR8 **Out, UINTN *Size) {
+    return CloneAsciiToHeap ("P", Out, Size);
+  }
+         )
+       );
   EXPECT_CALL (IdMock, DfciIdSupportGetManufacturer (_, _))
     .Times (2)
-    .WillRepeatedly (Invoke ([](CHAR8 **Out, UINTN *Size) { return CloneAsciiToHeap ("M", Out, Size); }));
+    .WillRepeatedly (
+       Invoke (
+         [](CHAR8 **Out, UINTN *Size) {
+    return CloneAsciiToHeap ("M", Out, Size);
+  }
+         )
+       );
 
-  ASSERT_EQ (GetRecoveryChallenge (&First,  &Size1), EFI_SUCCESS);
+  ASSERT_EQ (GetRecoveryChallenge (&First, &Size1), EFI_SUCCESS);
   ASSERT_EQ (GetRecoveryChallenge (&Second, &Size2), EFI_SUCCESS);
 
   // First call's nonce should be all 0xAA, second all 0x55.
-  EXPECT_EQ (First->Nonce.Bytes[0],  0xAA);
+  EXPECT_EQ (First->Nonce.Bytes[0], 0xAA);
   EXPECT_EQ (Second->Nonce.Bytes[0], 0x55);
   EXPECT_NE (
     CompareMem (
@@ -452,9 +471,9 @@ TEST_F (DfciRecoveryLibTest, Encrypt_NullPublicKeyRejected) {
 }
 
 TEST_F (DfciRecoveryLibTest, Encrypt_NullEncryptedDataPtrRejected) {
-  DFCI_RECOVERY_CHALLENGE  Challenge       = { 0 };
-  UINT8                    PublicKey[8]    = { 0 };
-  UINTN                    OutSize         = 0xDEAD;
+  DFCI_RECOVERY_CHALLENGE  Challenge    = { 0 };
+  UINT8                    PublicKey[8] = { 0 };
+  UINTN                    OutSize      = 0xDEAD;
   EFI_STATUS               Status;
 
   Status = EncryptRecoveryChallenge (&Challenge, sizeof (Challenge), PublicKey, sizeof (PublicKey), NULL, &OutSize);
@@ -476,16 +495,17 @@ TEST_F (DfciRecoveryLibTest, Encrypt_NullEncryptedDataSizeRejected) {
 // ===========================================================================
 
 TEST_F (DfciRecoveryLibTest, Encrypt_HappyPath_PassesPlaintextAndKeyToCrypto) {
-  DFCI_RECOVERY_CHALLENGE  Challenge    = { 0 };
-  UINT8                    PublicKey[]  = { 0xAA, 0xBB, 0xCC };
-  UINT8                    *Out         = NULL;
-  UINTN                    OutSize      = 0;
+  DFCI_RECOVERY_CHALLENGE  Challenge   = { 0 };
+  UINT8                    PublicKey[] = { 0xAA, 0xBB, 0xCC };
+  UINT8                    *Out        = NULL;
+  UINTN                    OutSize     = 0;
   EFI_STATUS               Status;
 
   // Capture buffers - must persist past the EXPECT_CALL.
   static UINT8  CapturedInData[256] = { 0 };
   static UINTN  CapturedInDataSize  = 0;
   static UINTN  CapturedKeySize     = 0;
+
   CapturedInDataSize = 0;
   CapturedKeySize    = 0;
 
@@ -496,45 +516,45 @@ TEST_F (DfciRecoveryLibTest, Encrypt_HappyPath_PassesPlaintextAndKeyToCrypto) {
     .WillOnce (
        Invoke (
          [](
-           CONST UINT8  *,
-           UINTN        KeyLen,
-           UINT8        *InData,
-           UINTN        InDataSize,
-           CONST UINT8  *,
-           UINTN        ,
-           UINT8        **EncOut,
-           UINTN        *EncOutSize
-           ) -> BOOLEAN {
-           if (InDataSize <= sizeof (CapturedInData)) {
-             CopyMem (CapturedInData, InData, InDataSize);
-           }
+            CONST UINT8  *,
+            UINTN        KeyLen,
+            UINT8        *InData,
+            UINTN        InDataSize,
+            CONST UINT8  *,
+            UINTN,
+            UINT8        **EncOut,
+            UINTN        *EncOutSize
+         ) -> BOOLEAN {
+    if (InDataSize <= sizeof (CapturedInData)) {
+      CopyMem (CapturedInData, InData, InDataSize);
+    }
 
-           CapturedInDataSize = InDataSize;
-           CapturedKeySize    = KeyLen;
+    CapturedInDataSize = InDataSize;
+    CapturedKeySize    = KeyLen;
 
-           *EncOut     = (UINT8 *)AllocatePool (16);
-           SetMem (*EncOut, 16, 0xCD);
-           *EncOutSize = 16;
-           return TRUE;
-         }
+    *EncOut = (UINT8 *)AllocatePool (16);
+    SetMem (*EncOut, 16, 0xCD);
+    *EncOutSize = 16;
+    return TRUE;
+  }
          )
        );
 
   Challenge.SerialNumber = 0;
-  Status = EncryptRecoveryChallenge (
-             &Challenge,
-             sizeof (Challenge),
-             PublicKey,
-             sizeof (PublicKey),
-             &Out,
-             &OutSize
-             );
+  Status                 = EncryptRecoveryChallenge (
+                             &Challenge,
+                             sizeof (Challenge),
+                             PublicKey,
+                             sizeof (PublicKey),
+                             &Out,
+                             &OutSize
+                             );
   ASSERT_EQ (Status, EFI_SUCCESS);
   ASSERT_NE (Out, nullptr);
   EXPECT_EQ (OutSize, (UINTN)16);
 
   // The CUT must pass our exact key size and challenge bytes through.
-  EXPECT_EQ (CapturedKeySize,    sizeof (PublicKey));
+  EXPECT_EQ (CapturedKeySize, sizeof (PublicKey));
   EXPECT_EQ (CapturedInDataSize, sizeof (Challenge));
   EXPECT_EQ (
     CompareMem (CapturedInData, &Challenge, sizeof (Challenge)),
@@ -565,7 +585,7 @@ TEST_F (DfciRecoveryLibTest, Encrypt_RngSeedFailureIsPropagated) {
              &OutSize
              );
   EXPECT_EQ (Status, EFI_DEVICE_ERROR);
-  EXPECT_EQ (Out,    nullptr);
+  EXPECT_EQ (Out, nullptr);
   EXPECT_EQ (OutSize, (UINTN)0);
 }
 
@@ -590,7 +610,7 @@ TEST_F (DfciRecoveryLibTest, Encrypt_Pkcs1v2EncryptReturnsFalse_MapsToAborted) {
              &OutSize
              );
   EXPECT_EQ (Status, EFI_ABORTED);
-  EXPECT_EQ (Out,    nullptr);
+  EXPECT_EQ (Out, nullptr);
   EXPECT_EQ (OutSize, (UINTN)0);
 }
 
@@ -598,7 +618,7 @@ TEST_F (DfciRecoveryLibTest, Encrypt_Pkcs1v2EncryptReturnsFalse_MapsToAborted) {
 // Header / contract tests (no mocks needed)
 // ===========================================================================
 
-class DfciRecoveryLibContractTest : public ::testing::Test {};
+class DfciRecoveryLibContractTest : public ::testing::Test { };
 
 TEST_F (DfciRecoveryLibContractTest, NonceSizeIs512Bits) {
   EXPECT_EQ (DFCI_RECOVERY_NONCE_SIZE, (UINTN)(512 / 8));
@@ -625,6 +645,7 @@ TEST_F (DfciRecoveryLibContractTest, NonceUnionAliasesBytesAndParts) {
   // Writing through Bytes[] must be visible through Parts.Nonce[] and
   // Parts.Key[] at the right offsets, proving the union layout.
   DFCI_CHALLENGE_NONCE  N;
+
   for (UINTN I = 0; I < DFCI_RECOVERY_NONCE_SIZE; I++) {
     N.Bytes[I] = (UINT8)I;
   }
