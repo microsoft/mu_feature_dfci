@@ -9,8 +9,7 @@ that are typically configured within a BIOS menu by a human.
 High value configuration can be moved to UEFI BIOS where it is resilient against malware,
 rootkits, and non-persistent physical tampering.
 Whereas traditional UEFI security implementations required a physical touch, DFCI securely
-enables **zero-touch** remote configuration of these settings built upon[Microsoft Intune](
-https://docs.microsoft.com/en-us/intune/configuration/device-firmware-configuration-interface-windows)
+enables **zero-touch** remote configuration of these settings built upon[Microsoft Intune](https://docs.microsoft.com/en-us/intune/configuration/device-firmware-configuration-interface-windows)
 and authorized by [Windows Autopilot](http://aka.ms/windowsautopilot).
 DFCI can provide additional assurance by configuring and locking hardware security features
 before launching the OS (e.g. disabling microphones or radios).
@@ -27,8 +26,7 @@ authorization.
 ### Why should I configure my UEFI BIOS
 
 PC configuration is typically performed via Active Directory Group Policy, System Center
-Configuration Manager (SCCM), or Modern Device Management (MDM) such as [Microsoft Intune](
-https://www.microsoft.com/en-us/microsoft-365/enterprise-mobility-security/microsoft-intune).
+Configuration Manager (SCCM), or Modern Device Management (MDM) such as [Microsoft Intune](https://www.microsoft.com/en-us/microsoft-365/enterprise-mobility-security/microsoft-intune).
 All of these solutions store their managed configuration in the OS disk partition.
 Unfortunately, this configuration can be bypassed by the PCs default ability to boot other
 operating system instances via external media (e.g. USB), network (e.g. PXE), & alternate disk
@@ -62,8 +60,7 @@ Autopilot work is required, the only remaining work should be the UEFI BIOS impl
 
 ### Windows Autopilot Implementation
 
-The pre-existing [Windows Autopilot device registration workflows](
-https://docs.microsoft.com/en-us/windows/deployment/windows-autopilot/add-devices)
+The pre-existing [Windows Autopilot device registration workflows](https://docs.microsoft.com/en-us/windows/deployment/windows-autopilot/add-devices)
 remain unchanged for DFCI, no additional work is required.
 It should be noted that Autopilot self-registrations are not trusted for the purpose of
 DFCI management (e.g. from Intune, Microsoft Store for Business, & Business 365).
