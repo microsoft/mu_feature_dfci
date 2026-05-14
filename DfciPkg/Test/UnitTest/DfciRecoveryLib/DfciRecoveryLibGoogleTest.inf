@@ -5,7 +5,7 @@
 # `DfciPkg/Include/Library/DfciRecoveryLib.h`. External dependencies
 # (UefiBootServicesTableLib, UefiRuntimeServicesTableLib, BaseCryptLib,
 # DfciDeviceIdSupportLib, EFI_RNG_PROTOCOL) are replaced with the
-# corresponding gMock mock libraries via the DSC's <LibraryClasses>
+# corresponding gMock mock libraries via the DSC file <LibraryClasses>
 # overrides.
 #
 # Copyright (C) Microsoft Corporation. All rights reserved.
