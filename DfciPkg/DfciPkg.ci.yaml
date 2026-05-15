@@ -13,6 +13,17 @@
         "DscPath": "DfciPkg.dsc"
     },
 
+    ## options defined ci/Plugin/HostUnitTestCompilerPlugin
+    "HostUnitTestCompilerPlugin": {
+        "DscPath": "Test/DfciPkgHostTest.dsc"
+    },
+
+    ## options defined ci/Plugin/HostUnitTestDscCompleteCheck
+    "HostUnitTestDscCompleteCheck": {
+        "IgnoreInf": [],
+        "DscPath": "Test/DfciPkgHostTest.dsc"
+    },
+
     ## options defined ci/Plugin/CharEncodingCheck
     "CharEncodingCheck": {
         "IgnoreFiles": []
@@ -31,6 +42,8 @@
             "NetworkPkg/NetworkPkg.dec"
         ],
         "AcceptableDependencies-HOST_APPLICATION":[ # for host based unit tests
+            "UnitTestFrameworkPkg/UnitTestFrameworkPkg.dec",
+            "CryptoPkg/CryptoPkg.dec"
         ],
         "AcceptableDependencies-UEFI_APPLICATION": [
             "ShellPkg/ShellPkg.dec"
