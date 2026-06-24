@@ -40,6 +40,24 @@ typedef struct {
 static DFCI_APPLY_PACKET_PROTOCOL  *mApplyIdentityProtocol;
 static DFCI_APPLY_PACKET_PROTOCOL  *mApplyPermissionsProtocol;
 static DFCI_APPLY_PACKET_PROTOCOL  *mApplySettingsProtocol;
+
+//
+// Late-binding registration for the three apply-packet protocols. The C
+// driver dispatch order is normally enforced by the driver's [Depex] so
+// these protocols are present at DfciManagerEntry time. That assumption
+// is fragile under BDS replacements that don't honor [Depex] (e.g. a Rust
+// BootOrchestrator that registers the driver as a component). Use
+// ProtocolNotify instead: register the notifies at entry, the callbacks
+// populate the statics whenever the producers install, and CompleteInit
+// runs once all three are present. Works under both ordering regimes.
+//
+static EFI_EVENT  mApplyIdentityNotifyEvent    = NULL;
+static EFI_EVENT  mApplyPermissionsNotifyEvent = NULL;
+static EFI_EVENT  mApplySettingsNotifyEvent    = NULL;
+static VOID       *mApplyIdentityRegistration    = NULL;
+static VOID       *mApplyPermissionsRegistration = NULL;
+static VOID       *mApplySettingsRegistration    = NULL;
+static BOOLEAN    mCompleteInitDone            = FALSE;
 static EFI_EVENT                   mEndOfDxeEvent        = NULL;
 static BOOLEAN                     mProcessingAtEndOfDxe = FALSE;
 static BOOLEAN                     mRebootRequired       = FALSE;
@@ -724,7 +742,12 @@ ProcessPacket (
 
   Data = MgrData->Data;
 
-  if ((Data == NULL) || (Data->Packet == NULL)) {
+  if (Data == NULL) {
+    DEBUG ((DEBUG_INFO, "%a Process Packet - No Data.\n", _DBGMSGID_));
+    return EFI_SUCCESS;
+  }
+
+  if (Data->Packet == NULL) {
     DEBUG ((DEBUG_INFO, "%a Process Packet - No pending Data for %s.\n", _DBGMSGID_, Data->MailboxName));
     return EFI_SUCCESS;
   }
@@ -864,6 +887,18 @@ ProcessMailBoxes (
 
   DEBUG ((DEBUG_INFO, "%a %a: ProcessMailboxes Entry\n", _DBGMSGID_, __FUNCTION__));
 
+  //
+  // FreeManagerData() clears mManagerData[i].Data at the end of a normal
+  // ProcessMailBoxes pass. If ProcessMailBoxes is reentered after that
+  // (e.g. a second SettingAccess notify firing after the first pass
+  // already freed state), downstream callees (CompletePacket etc.) would
+  // NULL-deref. Bail out cleanly instead.
+  //
+  if (mManagerData[MGR_IDENTITY].Data == NULL) {
+    DEBUG ((DEBUG_INFO, "%a %a: Manager data already freed; nothing to do.\n", _DBGMSGID_, __FUNCTION__));
+    return EFI_SUCCESS;
+  }
+
   // Process all packets in this order.  If any identity packet state is set to
   // DFCI_PACKET_STATE_DATA_DELAYED_PROCESSING, ProcessPacket will register an EndOfDxe
   // handler and return EFI_MEDIA_CHANGED.
@@ -986,6 +1021,193 @@ EARLY_EXIT:
 }
 
 /**
+  Complete initialization once all three apply-packet protocols are present.
+  Allocates manager data, registers the EndOfDxe callback, and queues the
+  initial mailbox processing pass. Safe to call repeatedly; runs once.
+**/
+STATIC
+EFI_STATUS
+DfciManagerCompleteInit (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+
+  if (mCompleteInitDone) {
+    return EFI_SUCCESS;
+  }
+
+  mCompleteInitDone = TRUE;
+
+  Status = AllocateManagerData ();
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a %a: AllocateManagerData failed. Code=%r\n", _DBGMSGID_, __FUNCTION__, Status));
+    goto ERROR_EXIT;
+  }
+
+  Status = gBS->CreateEventEx (
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_CALLBACK,
+                  EndOfDxeCallback,
+                  NULL,
+                  &gEfiEndOfDxeEventGroupGuid,
+                  &mEndOfDxeEvent
+                  );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a %a: EndOfDxe callback registration failed! %r\n", _DBGMSGID_, __FUNCTION__, Status));
+    goto ERROR_EXIT;
+  }
+
+  Status = QueueMailboxAtSettingAccess ();
+  DEBUG ((DEBUG_INFO, "%a %a: Queued mailbox for processing. Code = %r.\n", _DBGMSGID_, __FUNCTION__, Status));
+
+  if (Status != EFI_MEDIA_CHANGED) {
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "%a %a: Error processing initial packets. Code = %r.\n", _DBGMSGID_, __FUNCTION__, Status));
+      gBS->CloseEvent (mEndOfDxeEvent);
+      mEndOfDxeEvent = NULL;
+      goto ERROR_EXIT;
+    }
+
+    gBS->CloseEvent (mEndOfDxeEvent);
+    mEndOfDxeEvent = NULL;
+  }
+
+  return EFI_SUCCESS;
+
+ERROR_EXIT:
+  DEBUG ((DEBUG_ERROR, "%a %a: Exiting with error. Code = %r\n", _DBGMSGID_, __FUNCTION__, Status));
+  FreeManagerData ();
+  return Status;
+}
+
+/**
+  Drive DfciManagerCompleteInit when all three apply-packet protocols have
+  arrived. Each per-protocol notify increments arrival; the third one
+  triggers completion.
+**/
+STATIC
+VOID
+CheckAndCompleteInit (
+  VOID
+  )
+{
+  if ((mApplyIdentityProtocol != NULL) &&
+      (mApplyPermissionsProtocol != NULL) &&
+      (mApplySettingsProtocol != NULL) &&
+      !mCompleteInitDone)
+  {
+    EFI_STATUS  Status = DfciManagerCompleteInit ();
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "%a %a: CompleteInit failed: %r\n", _DBGMSGID_, __FUNCTION__, Status));
+    }
+  }
+}
+
+/**
+  Protocol-notify callback for gDfciApplyIdentityProtocolGuid.
+**/
+STATIC
+VOID
+EFIAPI
+ApplyIdentityProtocolNotify (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  EFI_STATUS  Status;
+  EFI_HANDLE  Handle;
+  UINTN       BufferSize = sizeof (Handle);
+
+  if (mApplyIdentityProtocol != NULL) {
+    return;
+  }
+
+  Status = gBS->LocateHandle (ByRegisterNotify, NULL, mApplyIdentityRegistration, &BufferSize, &Handle);
+  if (EFI_ERROR (Status)) {
+    return;
+  }
+
+  Status = gBS->HandleProtocol (Handle, &gDfciApplyIdentityProtocolGuid, (VOID **)&mApplyIdentityProtocol);
+  if (EFI_ERROR (Status) || (mApplyIdentityProtocol == NULL)) {
+    return;
+  }
+
+  gBS->CloseEvent (Event);
+  mApplyIdentityNotifyEvent = NULL;
+  CheckAndCompleteInit ();
+}
+
+/**
+  Protocol-notify callback for gDfciApplyPermissionsProtocolGuid.
+**/
+STATIC
+VOID
+EFIAPI
+ApplyPermissionsProtocolNotify (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  EFI_STATUS  Status;
+  EFI_HANDLE  Handle;
+  UINTN       BufferSize = sizeof (Handle);
+
+  if (mApplyPermissionsProtocol != NULL) {
+    return;
+  }
+
+  Status = gBS->LocateHandle (ByRegisterNotify, NULL, mApplyPermissionsRegistration, &BufferSize, &Handle);
+  if (EFI_ERROR (Status)) {
+    return;
+  }
+
+  Status = gBS->HandleProtocol (Handle, &gDfciApplyPermissionsProtocolGuid, (VOID **)&mApplyPermissionsProtocol);
+  if (EFI_ERROR (Status) || (mApplyPermissionsProtocol == NULL)) {
+    return;
+  }
+
+  gBS->CloseEvent (Event);
+  mApplyPermissionsNotifyEvent = NULL;
+  CheckAndCompleteInit ();
+}
+
+/**
+  Protocol-notify callback for gDfciApplySettingsProtocolGuid.
+**/
+STATIC
+VOID
+EFIAPI
+ApplySettingsProtocolNotify (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  EFI_STATUS  Status;
+  EFI_HANDLE  Handle;
+  UINTN       BufferSize = sizeof (Handle);
+
+  if (mApplySettingsProtocol != NULL) {
+    return;
+  }
+
+  Status = gBS->LocateHandle (ByRegisterNotify, NULL, mApplySettingsRegistration, &BufferSize, &Handle);
+  if (EFI_ERROR (Status)) {
+    return;
+  }
+
+  Status = gBS->HandleProtocol (Handle, &gDfciApplySettingsProtocolGuid, (VOID **)&mApplySettingsProtocol);
+  if (EFI_ERROR (Status) || (mApplySettingsProtocol == NULL)) {
+    return;
+  }
+
+  gBS->CloseEvent (Event);
+  mApplySettingsNotifyEvent = NULL;
+  CheckAndCompleteInit ();
+}
+
+/**
   Entry to DfciManager.
 
   @param ImageHandle     The image handle.
@@ -1016,69 +1238,80 @@ DfciManagerEntry (
     goto ERROR_EXIT;
   }
 
-  Status = gBS->LocateProtocol (&gDfciApplyIdentityProtocolGuid, NULL, (VOID **)&mApplyIdentityProtocol);
-  if (EFI_ERROR (Status) || (NULL == mApplyIdentityProtocol)) {
-    DEBUG ((DEBUG_ERROR, "%a %a: Cannot find Apply Identity Protocol.\n", _DBGMSGID_, __FUNCTION__));
-    ASSERT (FALSE);
-    goto ERROR_EXIT;
-  }
-
-  Status = gBS->LocateProtocol (&gDfciApplyPermissionsProtocolGuid, NULL, (VOID **)&mApplyPermissionsProtocol);
-  if (EFI_ERROR (Status) || (NULL == mApplyPermissionsProtocol)) {
-    DEBUG ((DEBUG_ERROR, "%a %a: Cannot find Apply Permission Protocol.\n", _DBGMSGID_, __FUNCTION__));
-    ASSERT (FALSE);
-    goto ERROR_EXIT;
-  }
-
-  Status = gBS->LocateProtocol (&gDfciApplySettingsProtocolGuid, NULL, (VOID **)&mApplySettingsProtocol);
-  if (EFI_ERROR (Status) || (NULL == mApplySettingsProtocol)) {
-    DEBUG ((DEBUG_ERROR, "%a %a: Cannot find Apply Settings Protocol.\n", _DBGMSGID_, __FUNCTION__));
-    ASSERT (FALSE);
-    goto ERROR_EXIT;
-  }
-
-  Status = AllocateManagerData ();
-
-  if (EFI_ERROR (Status)) {
-    goto ERROR_EXIT;
-  }
-
   //
-  // Request notification of EndOfDxe.
+  // Register protocol-notify callbacks for the three apply-packet protocols.
+  // Each callback populates its respective static when its producer installs;
+  // when all three are populated, CheckAndCompleteInit runs the remaining
+  // initialization (manager data, EndOfDxe registration, mailbox queue).
   //
-  // NOTE: If this fails, the provisioning instance data object is left in the
-  //       DELAYED_PROCESSING state.
+  // If the producers have already installed by the time we register here,
+  // the notifies fire synchronously and CompleteInit runs before we return.
+  // If they install later, CompleteInit runs at that point. Either way the
+  // statics are guaranteed non-NULL before any downstream code touches them.
   //
-  Status = gBS->CreateEventEx (
+  Status = gBS->CreateEvent (
                   EVT_NOTIFY_SIGNAL,
                   TPL_CALLBACK,
-                  EndOfDxeCallback,
+                  ApplyIdentityProtocolNotify,
                   NULL,
-                  &gEfiEndOfDxeEventGroupGuid,
-                  &mEndOfDxeEvent
+                  &mApplyIdentityNotifyEvent
                   );
-
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "%a %a: EndOfDxe callback registration failed! %r\n", _DBGMSGID_, __FUNCTION__, Status));
+    DEBUG ((DEBUG_ERROR, "%a %a: CreateEvent (Identity notify) failed: %r\n", _DBGMSGID_, __FUNCTION__, Status));
     goto ERROR_EXIT;
-  } else {
-    Status = QueueMailboxAtSettingAccess ();
-    DEBUG ((DEBUG_INFO, "%a %a: Queued mailbox for processing. Code = %r.\n", _DBGMSGID_, __FUNCTION__, Status));
-
-    if (Status != EFI_MEDIA_CHANGED) {
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "%a %a: Error processing initial packets. Code = %r.\n", _DBGMSGID_, __FUNCTION__, Status));
-        goto ERROR_EXIT;
-      }
-
-      gBS->CloseEvent (mEndOfDxeEvent);
-      mEndOfDxeEvent = NULL;
-    } else {
-      Status = EFI_SUCCESS;
-    }
   }
 
+  Status = gBS->RegisterProtocolNotify (
+                  &gDfciApplyIdentityProtocolGuid,
+                  mApplyIdentityNotifyEvent,
+                  &mApplyIdentityRegistration
+                  );
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a %a: RegisterProtocolNotify (Identity) failed: %r\n", _DBGMSGID_, __FUNCTION__, Status));
+    goto ERROR_EXIT;
+  }
+
+  Status = gBS->CreateEvent (
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_CALLBACK,
+                  ApplyPermissionsProtocolNotify,
+                  NULL,
+                  &mApplyPermissionsNotifyEvent
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a %a: CreateEvent (Permissions notify) failed: %r\n", _DBGMSGID_, __FUNCTION__, Status));
+    goto ERROR_EXIT;
+  }
+
+  Status = gBS->RegisterProtocolNotify (
+                  &gDfciApplyPermissionsProtocolGuid,
+                  mApplyPermissionsNotifyEvent,
+                  &mApplyPermissionsRegistration
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a %a: RegisterProtocolNotify (Permissions) failed: %r\n", _DBGMSGID_, __FUNCTION__, Status));
+    goto ERROR_EXIT;
+  }
+
+  Status = gBS->CreateEvent (
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_CALLBACK,
+                  ApplySettingsProtocolNotify,
+                  NULL,
+                  &mApplySettingsNotifyEvent
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a %a: CreateEvent (Settings notify) failed: %r\n", _DBGMSGID_, __FUNCTION__, Status));
+    goto ERROR_EXIT;
+  }
+
+  Status = gBS->RegisterProtocolNotify (
+                  &gDfciApplySettingsProtocolGuid,
+                  mApplySettingsNotifyEvent,
+                  &mApplySettingsRegistration
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a %a: RegisterProtocolNotify (Settings) failed: %r\n", _DBGMSGID_, __FUNCTION__, Status));
     goto ERROR_EXIT;
   }
 
