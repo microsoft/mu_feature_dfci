@@ -44,6 +44,12 @@ typedef struct {
 
 #pragma pack (pop)
 
+//
+// Minimum size, in bytes, that the internal variable must be before any of
+// its header fields are dereferenced.
+//
+#define INTERNAL_VAR_MIN_HEADER_SIZE  OFFSET_OF (INTERNAL_VAR_STRUCT, CertSizes)
+
 INTERNAL_CERT_STORE  mInternalCertStore = {
   0, 0, DFCI_IDENTITY_LOCAL, {
     { NULL,0 }, { NULL,            0 },{ NULL,  0 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 }, { NULL, 0 }
@@ -167,6 +173,15 @@ LoadProvisionedData (
     goto CLEANUP;
   }
 
+  // Make sure the variable is at least large enough to contain the common
+  // header fields that are dereferenced below before the variable version -
+  // and therefore its full size - is known.
+  if (VarSize < INTERNAL_VAR_MIN_HEADER_SIZE) {
+    DEBUG ((DEBUG_ERROR, "Auth Manager Internal Var too small for header.\n"));
+    Status = EFI_COMPROMISED_DATA;
+    goto CLEANUP;
+  }
+
   // Check ascii signature to make sure var looks as expected.
   if (Var->HeaderSignature != _INTERNAL_VAR_SIGNATURE) {
     DEBUG ((DEBUG_ERROR, "Auth Manager Internal Var Signature not valid.\n"));
@@ -183,6 +198,14 @@ LoadProvisionedData (
     {
       INTERNAL_VAR_STRUCT_V1  *Var1 = NULL;
 
+      // Ensure the variable is large enough to contain the V1 header before
+      // subtracting its size to avoid an unsigned underflow of VarSize.
+      if (VarSize < sizeof (INTERNAL_VAR_STRUCT_V1)) {
+        DEBUG ((DEBUG_ERROR, "Auth Manager Internal Var too small for V1 header.\n"));
+        Status = EFI_COMPROMISED_DATA;
+        goto CLEANUP;
+      }
+
       Var1                       = (INTERNAL_VAR_STRUCT_V1 *)Var;
       VarSize                   -= sizeof (INTERNAL_VAR_STRUCT_V1); // Track remaining var size to be processed.
       BytePtr                    = Var1->PackedCertData;
@@ -194,6 +217,15 @@ LoadProvisionedData (
     }
     case _INTERNAL_VAR_VERSION_V2:
     {
+      // Ensure the variable is large enough to contain the V2 header before
+      // subtracting its size to avoid an unsigned underflow of VarSize and
+      // out of bounds reads of Var->Version and Var->Lsv.
+      if (VarSize < sizeof (INTERNAL_VAR_STRUCT)) {
+        DEBUG ((DEBUG_ERROR, "Auth Manager Internal Var too small for V2 header.\n"));
+        Status = EFI_COMPROMISED_DATA;
+        goto CLEANUP;
+      }
+
       VarSize                   -= sizeof (INTERNAL_VAR_STRUCT); // Track remaining var size to be processed.
       BytePtr                    = Var->PackedCertData;
       mInternalCertStore.Version = Var->Version;
