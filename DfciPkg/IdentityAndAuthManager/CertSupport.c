@@ -191,9 +191,9 @@ GetIssuerName8 (
     return Status;
   }
 
-  if (AsciiNameSize >= MaxStringLength) {
-    AsciiNameSize              = MaxStringLength;
-    AsciiName[MaxStringLength] = '\0';
+  if (AsciiNameSize > MaxStringLength) {
+    AsciiNameSize                = MaxStringLength;
+    AsciiName[AsciiNameSize - 1] = '\0';
   }
 
   *Value = AsciiName;
