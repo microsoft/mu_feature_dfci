@@ -252,12 +252,18 @@ GetIssuerName16 (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  AsciiStrToUnicodeStrS (AsciiName, NameBuffer, AsciiNameSize);
-  FreePool (AsciiName);
-  *Value = NameBuffer;
-  if (NULL != ValueSize) {
-    *ValueSize = NameBufferSize;
+  Status = AsciiStrToUnicodeStrS (AsciiName, NameBuffer, AsciiNameSize);
+  if (!EFI_ERROR (Status)) {
+    *Value = NameBuffer;
+    if (NULL != ValueSize) {
+      *ValueSize = NameBufferSize;
+    }
+  } else {
+    DEBUG ((DEBUG_ERROR, "%a: AsciiStrToUnicodeStrS failed. %r\n", __FUNCTION__, Status));
+    FreePool (NameBuffer);
   }
+
+  FreePool (AsciiName);
 
   return Status;
 }
