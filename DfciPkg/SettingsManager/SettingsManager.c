@@ -64,7 +64,8 @@ InternalSystemSettingAccessSet (
     // May be group setting
     Group = FindGroup (Id);
     if (Group == NULL) {
-      DEBUG ((DEBUG_ERROR, "%a - Requested ID (%a) not found.\n", __FUNCTION__, Id));
+      // Not an error: platform-optional settings may have no provider on this build.
+      DEBUG ((DEBUG_VERBOSE, "%a - Requested ID (%a) not found.\n", __FUNCTION__, Id));
       return EFI_NOT_FOUND;
     }
 
@@ -238,7 +239,8 @@ InternalSystemSettingAccessGet (
     // May be group setting
     Group = FindGroup (Id);
     if (Group == NULL) {
-      DEBUG ((DEBUG_ERROR, "%a - Requested ID (%a) not found.\n", __FUNCTION__, Id));
+      // Not an error: platform-optional settings may have no provider on this build.
+      DEBUG ((DEBUG_VERBOSE, "%a - Requested ID (%a) not found.\n", __FUNCTION__, Id));
       return EFI_NOT_FOUND;
     }
 

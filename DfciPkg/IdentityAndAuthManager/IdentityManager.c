@@ -195,7 +195,9 @@ GetIdentityProperties (
 
   Entry = FindListEntryByAuthToken (IdentityToken);
   if (Entry == NULL) {
-    DEBUG ((DEBUG_ERROR, "%a - Auth Token (0x%X) Not found.\n", __FUNCTION__, *IdentityToken));
+    // Not an error: callers routinely query with the local/anonymous token (0x0)
+    // which has no identity entry. Log at VERBOSE so it doesn't pollute error logs.
+    DEBUG ((DEBUG_VERBOSE, "%a - Auth Token (0x%X) Not found.\n", __FUNCTION__, *IdentityToken));
     return EFI_NOT_FOUND;
   }
 

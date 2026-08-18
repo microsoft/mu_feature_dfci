@@ -121,7 +121,8 @@ HasWritePermissions (
   // 1. Get Identity from Auth Token
   Status = mAuthenticationProtocol->GetIdentityProperties (mAuthenticationProtocol, AuthToken, &Properties);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "%a - Failed to get properties for auth token %r\n", __FUNCTION__, Status));
+    // Expected for the local/anonymous token (0x0); log at VERBOSE to avoid error-log noise.
+    DEBUG ((DEBUG_VERBOSE, "%a - Failed to get properties for auth token %r\n", __FUNCTION__, Status));
     return Status;
   }
 
