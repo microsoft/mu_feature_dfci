@@ -422,7 +422,7 @@ ApplyProvisionData (
   }
 
   // Dont try to copy if it was a delete operation
-  if (Data->Payload > 0) {
+  if (Data->Payload != NULL) {
     mInternalCertStore.Certs[Index].Cert     = NewCertData;
     mInternalCertStore.Certs[Index].CertSize = Data->PayloadSize;
 
