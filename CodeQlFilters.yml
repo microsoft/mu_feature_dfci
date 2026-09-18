@@ -1,0 +1,12 @@
+## @file
+# CodeQL Result Filters for mu_feature_dfci
+#
+# Copyright (c) Microsoft Corporation
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+{
+  "Filters": [
+    "-**/DfciPkg/Library/DfciSettingPermissionLib/PermissionStoreSupport.c:cpp/redundant-null-check-param",
+  ]
+}
